@@ -4,5 +4,8 @@
   "bin": {
     "configure": "./run"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "vars": "*"
+  }
 }

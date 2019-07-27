@@ -7,6 +7,7 @@ const config = createConfig({
 });
 
 export const handler = domainWrapper(async (event: APIGatewayProxyEvent, context: Context) => {
+  console.log('+++');
   return {
     statusCode: 200,
     body: JSON.stringify({}),

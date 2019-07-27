@@ -1,4 +1,5 @@
 import { createConfig } from 'common';
+import { Configuration } from 'configure';
 
 const config = createConfig({
   AWS_REGION: process.env.AWS_REGION,
@@ -9,7 +10,7 @@ const config = createConfig({
   NICE_NAME: process.env.NICE_NAME
 });
 
-export default {
+const configuration: Configuration = {
   region: config.AWS_REGION,
   stage: config.STAGE,
   modules: [
@@ -49,8 +50,12 @@ export default {
     {
       type: 'shell',
       key: 'API',
-      rootDir: './api',
-      command: 'make configure'
-    }
+      cwd: './api',
+      command: 'make',
+      args: ['configure'],
+      outfile: '.envs.lambda'
+    },
   ]
 }
+
+export default configuration;

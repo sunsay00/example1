@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+const { vars } = require('./index');
+const { spawn } = require('child_process');
+
+const argv = [];
+process.argv.forEach(v => {
+  if (v == '-V') {
+    g_verbose = true;
+    return;
+  } else {
+    argv.push(v);
+  }
+});
+
+if (argv.length < 2) {
+  console.log(`usage: ${path.basename(argv[1])} <cmd> [...<args>]`);
+  process.exit(1);
+}
+
+if (argv.length == 2) {
+  Object.entries(vars).forEach(([k, v]) => console.log(`${k}=${v}`));
+} else {
+  let failed = false;
+  const [_, __, cmd, ...args] = argv;
+  const proc = spawn(cmd, args, { env: vars, stdio: [process.stdin, process.stdout, 'pipe'] });
+  proc.stderr.on('data', data => {
+    if (/Unhandled rejection ServerlessError/.exec(data.toString())) // workaround for invalid return code from serverless
+      failed = true;
+    process.stderr.write(data.toString());
+  });
+  proc.on('close', code => {
+    process.exit(failed ? 1 : code);
+  });
+}

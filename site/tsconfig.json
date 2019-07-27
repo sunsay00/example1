@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig-base",
+  "compilerOptions": {
+    "composite": true,
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2017",
+      "es2018",
+      "esnext.asynciterable"
+    ],
+    "baseUrl": ".",
+    "noEmit": true,
+    "outDir": "./lib",
+    "rootDir": "./src"
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}

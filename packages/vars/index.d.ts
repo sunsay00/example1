@@ -1,0 +1,1 @@
+export const vars: { [_: string]: undefined | string };

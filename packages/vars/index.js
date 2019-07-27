@@ -1,8 +1,4 @@
-#!/usr/bin/env node
-
-const path = require('path');
 const fs = require('fs');
-const { spawn } = require("child_process");
 
 const repoDir = `${__dirname}/../..`;
 let g_verbose = false;
@@ -30,35 +26,14 @@ const parseEnvs = (envsPath, required = false) => {
   return ret;
 }
 
-const argv = [];
-process.argv.forEach(v => {
-  if (v == '-V') {
-    g_verbose = true;
-    return;
-  } else {
-    argv.push(v);
-  }
-});
-
-if (argv.length < 2) {
-  console.log(`usage: ${path.basename(argv[1])} <cmd> [...<args>]`);
-  process.exit(1);
-}
+const rootEnv = parseEnvs('envs', true);
+const stage = process.env.STAGE || rootEnv.STAGE || 'dev';
 
 let env = { ...process.env };
-const additionalEnvPaths = fs.readdirSync(`${repoDir}/.envs`).map(f => `.envs/${f}`);
-additionalEnvPaths.forEach(p => { env = { ...env, ...parseEnvs(p) }; });
-
-env = { ...env, ...parseEnvs(`envs`, true) };
-const stage = env.STAGE || 'dev';
+const additionalEnvPaths = fs.readdirSync(`${repoDir}/.envs.${stage}`).map(f => `.envs.${stage}/${f}`);
+env = { ...env, ...additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseEnvs(p) }), {}) };
+env = { ...env, ...rootEnv };
 env = { ...env, ...parseEnvs(`.secrets.${stage}`) };
 env = { ...parseEnvs(`envs.${stage}`), ...env, STAGE: stage };
 
-if (argv.length == 2) {
-  Object.entries(env).forEach(([k, v]) => console.log(`${k}=${v}`));
-} else {
-  const [_, __, cmd, ...args] = argv;
-  const proc = spawn(cmd, args, { env, stdio: [process.stdin, process.stdout, 'pipe'] });
-  proc.stderr.on('data', data => process.stderr.write(data.toString()));
-  proc.on('close', code => process.exit(code));
-}
+exports.vars = env;

@@ -1,11 +1,13 @@
+include envs
+
 all: configure
 
-.envs/aws: envs
+.envs.$(STAGE)/aws: envs
 	@git submodule update --init --recursive && tsc -b && \
-		mkdir -p .envs && yarn vars yarn awsinfo .envs/aws
+		mkdir -p .envs.$(STAGE) && yarn vars yarn awsinfo .envs.$(STAGE)/aws
 
 vars:
 	yarn vars -V
 
-configure: .envs/aws
+configure: .envs.$(STAGE)/aws
 	yarn vars yarn configure up

@@ -1,8 +1,9 @@
 {
   "name": "vars",
   "version": "0.0.1",
+  "types": "index.d.ts",
   "bin": {
-    "vars": "index.js"
+    "vars": "./vars"
   },
   "license": "MIT"
 }

@@ -1,5 +1,39 @@
 import * as AWS from 'aws-sdk';
 import * as fs from 'fs';
+import { spawn } from 'child_process';
+import * as RT from 'runtypes';
+import { vars } from 'vars';
+
+const CFRecord = RT.Record({
+  type: RT.Literal('cloudformation'),
+  key: RT.String.withConstraint(s => verifyKey(s)),
+  name: RT.String,
+}).And(RT.Partial({
+  inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
+  outputs: RT.Array(RT.String),
+}));
+
+const ShellRecord = RT.Record({
+  type: RT.Literal('shell'),
+  key: RT.String.withConstraint(s => verifyKey(s)),
+  cwd: RT.String,
+  command: RT.String,
+  args: RT.Array(RT.String),
+}).And(RT.Partial({
+  inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
+  outputs: RT.Array(RT.String),
+  outfile: RT.String,
+}));
+
+const Record = RT.Union(CFRecord, ShellRecord);
+
+type Record = RT.Static<typeof Record>;
+
+export type Configuration = {
+  region: string,
+  stage: string,
+  modules: Record[],
+};
 
 const error = (msg: string) => console.error(`[CONF] error: ${msg}`);
 const log = (msg: string) => console.log(`[CONF] ${msg}`);
@@ -29,13 +63,14 @@ const verifyKey = (key: string) => {
   if (_keys[key])
     throw new Error(`duplicate key '${key}'`);
   _keys[key] = true;
+  return true;
 }
 
 
 const writeResult = (outPath: string, key: string, data: { [k: string]: string }) => {
   let out = '';
   Object.entries(data).map(([k, v]) => {
-    out += `${key.toUpperCase()}_${k}=${v}\n`;
+    out += key ? `${key.toUpperCase()}_${k}=${v}\n` : `${k}=${v}\n`;
   });
   fs.writeFileSync(outPath, out);
 };
@@ -110,7 +145,7 @@ const main = async (cmd: string) => {
     await cf.waitFor('stackDeleteComplete', { StackName }).promise();
   }
 
-  const up = async (StackName: string, cfPath: string, inputs: { [k: string]: string }, expectedOutputs: string[]) => {
+  const up = async (StackName: string, cfPath: string, inputs: { [k: string]: string | number }, expectedOutputs: string[]) => {
     const missinginputs = [];
     for (let m in inputs)
       if (!inputs[m])
@@ -182,38 +217,69 @@ const main = async (cmd: string) => {
 
   if (cmd == 'up') {
     let previous = {};
-    let [f, ...rest] = configuration.modules;
-    while (true) {
-      const m = parseModule(f, previous);
-      if (m == undefined) break;
-      const [nf, ...nrest] = rest;
-      f = nf;
-      rest = nrest;
-      if (m.type == 'cloudformation') {
-        if (!m.name || typeof m.name != 'string')
-          throw new Error('invalid cloudformation module - missing/bad name');
-        verifyKey(m.key);
-        const tspath = `${__dirname}/../../node_modules/${m.name}/index.ts`;
-        const envsdir = `${__dirname}/../../.envs`;
-        if (!fs.existsSync(envsdir))
-          fs.mkdirSync(envsdir);
-        const opath = `${envsdir}/cf.${m.key.toLowerCase()}`;
-        const cfpath = `${__dirname}/../../node_modules/${m.name}/cf.yaml`;
-        const ot = lastmod(opath);
-        if (lastmod(cfpath) <= ot && lastmod(configPath) <= ot) {
-          log(`${m.name} is up to date`);
-          continue;
-        }
-        if (!fs.existsSync(cfpath))
-          throw new Error(`invalid cf module ${m.name} - ${cfpath} not found`);
-        previous = await up(getStackname(m.name), cfpath, m.inputs, m.outputs);
-        writeResult(opath, m.key, previous);
-        writeTs(tspath, m.key, previous);
-      } else if (m.type == 'shell') {
-        console.log('shell command NYI', m);
-      } else {
-        throw new Error(`unknown type '${m.type}'`);
-      }
+    for (let f of configuration.modules) {
+      const mod = typeof f == 'function' ? (f as any)(previous) : f;
+      await Record.match(
+        async cloudformation => {
+          const { name, key, inputs, outputs } = cloudformation;
+          const tspath = `${__dirname}/../../node_modules/${name}/index.ts`;
+          const envsdir = `${__dirname}/../../.envs.${configuration.stage}`;
+          if (!fs.existsSync(envsdir))
+            fs.mkdirSync(envsdir);
+          const opath = `${envsdir}/cf.${key.toLowerCase()}`;
+          const cfpath = `${__dirname}/../../node_modules/${name}/cf.yaml`;
+          const ot = lastmod(opath);
+          if (lastmod(cfpath) <= ot && lastmod(configPath) <= ot) {
+            log(`${name} is up to date`);
+            return false;
+          }
+          if (!fs.existsSync(cfpath))
+            throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
+          previous = await up(getStackname(name), cfpath, inputs, outputs);
+          writeResult(opath, key, previous);
+          writeTs(tspath, key, previous);
+          return false;
+        },
+        shell => new Promise<boolean>((resolve, reject) => {
+          let dirty = true;
+          let outputs = false;
+          let mode = '';
+          previous = {};
+          const { command, args, cwd, outfile } = shell;
+          const proc = spawn(command, args, { env: vars, cwd });
+          proc.stdout.on('data', data => {
+            const str = data.toString().trim();
+            if (!outputs) {
+              if (command == 'make' && /^make.*: Nothing to be done for/.exec(str))
+                dirty = false;
+              else if (/^Service Information/.exec(str))
+                outputs = true;
+            } else {
+              if (/^Serverless: Run/.exec(str)) {
+                outputs = false;
+              } else {
+                const sexec = /^(.+):/.exec(str);
+                if (sexec && sexec.length == 2)
+                  mode = sexec[1];
+                if (mode == 'endpoints') {
+                  const exec = /POST - (.+\/)(.+)/.exec(str);
+                  if (exec && exec.length == 3)
+                    previous[`${exec[2]}Endpoint`] = `${exec[1]}${exec[2]}`;
+                }
+              }
+            }
+            process.stdout.write(data.toString());
+          });
+          proc.stderr.on('data', data => process.stderr.write(data.toString()));
+          proc.on('close', code => {
+            if (code == 0 && dirty && outfile) {
+              const opath = `${__dirname}/../../${cwd}/${outfile}`;
+              writeResult(opath, '', previous);
+            }
+            code != 0 ? reject(new Error('shell failed')) : resolve(false);
+          });
+        })
+      )(mod);
     }
   } else if (cmd == 'down') {
     let previous = {};
