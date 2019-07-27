@@ -1,0 +1,6 @@
+{
+  "name": "lambdainfo",
+  "version": "0.0.1",
+  "bin": { "lambdainfo": "lambdainfo" },
+  "license": "MIT"
+}

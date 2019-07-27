@@ -1,0 +1,30 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "concur": "concurrently",
+    "gqlgen": "graphql-codegen",
+    "prisma": "prisma",
+    "sls": "serverless",
+    "tsc": "../node_modules/typescript/bin/tsc",
+    "webpack": "webpack"
+  },
+  "dependencies": {
+    "aws-lambda": "^0.1.2"
+  },
+  "devDependencies": {
+    "lambdainfo": "*",
+    "vars": "*",
+    "cf-cognito": "*",
+    "@types/aws-lambda": "^8.10.31",
+    "@types/node": "^12.6.8",
+    "jwk-to-pem": "^2.0.1",
+    "serverless": "^1.48.4",
+    "serverless-offline": "^5.8.0",
+    "webpack": "^4.38.0",
+    "webpack-cli": "^3.3.6"
+  }
+}

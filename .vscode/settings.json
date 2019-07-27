@@ -1,0 +1,26 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "emmet.showExpandedAbbreviation": "never",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "build": true,
+    "coverage": true,
+    ".gradle": true,
+    ".helpers": true,
+    "bin": true,
+    "**/.cache": true,
+    "site/public": true,
+    "packages/gatsby-theme-pygine/lib": true,
+    "**/yarn-error.log": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true
+  }
+}

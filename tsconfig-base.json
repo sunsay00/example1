@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "pretty": true,
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2017",
+      "es2018",
+      "esnext.asynciterable"
+    ],
+    "target": "es5",
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+    "noEmitOnError": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictPropertyInitialization": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "strictFunctionTypes": true,
+    "jsx": "react-native",
+    "noImplicitUseStrict": true,
+    "types": []
+  }
+}

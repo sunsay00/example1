@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "beauty",
+  "version": "0.0.1",
+  "workspaces": [
+    "packages/*",
+    "api"
+  ],
+  "devDependencies": {
+    "@types/node": "^12.6.8",
+    "typescript": "3.5.3"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.468.0"
+  }
+}

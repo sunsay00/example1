@@ -1,0 +1,7 @@
+{
+  "name": "cf-cert",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "index.ts",
+  "types": "index.ts"
+}

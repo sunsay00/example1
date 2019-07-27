@@ -1,0 +1,16 @@
+---
+Parameters:
+  Domain:
+    Type: String
+
+Resources:
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub ${Domain}
+      SubjectAlternativeNames:
+        - !Sub "*.${Domain}"
+
+Outputs:
+  CertificateArn:
+    Value: !Ref Certificate

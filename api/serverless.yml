@@ -1,0 +1,62 @@
+service: api
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+  stage: ${env:STAGE}
+  region: ${env:AWS_REGION}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Resource:
+        - arn:aws:cognito-idp:${env:AWS_REGION}:${env:AWS_ACCOUNT_ID}:userpool/${env:COG_UserPoolId}
+      Action:
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminDeleteUser
+        - cognito-idp:AdminConfirmSignUp
+        - cognito-idp:AdminAddUserToGroup
+        - cognito-idp:AdminDisableUser
+        - cognito-idp:AdminEnableUser
+        - cognito-idp:ListUsers
+        - cognito-idp:AdminUpdateUserAttributes
+        - cognito-idp:AdminGetUser
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:AbortMultipartUpload
+        - s3:GetObject
+        - s3:GetObjectAcl
+        - s3:ListBucketMultipartUploads
+        - s3:ListMultipartUploadParts
+        - s3:AbortMultipartUpload
+      Resource:
+        - !Sub arn:aws:s3:::uploads-${env:STAGE}-${env:AWS_REGION}
+        - !Sub arn:aws:s3:::uploads-${env:STAGE}-${env:AWS_REGION}/*
+
+package:
+  include:
+    - build/api.js
+    - build/auth.js
+  exclude:
+    - "**/*"
+
+functions:
+  auth:
+    handler: ./build/auth.handler
+  api:
+    handler: ./build/api.handler
+    environment:
+      STAGE: ${env:STAGE}
+    events:
+      - http:
+          authorizer: auth
+          path: graphql
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+
