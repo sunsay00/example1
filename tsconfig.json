@@ -10,6 +10,9 @@
     },
     {
       "path": "./packages/cf-cognito"
+    },
+    {
+      "path": "./packages/gatsby-theme-core-ui"
     }
   ]
 }

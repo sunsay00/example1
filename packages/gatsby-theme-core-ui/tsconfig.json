@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig-base",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./lib",
+    "rootDir": "."
+  },
+  "include": [
+    "./src/**/*",
+    "./index.ts"
+  ],
+  "references": [
+    {
+      "path": "../core-ui"
+    }
+  ]
+}

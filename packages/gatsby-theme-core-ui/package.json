@@ -1,0 +1,28 @@
+{
+  "name": "gatsby-theme-core-ui",
+  "version": "1.0.0",
+  "types": "./lib/index.d.ts",
+  "main": "./index.ts",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-plugin-react-native-web": "^0.11.5",
+    "gatsby": "^2.13.39",
+    "gatsby-plugin-google-fonts": "^1.0.0",
+    "gatsby-plugin-page-creator": "^2.1.5",
+    "gatsby-plugin-react-native-web": "^2.0.0-beta.0",
+    "gatsby-plugin-typescript": "^2.0.15",
+    "gatsby-source-filesystem": "^2.1.6",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/react-fontawesome": "^0.1.4",
+    "gatsby-background-image": "^0.8.2",
+    "gatsby-image": "^2.2.7",
+    "prism-react-renderer": "^0.1.6",
+    "react-live": "^2.1.2",
+    "react-native-web": "^0.11.4"
+  }
+}
