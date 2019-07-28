@@ -3,7 +3,7 @@ import {
   Image, Section, View, Header1, Header2, Header3, Header4, Header5, Header6,
   Code
 } from 'core-ui';
-import { WebNavLayout, WebNavBar, WebNavLink } from 'web-ui';
+import { WebNavLayout, WebNavBar, WebNavLink } from '../..';
 
 /*
   p: Paragraph,
