@@ -90,37 +90,43 @@ export const WebNavBar = (props: {
   );
 }
 
-export const WebNavLink = (props: { secondary?: boolean, to: string, children?: React.ReactNode }) =>
-  <NavContext.Consumer>{setOpened =>
-    <Link to={props.to} style={{ textDecoration: 'none' }}>
-      <Text style={{
-        padding: { xs: 4, sm: 8, md: 16 }.md,
-        fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
-        fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
-        fontSize: sg.fonts.sansSerif.size.heading4,
-        color: props.secondary ? sg.colors.white : sg.colors.black,
-      }}>{props.children}</Text>
-    </Link>
-  }</NavContext.Consumer>
-
-export const WebNavAnchorLink = (props: { secondary?: boolean, to: string, children?: React.ReactNode }) =>
-  <NavContext.Consumer>{setOpened =>
-    <TouchableOpacity onPress={() => {
-      const anchor = document.querySelector(`#${props.to}`);
-      if (anchor) {
-        setOpened(false);
-        anchor.scrollIntoView({ behavior: 'smooth' });
-      }
-    }}>
-      <Text style={{
-        padding: { xs: 4, sm: 8, md: 16 }.md,
-        fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
-        fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
-        fontSize: sg.fonts.sansSerif.size.heading4,
-        color: props.secondary ? sg.colors.white : sg.colors.black,
-      }}>{props.children}</Text>
-    </TouchableOpacity>
-  }</NavContext.Consumer>
+export const WebNavLink = (props: { secondary?: boolean, to: string, children?: React.ReactNode }) => {
+  if (props.to.startsWith('#')) {
+    return (
+      <NavContext.Consumer>{setOpened =>
+        <TouchableOpacity onPress={() => {
+          const anchor = document.querySelector(props.to);
+          if (anchor) {
+            setOpened(false);
+            anchor.scrollIntoView({ behavior: 'smooth' });
+          }
+        }}>
+          <Text style={{
+            padding: { xs: 4, sm: 8, md: 16 }.md,
+            fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
+            fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
+            fontSize: sg.fonts.sansSerif.size.heading4,
+            color: props.secondary ? sg.colors.white : sg.colors.black,
+          }}>{props.children}</Text>
+        </TouchableOpacity>
+      }</NavContext.Consumer>
+    );
+  } else {
+    return (
+      <NavContext.Consumer>{setOpened =>
+        <Link to={props.to} style={{ textDecoration: 'none' }}>
+          <Text style={{
+            padding: { xs: 4, sm: 8, md: 16 }.md,
+            fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
+            fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
+            fontSize: sg.fonts.sansSerif.size.heading4,
+            color: props.secondary ? sg.colors.white : sg.colors.black,
+          }}>{props.children}</Text>
+        </Link>
+      }</NavContext.Consumer>
+    );
+  }
+}
 
 export const WebNavAnchor = (props: { id: string }) =>
   <NavLayoutContext.Consumer>{({ height }) =>
