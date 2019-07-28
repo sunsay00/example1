@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
-  sg, Header3, Image, Text, View, Spacer, Breakable, Grid,
-  WebNavLayout, WebNavBar, WebNavLink, Section, Icon, WebNavAnchor, ImageBackground
+  sg, Header3, Image, Text, View, Spacer, Breakable, Grid, Section, Icon, WebNavAnchor, ImageBackground,
+  WebNavLayout, WebNavBar, WebNavAnchorLink, WebNavLink
 } from 'gatsby-theme-core-ui';
 import { Cover } from '../components/cover';
 import { Headline2 } from '../components/headline';
@@ -56,8 +56,9 @@ export default () => {
   return (
     <WebNavLayout renderNavBar={() =>
       <WebNavBar renderLogo={() => <Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-        <WebNavLink to="services">Services</WebNavLink>
-        <WebNavLink to="contact">Contact</WebNavLink>
+        <WebNavLink to="/styleguide/">Styleguide</WebNavLink>
+        <WebNavAnchorLink to="services">Services</WebNavAnchorLink>
+        <WebNavAnchorLink to="contact">Contact</WebNavAnchorLink>
       </WebNavBar>
     }>
       <Section>

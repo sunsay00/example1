@@ -5,6 +5,7 @@
   "main": "./index.ts",
   "license": "MIT",
   "devDependencies": {
+    "@types/debounce": "^1.2.0",
     "babel-plugin-react-native-web": "^0.11.5",
     "gatsby": "^2.13.39",
     "gatsby-plugin-google-fonts": "^1.0.0",
@@ -20,6 +21,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.9.0",
     "@fortawesome/react-fontawesome": "^0.1.4",
     "core-ui": "*",
+    "debounce": "^1.2.0",
     "gatsby-background-image": "^0.8.2",
     "gatsby-image": "^2.2.7",
     "prism-react-renderer": "^0.1.6",

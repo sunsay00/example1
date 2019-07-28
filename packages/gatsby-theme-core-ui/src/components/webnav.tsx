@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { View, Section, Icon, Breakable, sg, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
+import { Link } from 'gatsby';
 
 const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
   const navRef = React.useRef<HTMLElement | null>(null);
@@ -90,6 +91,19 @@ export const WebNavBar = (props: {
 }
 
 export const WebNavLink = (props: { secondary?: boolean, to: string, children?: React.ReactNode }) =>
+  <NavContext.Consumer>{setOpened =>
+    <Link to={props.to} style={{ textDecoration: 'none' }}>
+      <Text style={{
+        padding: { xs: 4, sm: 8, md: 16 }.md,
+        fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
+        fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
+        fontSize: sg.fonts.sansSerif.size.heading4,
+        color: props.secondary ? sg.colors.white : sg.colors.black,
+      }}>{props.children}</Text>
+    </Link>
+  }</NavContext.Consumer>
+
+export const WebNavAnchorLink = (props: { secondary?: boolean, to: string, children?: React.ReactNode }) =>
   <NavContext.Consumer>{setOpened =>
     <TouchableOpacity onPress={() => {
       const anchor = document.querySelector(`#${props.to}`);

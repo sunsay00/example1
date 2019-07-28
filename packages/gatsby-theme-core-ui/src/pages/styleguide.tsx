@@ -3,7 +3,7 @@ import {
   Image, Section, View, Header1, Header2, Header3, Header4, Header5, Header6,
   Code
 } from 'core-ui';
-import { WebNavLayout, WebNavBar, WebNavLink } from '../..';
+import { WebNavLayout, WebNavBar, WebNavAnchorLink, WebNavLink } from '../components/webnav';
 
 /*
   p: Paragraph,
@@ -32,8 +32,9 @@ import { WebNavLayout, WebNavBar, WebNavLink } from '../..';
 export default (props: {}) =>
   <WebNavLayout renderNavBar={() =>
     <WebNavBar renderLogo={() => <Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-      <WebNavLink to="services">Services</WebNavLink>
-      <WebNavLink to="contact">Contact</WebNavLink>
+      <WebNavLink to="/styleguide/">Styleguide</WebNavLink>
+      <WebNavAnchorLink to="services">Services</WebNavAnchorLink>
+      <WebNavAnchorLink to="contact">Contact</WebNavAnchorLink>
     </WebNavBar>
   }>
     <Section>
