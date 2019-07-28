@@ -33,14 +33,14 @@ export default (props: {}) =>
   <WebNavLayout renderNavBar={() =>
     <WebNavBar renderLogo={() => <Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
       <WebNavLink to="/styleguide/">Styleguide</WebNavLink>
-      <WebNavAnchorLink to="services">Services</WebNavAnchorLink>
-      <WebNavAnchorLink to="contact">Contact</WebNavAnchorLink>
+      <WebNavLink to="/#services">Services</WebNavLink>
+      <WebNavLink to="/#contact">Contact</WebNavLink>
     </WebNavBar>
   }>
     <Section>
       <View style={{ marginVertical: 32, marginHorizontal: 16 }}>
 
-        <Header1>Infinage Labs</Header1>
+        <Header1>Infinage Styleguide</Header1>
 
         <Header2>Table of Contents</Header2>
         {/*
