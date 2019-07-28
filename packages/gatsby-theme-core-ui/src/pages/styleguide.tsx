@@ -1,6 +1,8 @@
+import * as React from 'react';
 import { UI } from 'core-ui';
+import { WebNavLayout, WebNavBar, WebNavLink } from 'web-ui';
 
-export const components = {
+/*
   p: UI.Paragraph,
   h1: UI.Header1,
   h2: UI.Header2,
@@ -22,120 +24,126 @@ export const components = {
   a: UI.Anchor,
   tbody: UI.TableBody,
   pre: UI.Preformatted
-};
+*/
 
 export default (props: {}) =>
-  <UI.Section>
-    <UI.View style={{ marginVertical: 32, marginHorizontal: 16 }}>
+  <WebNavLayout renderNavBar={() =>
+    <WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
+      <WebNavLink to="services">Services</WebNavLink>
+      <WebNavLink to="contact">Contact</WebNavLink>
+    </WebNavBar>
+  }>
+    <UI.Section>
+      <UI.View style={{ marginVertical: 32, marginHorizontal: 16 }}>
 
-      <UI.Header1>Infinage Labs</UI.Header1>
+        <UI.Header1>Infinage Labs</UI.Header1>
 
-      <UI.Header2>Table of Contents</UI.Header2>
-      {/*
+        <UI.Header2>Table of Contents</UI.Header2>
+        {/*
       - [Components](#components)
       - [Base Tags](#basetags)
 
 ## Components <a name="components" />
+      */}
+        <UI.Header4>Accent</UI.Header4>
 
-      <UI.Header4>Accent</UI.Header4>
+        <UI.Code live>{
+          `<UI.Accent secondary={false}>Accent</UI.Accent>`
+        }</UI.Code>
 
-      ```jsx live=true
-<UI.Accent secondary={false}>Accent</UI.Accent>
-      ```
+        <UI.Header4>Badge</UI.Header4>
 
-      #### Badge
+        <UI.Code live>{
+          `<UI.Badge value={13} />`
+        }</UI.Code>
 
-      ```jsx live=true
-<UI.Badge value={13} />
-      ```
+        <UI.Header4>BulletCrumbs</UI.Header4>
 
-      #### BulletCrumbs
+        <UI.Code live>{
+          `< UI.BulletCrumbs crumbs={['one', 'two', ' three']} />`
+        }</UI.Code>
 
-      ```jsx live=true
-<UI.BulletCrumbs crumbs={['one', 'two', ' three']} />
-      ```
+        <UI.Header4>BulletCrumbButtons</UI.Header4>
 
-      #### BulletCrumbButtons
+        <UI.Code live>{
+          `<UI.BulletCrumbButtons crumbs={['one', 'two', 'three']} />`
+        }</UI.Code>
 
-      ```jsx live=true
-<UI.BulletCrumbButtons crumbs={['one', 'two', 'three']} />
-      ```
+        <UI.Header4>Button</UI.Header4>
 
-      #### Button
+        <UI.Code live>{
+          `<UI.Button onPress={() => alert('button pressed!')}>Primary Button</UI.Button>`
+        }</UI.Code>
 
-      ```jsx live=true
-<UI.Button onPress={() => alert('button pressed!')}>Primary Button</UI.Button>
-      ```
+        <UI.Header4>Carousel</UI.Header4>
 
-      #### Carousel
+        <UI.Code live>{
+          `<UI.Carousel scrollEnabled infinite autoplay>
+  <UI.View style={{
+    height: 240, justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'aliceblue'
+  }}><UI.Text>Page 1</UI.Text></UI.View>
+  <UI.View style={{
+    height: 240, justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'tomato'
+  }}><UI.Text>Page 2</UI.Text></UI.View>
+  <UI.View style={{
+    height: 240, justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rebeccapurple',
+  }}><UI.Text>Page 3</UI.Text></UI.View>
+</UI.Carousel>`
+        }</UI.Code>
 
-      ```jsx live=true
-<UI.Carousel scrollEnabled infinite autoplay>
+        <UI.Header4>Icon</UI.Header4>
 
-        <UI.View style={{
-          height: 240, justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'aliceblue'
-        }}><UI.Text>Page 1</UI.Text></UI.View>
+        <UI.Code live>{
+          `<UI.Icon name="stroopwafel" color="tomato" />`
+        }</UI.Code>
 
-        <UI.View style={{
-          height: 240, justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'tomato'
-        }}><UI.Text>Page 2</UI.Text></UI.View>
+        <UI.Header4>UserNameInput</UI.Header4>
 
-        <UI.View style={{
-          height: 240, justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rebeccapurple',
-        }}><UI.Text>Page 3</UI.Text></UI.View>
+        <UI.Code live>{
+          `<UI.UserNameInput placeholder="User Name" />`
+        }</UI.Code>
 
-      </UI.Carousel>
-      ```
+        <UI.Header4>PasswordInput</UI.Header4>
 
-      #### Icon
+        <UI.Code live>{
+          `<UI.PasswordInput placeholder="Password" message="password required" />`
+        }</UI.Code>
 
-      ```js live=true
-<UI.Icon name="stroopwafel" color="tomato" />
-      ```
+        <UI.Header4>EmailInput</UI.Header4>
 
-      #### UserNameInput
+        <UI.Code live>{
+          `<UI.EmailInput placeholder="Email" disabled />`
+        }</UI.Code>
 
-      ```js live=true
-<UI.UserNameInput placeholder="User Name" />
-      ```
+        <UI.Header4>NumericInput</UI.Header4>
 
-      #### PasswordInput
+        <UI.Code live>{
+          `<UI.NumericInput placeholder="Age" value={25} />`
+        }</UI.Code>
 
-      ```js live=true
-<UI.PasswordInput placeholder="Password" message="password required" />
-      ```
+        {/*
+      ## Basic Tags <a name="basetags" />
+      */}
 
-      #### EmailInput
+        <UI.Header1>h1</UI.Header1>
 
-      ```js live=true
-<UI.EmailInput placeholder="Email" disabled />
-      ```
+        <UI.Header2>h2</UI.Header2>
 
-      #### NumericInput
+        <UI.Header3>h3</UI.Header3>
 
-      ```js live=true
-<UI.NumericInput placeholder="Age" value={25} />
-      ```
+        <UI.Header4>h4</UI.Header4>
 
-## Basic Tags <a name="basetags" />
+        <UI.Header5>h5</UI.Header5>
 
-      # h1
+        <UI.Header6>h6</UI.Header6>
 
-      ## h2
-
-      ### h3
-
-      #### h4
-
-      ##### h5
-
-      ###### h6
+        {/*
 
       paragraph1
       paragraph2
@@ -181,5 +189,6 @@ export default (props: {}) =>
 
       ![alt](https://static1.squarespace.com/static/59ea4ce9b1ffb6d0755d0fa3/t/5a9dcfc1ec212d191ef4b333/1508695516730/?format=100w)
       */}
-    </UI.View>
-  </UI.Section>
+      </UI.View>
+    </UI.Section>
+  </WebNavLayout>

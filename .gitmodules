@@ -4,3 +4,6 @@
 [submodule "packages/core-ui"]
 	path = packages/core-ui
 	url = https://github.com/kyunghoon/core-ui.git
+[submodule "packages/web-ui"]
+	path = packages/web-ui
+	url = https://github.com/kyunghoon/web-ui.git

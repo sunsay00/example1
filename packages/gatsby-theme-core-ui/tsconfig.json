@@ -8,10 +8,5 @@
   "include": [
     "./src/**/*",
     "./index.ts"
-  ],
-  "references": [
-    {
-      "path": "../core-ui"
-    }
   ]
 }

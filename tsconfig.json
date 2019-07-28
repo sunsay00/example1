@@ -9,6 +9,12 @@
       "path": "./packages/core"
     },
     {
+      "path": "./packages/core-ui"
+    },
+    {
+      "path": "./packages/web-ui"
+    },
+    {
       "path": "./packages/cf-cognito"
     },
     {

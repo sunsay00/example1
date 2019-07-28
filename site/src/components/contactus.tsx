@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { UI } from 'gatsby-theme-core-ui';
+import { UI, Breakable } from 'gatsby-theme-core-ui';
 import { Headline2 } from './headline';
-import { Breakable } from './breakable';
 import { FinePrint } from './fineprint';
 
 export const ContactUs = () =>

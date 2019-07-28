@@ -4,7 +4,6 @@ import gql from 'graphql-tag';
 import * as React from 'react';
 import { AsyncStorage } from 'react-native';
 import { ApolloProvider } from 'react-apollo-hooks';
-//import { useAuthToken } from './src/hooks/useauthtoken';
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { persistCache } from 'apollo-cache-persist';

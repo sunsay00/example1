@@ -1,10 +1,8 @@
 import * as React from 'react';
-import { UI, sg } from 'gatsby-theme-core-ui';
-import { WebNavLayout, WebNavBar, WebNavLink, WebNavAnchor } from '../components/webnav';
+import { UI, sg, Breakable, Grid } from 'gatsby-theme-core-ui';
+import { WebNavLayout, WebNavBar, WebNavLink, WebNavAnchor } from 'web-ui';
 import { Cover } from '../components/cover';
-import { Grid } from '../components/grid';
 import { Headline2 } from '../components/headline';
-import { Breakable } from '../components/breakable';
 import { ContactUs } from '../components/contactus';
 import { Footer } from '../components/footer';
 

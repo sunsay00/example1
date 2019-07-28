@@ -13,3 +13,7 @@ export const UI = {
 };
 
 export const sg = coresg;
+
+export { Breakable, Grid } from 'core-ui';
+export const View = UI.View;
+export const Text = UI.Text;
