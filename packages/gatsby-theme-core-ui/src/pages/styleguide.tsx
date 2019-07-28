@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
   Image, Section, View, Header1, Header2, Header3, Header4, Header5, Header6,
-  Code
+  Code, Breakable
 } from 'core-ui';
 import { WebNavLayout, WebNavBar, WebNavAnchorLink, WebNavLink } from '../components/webnav';
 
@@ -28,6 +28,7 @@ import { WebNavLayout, WebNavBar, WebNavAnchorLink, WebNavLink } from '../compon
   tbody: TableBody,
   pre: Preformatted
 */
+
 
 export default (props: {}) =>
   <WebNavLayout renderNavBar={() =>
