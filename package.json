@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "workspaces": [
     "packages/*",
-    "api"
+    "api",
+    "site"
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",

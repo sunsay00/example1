@@ -2,6 +2,14 @@
   "name": "cf-cognito",
   "version": "0.0.1",
   "license": "MIT",
-  "main": "index.ts",
-  "types": "index.ts"
+  "main": "./lib/index.d.ts",
+  "types": "./lib/index.js",
+  "devDependencies": {
+    "@types/sjcl": "1.0.27"
+  },
+  "dependencies": {
+    "sjcl": "git+https://github.com/kyunghoon/react-native-sjcl.git",
+    "aws-sdk": "git://github.com/aws/aws-sdk-js.git#react-native",
+    "react-native-aws-cognito-js": "0.0.4"
+  }
 }

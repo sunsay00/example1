@@ -76,7 +76,7 @@ const writeResult = (outPath: string, key: string, data: { [k: string]: string }
 };
 
 const writeTs = (outPath: string, key: string, data: { [k: string]: string }) => {
-  let out = '';
+  let out = '// this file has been automatically generated\n\n';
   Object.entries(data).map(([k, v]) => {
     out += `  ${k}: ${JSON.stringify(v)},\n`;
   });
@@ -222,7 +222,9 @@ const main = async (cmd: string) => {
       await Record.match(
         async cloudformation => {
           const { name, key, inputs, outputs } = cloudformation;
-          const tspath = `${__dirname}/../../node_modules/${name}/index.ts`;
+          const tsdir = `${__dirname}/../../node_modules/${name}/src`;
+          if (!fs.existsSync(tsdir))
+            fs.mkdirSync(tsdir);
           const envsdir = `${__dirname}/../../.envs.${configuration.stage}`;
           if (!fs.existsSync(envsdir))
             fs.mkdirSync(envsdir);
@@ -237,7 +239,7 @@ const main = async (cmd: string) => {
             throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
           previous = await up(getStackname(name), cfpath, inputs, outputs);
           writeResult(opath, key, previous);
-          writeTs(tspath, key, previous);
+          writeTs(`${tsdir}/vars.ts`, key, previous);
           return false;
         },
         shell => new Promise<boolean>((resolve, reject) => {
