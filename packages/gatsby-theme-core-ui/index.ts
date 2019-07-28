@@ -1,19 +1,6 @@
-import { UI as CoreUI, sg as coresg } from 'core-ui';
-import { Image } from './src/components/image';
-import { ImageBackground } from './src/components/imagebackground';
-
-export const UI = {
-  ...CoreUI,
-  Image,
-  ImageBackground,
-  Actual: {
-    Image: CoreUI.Image,
-    ImageBackground: CoreUI.ImageBackground
-  }
-};
-
-export const sg = coresg;
-
-export { Breakable, Grid } from 'core-ui';
-export const View = UI.View;
-export const Text = UI.Text;
+import { Image, ImageBackground } from 'core-ui';
+export const Actual = { Image, ImageBackground };
+export * from 'web-ui';
+export * from 'core-ui';
+export { Image } from './src/components/image';
+export { ImageBackground } from './src/components/imagebackground';

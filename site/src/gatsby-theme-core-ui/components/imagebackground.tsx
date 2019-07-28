@@ -1,5 +1,5 @@
 import * as React from 'react';
-import BackgroundImage from 'gatsby-background-image';
+import GTBackgroundImage from 'gatsby-background-image';
 import { ImageStyle, ImageResizeMode } from 'react-native';
 import { StaticQuery, graphql } from 'gatsby';
 import { convertImageStyle } from './image';
@@ -24,7 +24,7 @@ export const ImageBackground = (props: { source: { uri: string }, children?: Rea
     render={data => {
       const edge = data.allFile.edges.find((e: any) => e.node.relativePath == props.source.uri);
       if (!edge) return null;
-      const BgImg = BackgroundImage as any;
+      const BgImg = GTBackgroundImage as any;
       return (
         <BgImg style={convertImageStyle(props.style, props.resizeMode)} fluid={edge.node.childImageSharp.fluid}>{
           React.Children.map(props.children, child => React.isValidElement(child) && React.cloneElement(child,

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { TouchableOpacity, ViewStyle } from 'react-native';
-import { UI, sg } from 'gatsby-theme-core-ui';
+import { sg, ViewStyle, TouchableOpacity, View, Text } from 'gatsby-theme-core-ui';
 import { has } from 'common';
 
 export const Tabs = (props: {
@@ -14,10 +13,10 @@ export const Tabs = (props: {
   const titles = children.map(child => React.isValidElement(child) && has(child.props, 'title', 'string') ? child.props.title : '');
   const [selectedIndex, setSelectedIndex] = React.useState(props.initalIndex > titles.length ? titles.length - 1 : props.initalIndex);
   return (
-    <UI.View style={props.style}>
-      <UI.View style={{ flexDirection: 'row' }}>
+    <View style={props.style}>
+      <View style={{ flexDirection: 'row' }}>
         {titles.map((title, i) =>
-          <UI.View key={i} style={i == selectedIndex ?
+          <View key={i} style={i == selectedIndex ?
             {
               borderTopLeftRadius: 8,
               borderTopRightRadius: 8,
@@ -33,19 +32,19 @@ export const Tabs = (props: {
               paddingVertical: 16,
               paddingHorizontal: 24,
             }} onPress={() => setSelectedIndex(i)}>
-              <UI.Text size="md" color={i == selectedIndex ? sg.colors.black : sg.rgba(sg.colors.black, .5)}>{title}</UI.Text>
+              <Text size="md" color={i == selectedIndex ? sg.colors.black : sg.rgba(sg.colors.black, .5)}>{title}</Text>
             </TouchableOpacity>
-          </UI.View>
+          </View>
         )}
-        <UI.View style={{
+        <View style={{
           flex: 1,
           paddingVertical: 8,
           paddingHorizontal: 24,
           borderBottomWidth: 1,
           borderColor: sg.rgba(sg.colors.black, .25),
         }} />
-      </UI.View>
-      <UI.View style={{
+      </View>
+      <View style={{
         padding: 16,
         ...!props.hideFrame && {
           borderLeftWidth: 1,
@@ -55,8 +54,8 @@ export const Tabs = (props: {
           borderBottomLeftRadius: 8,
           borderBottomRightRadius: 8,
         } || undefined
-      }}>{children[selectedIndex]}</UI.View>
-    </UI.View>
+      }}>{children[selectedIndex]}</View>
+    </View>
   );
 }
 

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { UI, sg } from 'gatsby-theme-core-ui';
+import { sg, Text } from 'gatsby-theme-core-ui';
 
 const Headline = (sz: 1 | 2) => (props: { children?: React.ReactNode, serifed?: boolean, secondary?: boolean }) => {
   const fontSize = sg.fonts[props.serifed ? 'serif' : 'sansSerif'].size[sz == 1 ? 'super1' : 'super2'];
   const lineHeight = sg.fonts[props.serifed ? 'serif' : 'sansSerif'].lineHeight[sz == 1 ? 'super1' : 'super2'];
   const color = sg.rgba(props.secondary ? sg.colors.white : sg.colors.black, 1);
   return (
-    <UI.Text style={{
+    <Text style={{
       textAlign: 'center',
       fontSize,
       lineHeight,
@@ -16,7 +16,7 @@ const Headline = (sz: 1 | 2) => (props: { children?: React.ReactNode, serifed?: 
       weight="bold"
       color={color}>
       {props.children}
-    </UI.Text>
+    </Text>
   );
 }
 

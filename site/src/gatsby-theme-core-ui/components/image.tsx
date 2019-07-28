@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { ImageStyle, ImageResizeMode } from 'react-native';
 import { StaticQuery, graphql } from 'gatsby';
-import Img from 'gatsby-image';
-import { UI } from 'gatsby-theme-core-ui';
+import GTImage from 'gatsby-image';
+import { Actual } from 'gatsby-theme-core-ui';
 
 export const convertImageStyle = (style?: ImageStyle, resizeMode?: ImageResizeMode) => style && ({
   marginLeft: style.marginHorizontal || style.marginLeft,
@@ -20,7 +20,7 @@ export const convertImageStyle = (style?: ImageStyle, resizeMode?: ImageResizeMo
 
 export const Image = (props: { source: { uri: string }, style?: ImageStyle, resizeMode?: ImageResizeMode }) => {
   if (props.source.uri.startsWith('http')) {
-    return <UI.Actual.Image source={props.source} style={props.style} resizeMode={props.resizeMode} />;
+    return <Actual.Image source={props.source} style={props.style} resizeMode={props.resizeMode} />;
   } else {
     return (
       <StaticQuery
@@ -43,7 +43,7 @@ export const Image = (props: { source: { uri: string }, style?: ImageStyle, resi
           const edge = data.allFile.edges.find((e: any) => e.node.relativePath == props.source.uri);
           if (!edge) return null;
           return (
-            <Img style={convertImageStyle(props.style, props.resizeMode)} fluid={edge.node.childImageSharp.fluid} />
+            <GTImage style={convertImageStyle(props.style, props.resizeMode)} fluid={edge.node.childImageSharp.fluid} />
           );
         }} />
     )

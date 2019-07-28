@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { UI } from 'core-ui';
+import { View, Text } from 'core-ui';
 
 export default (props: { pageContext: { body: string } }) =>
-  <UI.View>
-    <UI.Text>{props.pageContext.body}</UI.Text>
-  </UI.View>
+  <View>
+    <Text>{props.pageContext.body}</Text>
+  </View>

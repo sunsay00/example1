@@ -1,147 +1,150 @@
 import * as React from 'react';
-import { UI } from 'core-ui';
+import {
+  Image, Section, View, Header1, Header2, Header3, Header4, Header5, Header6,
+  Code
+} from 'core-ui';
 import { WebNavLayout, WebNavBar, WebNavLink } from 'web-ui';
 
 /*
-  p: UI.Paragraph,
-  h1: UI.Header1,
-  h2: UI.Header2,
-  h3: UI.Header3,
-  h4: UI.Header4,
-  h5: UI.Header5,
-  h6: UI.Header6,
-  blockquote: UI.Blockquote,
-  ul: UI.UnorderedList,
-  ol: UI.OrderedList,
-  li: UI.ListItem,
-  table: UI.Table,
-  tr: UI.TableRow,
-  td: UI.TableData,
-  th: UI.TableHeader,
-  code: UI.Code,
-  inlineCode: UI.InlineCode,
-  hr: UI.HRule,
-  a: UI.Anchor,
-  tbody: UI.TableBody,
-  pre: UI.Preformatted
+  p: Paragraph,
+  h1: Header1,
+  h2: Header2,
+  h3: Header3,
+  h4: Header4,
+  h5: Header5,
+  h6: Header6,
+  blockquote: Blockquote,
+  ul: UnorderedList,
+  ol: OrderedList,
+  li: ListItem,
+  table: Table,
+  tr: TableRow,
+  td: TableData,
+  th: TableHeader,
+  code: Code,
+  inlineCode: InlineCode,
+  hr: HRule,
+  a: Anchor,
+  tbody: TableBody,
+  pre: Preformatted
 */
 
 export default (props: {}) =>
   <WebNavLayout renderNavBar={() =>
-    <WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
+    <WebNavBar renderLogo={() => <Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
       <WebNavLink to="services">Services</WebNavLink>
       <WebNavLink to="contact">Contact</WebNavLink>
     </WebNavBar>
   }>
-    <UI.Section>
-      <UI.View style={{ marginVertical: 32, marginHorizontal: 16 }}>
+    <Section>
+      <View style={{ marginVertical: 32, marginHorizontal: 16 }}>
 
-        <UI.Header1>Infinage Labs</UI.Header1>
+        <Header1>Infinage Labs</Header1>
 
-        <UI.Header2>Table of Contents</UI.Header2>
+        <Header2>Table of Contents</Header2>
         {/*
       - [Components](#components)
       - [Base Tags](#basetags)
 
 ## Components <a name="components" />
       */}
-        <UI.Header4>Accent</UI.Header4>
+        <Header4>Accent</Header4>
 
-        <UI.Code live>{
-          `<UI.Accent secondary={false}>Accent</UI.Accent>`
-        }</UI.Code>
+        <Code live>{
+          `<Accent secondary={false}>Accent</Accent>`
+        }</Code>
 
-        <UI.Header4>Badge</UI.Header4>
+        <Header4>Badge</Header4>
 
-        <UI.Code live>{
-          `<UI.Badge value={13} />`
-        }</UI.Code>
+        <Code live>{
+          `<Badge value={13} />`
+        }</Code>
 
-        <UI.Header4>BulletCrumbs</UI.Header4>
+        <Header4>BulletCrumbs</Header4>
 
-        <UI.Code live>{
-          `< UI.BulletCrumbs crumbs={['one', 'two', ' three']} />`
-        }</UI.Code>
+        <Code live>{
+          `< BulletCrumbs crumbs={['one', 'two', ' three']} />`
+        }</Code>
 
-        <UI.Header4>BulletCrumbButtons</UI.Header4>
+        <Header4>BulletCrumbButtons</Header4>
 
-        <UI.Code live>{
-          `<UI.BulletCrumbButtons crumbs={['one', 'two', 'three']} />`
-        }</UI.Code>
+        <Code live>{
+          `<BulletCrumbButtons crumbs={['one', 'two', 'three']} />`
+        }</Code>
 
-        <UI.Header4>Button</UI.Header4>
+        <Header4>Button</Header4>
 
-        <UI.Code live>{
-          `<UI.Button onPress={() => alert('button pressed!')}>Primary Button</UI.Button>`
-        }</UI.Code>
+        <Code live>{
+          `<Button onPress={() => alert('button pressed!')}>Primary Button</Button>`
+        }</Code>
 
-        <UI.Header4>Carousel</UI.Header4>
+        <Header4>Carousel</Header4>
 
-        <UI.Code live>{
-          `<UI.Carousel scrollEnabled infinite autoplay>
-  <UI.View style={{
+        <Code live>{
+          `<Carousel scrollEnabled infinite autoplay>
+  <View style={{
     height: 240, justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'aliceblue'
-  }}><UI.Text>Page 1</UI.Text></UI.View>
-  <UI.View style={{
+  }}><Text>Page 1</Text></View>
+  <View style={{
     height: 240, justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'tomato'
-  }}><UI.Text>Page 2</UI.Text></UI.View>
-  <UI.View style={{
+  }}><Text>Page 2</Text></View>
+  <View style={{
     height: 240, justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rebeccapurple',
-  }}><UI.Text>Page 3</UI.Text></UI.View>
-</UI.Carousel>`
-        }</UI.Code>
+  }}><Text>Page 3</Text></View>
+</Carousel>`
+        }</Code>
 
-        <UI.Header4>Icon</UI.Header4>
+        <Header4>Icon</Header4>
 
-        <UI.Code live>{
-          `<UI.Icon name="stroopwafel" color="tomato" />`
-        }</UI.Code>
+        <Code live>{
+          `<Icon name="stroopwafel" color="tomato" />`
+        }</Code>
 
-        <UI.Header4>UserNameInput</UI.Header4>
+        <Header4>UserNameInput</Header4>
 
-        <UI.Code live>{
-          `<UI.UserNameInput placeholder="User Name" />`
-        }</UI.Code>
+        <Code live>{
+          `<UserNameInput placeholder="User Name" />`
+        }</Code>
 
-        <UI.Header4>PasswordInput</UI.Header4>
+        <Header4>PasswordInput</Header4>
 
-        <UI.Code live>{
-          `<UI.PasswordInput placeholder="Password" message="password required" />`
-        }</UI.Code>
+        <Code live>{
+          `<PasswordInput placeholder="Password" message="password required" />`
+        }</Code>
 
-        <UI.Header4>EmailInput</UI.Header4>
+        <Header4>EmailInput</Header4>
 
-        <UI.Code live>{
-          `<UI.EmailInput placeholder="Email" disabled />`
-        }</UI.Code>
+        <Code live>{
+          `<EmailInput placeholder="Email" disabled />`
+        }</Code>
 
-        <UI.Header4>NumericInput</UI.Header4>
+        <Header4>NumericInput</Header4>
 
-        <UI.Code live>{
-          `<UI.NumericInput placeholder="Age" value={25} />`
-        }</UI.Code>
+        <Code live>{
+          `<NumericInput placeholder="Age" value={25} />`
+        }</Code>
 
         {/*
       ## Basic Tags <a name="basetags" />
       */}
 
-        <UI.Header1>h1</UI.Header1>
+        <Header1>h1</Header1>
 
-        <UI.Header2>h2</UI.Header2>
+        <Header2>h2</Header2>
 
-        <UI.Header3>h3</UI.Header3>
+        <Header3>h3</Header3>
 
-        <UI.Header4>h4</UI.Header4>
+        <Header4>h4</Header4>
 
-        <UI.Header5>h5</UI.Header5>
+        <Header5>h5</Header5>
 
-        <UI.Header6>h6</UI.Header6>
+        <Header6>h6</Header6>
 
         {/*
 
@@ -189,6 +192,6 @@ export default (props: {}) =>
 
       ![alt](https://static1.squarespace.com/static/59ea4ce9b1ffb6d0755d0fa3/t/5a9dcfc1ec212d191ef4b333/1508695516730/?format=100w)
       */}
-      </UI.View>
-    </UI.Section>
+      </View>
+    </Section>
   </WebNavLayout>
