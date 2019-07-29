@@ -1,8 +1,17 @@
 import * as React from 'react';
-import { sg, Text } from 'gatsby-theme-core-ui';
+import * as UI from 'gatsby-theme-core-ui';
 
 export const FinePrint = (props: { secondary?: boolean, children?: React.ReactChild }) =>
-  <Text color={props.secondary && sg.rgba(sg.colors.white, .5) || undefined} weight="thin" style={{ marginLeft: 16 + 22, marginBottom: 16, fontSize: 11, lineHeight: 14 }}>
+  <UI.Text
+    color={props.secondary && UI.rgba(UI.Colors.white, .5) || undefined}
+    weight="thin"
+    style={{
+      marginLeft: 16 + 22,
+      marginBottom: 16,
+      fontSize: 11,
+      lineHeight: 14
+    }}
+  >
     {props.children}
-  </Text>
+  </UI.Text>
 

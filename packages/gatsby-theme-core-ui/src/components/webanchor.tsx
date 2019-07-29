@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { sg } from 'core-ui';
+import { Colors } from 'core-ui';
 
-export const WebAnchor = (props: any) =>
-  <a {...props} style={{ ...props.style, textDecoration: 'none', color: sg.colors.accentBlue }} />
+export const WebAnchor = (props: { style: {} }) =>
+  <a {...props} style={{ ...props.style, textDecoration: 'none', color: Colors.accentBlue }} />

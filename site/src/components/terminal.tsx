@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { sg, Code, ScrollView, ViewStyle } from 'gatsby-theme-core-ui';
+import { Code, ScrollView, ViewStyle } from 'gatsby-theme-core-ui';
 
 export const Terminal = (props: { lines: string[], style?: ViewStyle, secondary?: boolean }) => {
   const scrollViewRef = React.useRef<ScrollView | null>(null);

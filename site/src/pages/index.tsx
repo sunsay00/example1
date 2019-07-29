@@ -1,34 +1,33 @@
 import * as React from 'react';
-import {
-  sg, Header3, Image, Text, View, Spacer, Breakable, Grid, Section, Icon, WebNavAnchor, ImageBackground,
-  WebNavLayout, WebNavBar, WebNavLink
-} from 'gatsby-theme-core-ui';
+import { useState } from 'react';
+import * as UI from 'gatsby-theme-core-ui';
 import { Cover } from '../components/cover';
 import { Headline2 } from '../components/headline';
 import { ContactUs } from '../components/contactus';
 import { Footer } from '../components/footer';
+import { FullModal } from '../components/fullmodal';
 
 const Post = (props: { title: string, image?: { uri: string }, children?: React.ReactNode }) =>
-  <Breakable
-    renderSmall={children => <View style={{ marginBottom: 24, maxWidth: 500 }}>{children}</View>}
-    renderMedium={children => <View style={{ marginBottom: 24, maxWidth: 600 }}>{children}</View>}
-    renderLarge={children => <View style={{ marginBottom: 24, maxWidth: 700 }}>{children}</View>}>
+  <UI.Breakable
+    renderSmall={children => <UI.View style={{ marginBottom: 24, maxWidth: 500 }}>{children}</UI.View>}
+    renderMedium={children => <UI.View style={{ marginBottom: 24, maxWidth: 600 }}>{children}</UI.View>}
+    renderLarge={children => <UI.View style={{ marginBottom: 24, maxWidth: 700 }}>{children}</UI.View>}>
     {props.image &&
-      <View style={{ paddingTop: 16 }}>
-        <Image style={{ width: '100%', height: 100, borderRadius: 8 }} source={{ uri: props.image.uri }} resizeMode="cover" />
-      </View>}
-    <View style={{ flexDirection: 'column', flex: 1 }}>
-      <Spacer size="lg" />
-      <Header3 serifed>{props.title}</Header3>
-      <Text numberOfLines={2} weight="thin" style={{ flexWrap: 'wrap', flex: 1, marginBottom: 8 }}>{props.children}</Text>
-    </View>
-  </Breakable>
+      <UI.View style={{ paddingTop: 16 }}>
+        <UI.Image style={{ width: '100%', height: 100, borderRadius: 8 }} source={{ uri: props.image.uri }} resizeMode="cover" />
+      </UI.View>}
+    <UI.View style={{ flexDirection: 'column', flex: 1 }}>
+      <UI.Spacer size="lg" />
+      <UI.Header3 serifed>{props.title}</UI.Header3>
+      <UI.Text numberOfLines={2} weight="thin" style={{ flexWrap: 'wrap', flex: 1, marginBottom: 8 }}>{props.children}</UI.Text>
+    </UI.View>
+  </UI.Breakable>
 
 const PostView = (props: { data: { title: string, content: string, image?: { uri: string } }[] }) =>
   <>{props.data.map((post, i) => <Post key={i} title={post.title} image={post.image}>{post.content}</Post>)}</>
 
 const Services = () =>
-  <View style={{ margin: 16, alignItems: 'center' }}>
+  <UI.View style={{ margin: 16, alignItems: 'center' }}>
     <Headline2 serifed>Services</Headline2>
     <PostView data={[{
       title: 'Infrastructure Integration',
@@ -50,65 +49,73 @@ const Services = () =>
       content: 'Every corporation strives to increase the market shares for its business. Distinctive and informative marketing materials are unquestionably one of the channels to attain this goal. Infinage entertains this interest for our clients with creative design and marketing.  We conceptualize and author unique designs on all types of marketing materials, such as company logo, corporate website, general graphics, print, brochure, menu, business card, etc. Please feel free to contact us for more information.',
       image: { uri: 'project.jpg' }
     }]} />
-  </View>
+  </UI.View>
 
 export default () => {
+  const [opened, setOpened] = useState(false);
   return (
-    <WebNavLayout renderNavBar={() =>
-      <WebNavBar renderLogo={() => <Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-        <WebNavLink to="/styleguide/">Styleguide</WebNavLink>
-        <WebNavLink to="#services">Services</WebNavLink>
-        <WebNavLink to="#contact">Contact</WebNavLink>
-      </WebNavBar>
+    <UI.WebNavLayout renderNavBar={() =>
+      <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
+        <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
+        <UI.WebNavLink to="#services">Services</UI.WebNavLink>
+        <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
+        <UI.WebNavLink onPress={() => setOpened(true)}>Log in</UI.WebNavLink>
+        <UI.WebNavLink>Wakka</UI.WebNavLink>
+      </UI.WebNavBar>
     }>
-      <Section>
+      <FullModal visible={opened} onDismiss={() => setOpened(false)}>
+        <UI.Header2>Log in</UI.Header2>
+        <UI.Button onPress={() => setOpened(b => !b)}>Hide</UI.Button>
+      </FullModal>
+
+      <UI.Section>
         <Cover />
-      </Section>
+      </UI.Section>
 
-      <Section>
-        <Grid stride={3}>
-          <View>
-            <View style={{ alignItems: 'center' }}>
-              <Icon name="server" color={sg.colors.accentBlue} />
-              <Spacer />
-              <Header3 serifed>Experienced IT</Header3>
-            </View>
-            <Text weight="thin">Infinage specializes in project management, software development, network infrastructure design and implementation, IT security assessment, and IT consulting services.</Text>
-          </View>
-          <View>
-            <View style={{ alignItems: 'center' }} >
-              <Icon name="bolt" color={sg.colors.accentGreen} />
-              <Spacer />
-              <Header3 serifed>Efficiency driven</Header3>
-            </View>
-            <Text weight="thin">Our highly trained staffs provide end-to-end IT solutions to our clients from a variety of industries based on their specific needs.</Text>
-          </View>
-          <View>
-            <View style={{ alignItems: 'center' }}>
-              <Icon name="globe" color={sg.colors.accentRed} />
-              <Spacer />
-              <Header3 serifed>Global solutions</Header3>
-            </View>
-            <Text weight="thin">We are steadily growing and evolving into a global IT Solutions firm as we continue to fulfill our clients’ escalating exigencies in the international markets.</Text>
-          </View>
-        </Grid>
-      </Section>
+      <UI.Section>
+        <UI.Grid stride={3}>
+          <UI.View>
+            <UI.View style={{ alignItems: 'center' }}>
+              <UI.Icon name="server" color={UI.Colors.accentBlue} />
+              <UI.Spacer />
+              <UI.Header3 serifed>Experienced IT</UI.Header3>
+            </UI.View>
+            <UI.Text weight="thin">Infinage specializes in project management, software development, network infrastructure design and implementation, IT security assessment, and IT consulting services.</UI.Text>
+          </UI.View>
+          <UI.View>
+            <UI.View style={{ alignItems: 'center' }} >
+              <UI.Icon name="bolt" color={UI.Colors.accentGreen} />
+              <UI.Spacer />
+              <UI.Header3 serifed>Efficiency driven</UI.Header3>
+            </UI.View>
+            <UI.Text weight="thin">Our highly trained staffs provide end-to-end IT solutions to our clients from a variety of industries based on their specific needs.</UI.Text>
+          </UI.View>
+          <UI.View>
+            <UI.View style={{ alignItems: 'center' }}>
+              <UI.Icon name="globe" color={UI.Colors.accentRed} />
+              <UI.Spacer />
+              <UI.Header3 serifed>Global solutions</UI.Header3>
+            </UI.View>
+            <UI.Text weight="thin">We are steadily growing and evolving into a global IT Solutions firm as we continue to fulfill our clients’ escalating exigencies in the international markets.</UI.Text>
+          </UI.View>
+        </UI.Grid>
+      </UI.Section>
 
-      <WebNavAnchor id="services" />
+      <UI.WebNavAnchor id="services" />
 
-      <View style={{ backgroundColor: sg.rgba(sg.colors.black, .05), marginHorizontal: -32, paddingHorizontal: 32 }}>
-        <Section>
+      <UI.View style={{ backgroundColor: UI.rgba(UI.Colors.black, .05), marginHorizontal: -32, paddingHorizontal: 32 }}>
+        <UI.Section>
           <Services />
-        </Section>
-      </View>
+        </UI.Section>
+      </UI.View>
 
-      <WebNavAnchor id="contact" />
+      <UI.WebNavAnchor id="contact" />
 
-      <ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32 }}>
-        <Section><ContactUs /></Section>
-        <Section><Footer /></Section>
-      </ImageBackground>
+      <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32 }}>
+        <UI.Section><ContactUs /></UI.Section>
+        <UI.Section><Footer /></UI.Section>
+      </UI.ImageBackground>
 
-    </WebNavLayout>
+    </UI.WebNavLayout>
   );
 }

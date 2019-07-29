@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Section, Icon, Breakable, sg, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
+import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
 import { Link } from 'gatsby';
 
 const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
@@ -13,7 +13,7 @@ const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
       <nav style={{
         flex: 1, position: 'fixed',
         top: navRef.current && navRef.current.offsetTop || 0, left: 0, right: 0,
-        backgroundColor: sg.colors.white, zIndex: 1,
+        backgroundColor: Colors.white, zIndex: 1,
       }}>
         {props.children}
       </nav>
@@ -46,7 +46,7 @@ export const WebNavBar = (props: {
               {React.Children.map(props.children, child =>
                 <View style={{
                   alignItems: 'center',
-                  borderBottomColor: sg.rgba(sg.colors.white, .2),
+                  borderBottomColor: rgba(Colors.white, .2),
                   borderBottomWidth: 1,
                   marginHorizontal: -32
                 }}>
@@ -57,7 +57,7 @@ export const WebNavBar = (props: {
                 </View>
               )}
             </Animated.View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, backgroundColor: sg.colors.white, marginHorizontal: -32, paddingHorizontal: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, backgroundColor: Colors.white, marginHorizontal: -32, paddingHorizontal: 16 }}>
               <TouchableOpacity onPress={() => {
                 const body = document.querySelector('body');
                 body && body.scrollIntoView({ behavior: 'smooth' });
@@ -90,42 +90,77 @@ export const WebNavBar = (props: {
   );
 }
 
-export const WebNavLink = (props: { secondary?: boolean, to: string, children?: React.ReactNode }) => {
-  if (props.to.startsWith('#')) {
+export const WebNavLink = (props: {
+  secondary?: boolean,
+  to?: string,
+  onPress?: () => void,
+  children?: React.ReactNode,
+}) => {
+  if (props.onPress) {
     return (
       <NavContext.Consumer>{setOpened =>
         <TouchableOpacity onPress={() => {
-          const anchor = document.querySelector(props.to);
-          if (anchor) {
-            setOpened(false);
-            anchor.scrollIntoView({ behavior: 'smooth' });
-          }
+          setOpened(false);
+          props.onPress && props.onPress();
         }}>
           <Text style={{
             padding: { xs: 4, sm: 8, md: 16 }.md,
-            fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
-            fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
-            fontSize: sg.fonts.sansSerif.size.heading4,
-            color: props.secondary ? sg.colors.white : sg.colors.black,
+            fontFamily: Fonts.sansSerif.weightProps.bold.name,
+            fontWeight: Fonts.sansSerif.weightProps.bold.value,
+            fontSize: Fonts.sansSerif.size.heading4,
+            color: props.secondary ? Colors.white : Colors.black,
           }}>{props.children}</Text>
         </TouchableOpacity>
-      }</NavContext.Consumer>
-    );
-  } else {
-    return (
-      <NavContext.Consumer>{setOpened =>
-        <Link to={props.to} style={{ textDecoration: 'none' }}>
-          <Text style={{
-            padding: { xs: 4, sm: 8, md: 16 }.md,
-            fontFamily: sg.fonts.sansSerif.weightProps.bold.name,
-            fontWeight: sg.fonts.sansSerif.weightProps.bold.value,
-            fontSize: sg.fonts.sansSerif.size.heading4,
-            color: props.secondary ? sg.colors.white : sg.colors.black,
-          }}>{props.children}</Text>
-        </Link>
-      }</NavContext.Consumer>
+      }</NavContext.Consumer >
     );
   }
+
+  if (props.to) {
+    const to = props.to;
+    if (props.to.startsWith('#')) {
+      return (
+        <NavContext.Consumer>{setOpened =>
+          <TouchableOpacity onPress={() => {
+            const anchor = document.querySelector(to);
+            if (anchor) {
+              setOpened(false);
+              anchor.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}>
+            <Text style={{
+              padding: { xs: 4, sm: 8, md: 16 }.md,
+              fontFamily: Fonts.sansSerif.weightProps.bold.name,
+              fontWeight: Fonts.sansSerif.weightProps.bold.value,
+              fontSize: Fonts.sansSerif.size.heading4,
+              color: props.secondary ? Colors.white : Colors.black,
+            }}>{props.children}</Text>
+          </TouchableOpacity>
+        }</NavContext.Consumer>
+      );
+    } else {
+      return (
+        <Link to={to} style={{ textDecoration: 'none' }}>
+          <Text style={{
+            padding: { xs: 4, sm: 8, md: 16 }.md,
+            fontFamily: Fonts.sansSerif.weightProps.bold.name,
+            fontWeight: Fonts.sansSerif.weightProps.bold.value,
+            fontSize: Fonts.sansSerif.size.heading4,
+            color: props.secondary ? Colors.white : Colors.black,
+          }}>{props.children}</Text>
+        </Link>
+      );
+    }
+  }
+
+  return (
+    <Text style={{
+      padding: { xs: 4, sm: 8, md: 16 }.md,
+      fontFamily: Fonts.sansSerif.weightProps.bold.name,
+      fontWeight: Fonts.sansSerif.weightProps.bold.value,
+      fontSize: Fonts.sansSerif.size.heading4,
+      color: rgba(props.secondary ? Colors.white : Colors.black, .5)
+    }}>{props.children}</Text>
+  );
 }
 
 export const WebNavAnchor = (props: { id: string }) =>
@@ -151,7 +186,7 @@ export const WebNavLayout = (props: { navHeight?: number, children?: React.React
             </View>
             {props.renderNavBar && props.renderNavBar()}
           </>}>
-          <View style={{ backgroundColor: sg.rgba(sg.colors.black, .03), marginHorizontal: -32, paddingHorizontal: 32, flexGrow: 1 }}>
+          <View style={{ backgroundColor: rgba(Colors.black, .03), marginHorizontal: -32, paddingHorizontal: 32, flexGrow: 1 }}>
             {props.children}
           </View>
         </Breakable>
