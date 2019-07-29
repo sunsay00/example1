@@ -59,32 +59,44 @@ export const useForm = <T extends FormFields<T>, K extends keyof T>(opts: T) => 
     result: undefined
   })) as FormStates<T>);
 
+  const reset = () => {
+    setHasValidated(false);
+    setStates(mapobj(opts, x => ({
+      value: '',
+      valid: false,
+      result: undefined,
+    })) as FormStates<T>);
+  };
+
   return {
+    reset,
     value: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L): FormResultTypes<T>[L] => {
       const state = states[k];
       const opt = opts[k];
-      const prev = (state.result as | undefined) || opt.default as R;
-      if (opt.pattern && !state.value.match(opt.pattern))
-        return prev;
-      return parseFormValue<R>(state.type, state.value, prev);
+      const prev = (state.result as R | undefined) || opt.default as R;
+      const result = parseFormValue<R>(state.type, state.value, prev);
+      const valid = !opt.pattern || state.value.match(opt.pattern) != null;
+      state.result = valid ? result : undefined;
+      return result;
     },
     message: (k: K) => hasValidated && !states[k].valid && opts[k].message || undefined,
-    changeText: (k: K) => (text: string) => setStates(f => ({ ...f, [k]: text })),
+    changeText: (k: K) => (value: string) => {
+      const opt = opts[k];
+      const valid = !opt.pattern || value.match(opt.pattern) != null;
+      setStates(prevs => {
+        const prev = prevs[k];
+        const state = { ...prev, valid, value };
+        return { ...prevs, [k]: state };
+      });
+    },
     validate: (): FormResultTypes<T> | undefined => {
       setHasValidated(true);
       for (let k in states)
         if (states[k].result == undefined)
           return undefined;
       const ret = mapobj(states, f => f.result!);
+      reset();
       return ret as any as FormResultTypes<T>;
-    },
-    reset: () => {
-      setHasValidated(false);
-      setStates(mapobj(opts, x => ({
-        value: '',
-        valid: false,
-        result: undefined,
-      })) as FormStates<T>);
     }
   };
 }

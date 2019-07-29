@@ -66,6 +66,9 @@ const useLogIn = () => {
   return { loading, resendConfirmation, logIn };
 }
 
+//export const emailPattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+//export const usernamePattern = /^[a-zA-Z0-9_-]{2,30}$/;
+
 export const Authentication = (props: {}) => {
   const form = useForm({
     emailOrUsername: {
@@ -76,13 +79,9 @@ export const Authentication = (props: {}) => {
     },
     password: {
       type: 'password',
+      pattern: /.{8,}/,
+      message: 'Password too short',
       default: '',
-    },
-    age: {
-      type: 'unsigned',
-      pattern: /^[0-9]+$/,
-      message: 'Invalid Age',
-      default: 0,
     },
   } as const);
 
