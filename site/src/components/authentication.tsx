@@ -79,7 +79,7 @@ export const Authentication = (props: {}) => {
     },
     password: {
       type: 'password',
-      pattern: /.{8,}/,
+      pattern: /^.{8,}$/,
       message: 'Password too short',
       default: '',
     },

@@ -50,7 +50,7 @@ export const mapobj = <T, U, V, K extends keyof T>(obj: { [k in K]: U }, fn: (v:
   return ret;
 }
 
-export const useForm = <T extends FormFields<T>, K extends keyof T>(opts: T) => {
+export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T) => {
   const [hasValidated, setHasValidated] = useState(false);
   const [states, setStates] = useState<FormStates<T>>(mapobj(opts as FormFields<T>, f => ({
     type: f.type,
@@ -70,29 +70,24 @@ export const useForm = <T extends FormFields<T>, K extends keyof T>(opts: T) => 
 
   return {
     reset,
-    value: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L): FormResultTypes<T>[L] => {
-      const state = states[k];
-      const opt = opts[k];
-      const prev = (state.result as R | undefined) || opt.default as R;
-      const result = parseFormValue<R>(state.type, state.value, prev);
-      const valid = !opt.pattern || state.value.match(opt.pattern) != null;
-      state.result = valid ? result : undefined;
-      return result;
-    },
-    message: (k: K) => hasValidated && !states[k].valid && opts[k].message || undefined,
-    changeText: (k: K) => (value: string) => {
+    value: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L): FormResultTypes<T>[L] =>
+      (states[k].result as R | undefined) || opts[k].default as R,
+    message: (k: L) => hasValidated && !states[k].valid && opts[k].message || undefined,
+    changeText: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L) => (value: string) => {
       const opt = opts[k];
       const valid = !opt.pattern || value.match(opt.pattern) != null;
-      setStates(prevs => {
-        const prev = prevs[k];
-        const state = { ...prev, valid, value };
-        return { ...prevs, [k]: state };
+      setStates(state => {
+        const prev = state[k];
+        const prevvalue = (prev.result as R | undefined) || opt.default as R;
+        const result = parseFormValue<R>(prev.type, value, prevvalue);
+        const next = { ...prev, valid, value, result };
+        return { ...state, [k]: next };
       });
     },
     validate: (): FormResultTypes<T> | undefined => {
       setHasValidated(true);
       for (let k in states)
-        if (states[k].result == undefined)
+        if (!states[k].valid || states[k].result == undefined)
           return undefined;
       const ret = mapobj(states, f => f.result!);
       reset();
