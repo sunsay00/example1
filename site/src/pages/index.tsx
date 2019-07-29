@@ -6,6 +6,7 @@ import { Headline2 } from '../components/headline';
 import { ContactUs } from '../components/contactus';
 import { Footer } from '../components/footer';
 import { FullModal } from '../components/fullmodal';
+import { Authentication } from '../components/authentication';
 
 const Post = (props: { title: string, image?: { uri: string }, children?: React.ReactNode }) =>
   <UI.Breakable
@@ -51,6 +52,7 @@ const Services = () =>
     }]} />
   </UI.View>
 
+
 export default () => {
   const [opened, setOpened] = useState(false);
   return (
@@ -60,12 +62,13 @@ export default () => {
         <UI.WebNavLink to="#services">Services</UI.WebNavLink>
         <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
         <UI.WebNavLink onPress={() => setOpened(true)}>Log in</UI.WebNavLink>
-        <UI.WebNavLink>Wakka</UI.WebNavLink>
+        <UI.WebNavLink>Disabled</UI.WebNavLink>
       </UI.WebNavBar>
     }>
       <FullModal visible={opened} onDismiss={() => setOpened(false)}>
-        <UI.Header2>Log in</UI.Header2>
-        <UI.Button onPress={() => setOpened(b => !b)}>Hide</UI.Button>
+        <UI.View style={{ padding: 32, backgroundColor: UI.Colors.white }}>
+          <Authentication />
+        </UI.View>
       </FullModal>
 
       <UI.Section>
