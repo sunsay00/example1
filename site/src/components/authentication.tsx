@@ -69,8 +69,11 @@ const useLogIn = () => {
 //export const emailPattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 //export const usernamePattern = /^[a-zA-Z0-9_-]{2,30}$/;
 
-export const Authentication = (props: {}) => {
-  const form = useForm({
+export const Authentication = (props: { onLoggedIn: () => void }) => {
+  const { loading, resendConfirmation, logIn } = useLogIn();
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+
+  const loginform = useForm({
     emailOrUsername: {
       type: 'text',
       pattern: /^.{2,}$/,
@@ -83,31 +86,32 @@ export const Authentication = (props: {}) => {
       message: 'Password too short',
       default: '',
     },
-  } as const);
-
-  const { loading, resendConfirmation, logIn } = useLogIn();
-  const [mode, setMode] = useState<'login'>('login');
+  }, async ({ emailOrUsername, password }) => {
+    await logIn(emailOrUsername, password);
+    props.onLoggedIn();
+  });
 
   if (mode == 'login') {
     return (
       <LogIn
         onForgot={() => resendConfirmation('')}
-        onLogIn={() => {
-          const ret = form.validate();
-          ret && logIn(ret.emailOrUsername, ret.password);
-        }}
-        onSignUp={() => { }}
-        onEmailOrUsernameChangeText={form.changeText('emailOrUsername')}
-        emailOrUsernameValue={form.value('emailOrUsername')}
-        emailOrUsernameMessage={form.message('emailOrUsername')}
-        onPasswordChangeText={form.changeText('password')}
-        passwordValue={form.value('password')}
-        passwordMessage={form.message('password')}
+        onLogIn={() => loginform.submit()}
+        onSignUp={() => setMode('signup')}
+        onEmailOrUsernameChangeText={loginform.changeText('emailOrUsername')}
+        emailOrUsernameValue={loginform.value('emailOrUsername')}
+        emailOrUsernameMessage={loginform.message('emailOrUsername')}
+        onPasswordChangeText={loginform.changeText('password')}
+        passwordValue={loginform.value('password')}
+        passwordMessage={loginform.message('password')}
         loading={loading}
         renderLogo={() =>
           <UI.View />//<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />
         }
       />
+    );
+  } else if (mode == 'signup') {
+    return (
+      <UI.View />
     );
   } else {
     return null;

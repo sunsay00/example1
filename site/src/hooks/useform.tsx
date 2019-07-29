@@ -50,7 +50,7 @@ export const mapobj = <T, U, V, K extends keyof T>(obj: { [k in K]: U }, fn: (v:
   return ret;
 }
 
-export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T) => {
+export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onSubmit: (results: FormResultTypes<T>) => Promise<void>) => {
   const [hasValidated, setHasValidated] = useState(false);
   const [states, setStates] = useState<FormStates<T>>(mapobj(opts as FormFields<T>, f => ({
     type: f.type,
@@ -84,14 +84,13 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T) => 
         return { ...state, [k]: next };
       });
     },
-    validate: (): FormResultTypes<T> | undefined => {
+    submit: () => {
       setHasValidated(true);
       for (let k in states)
         if (!states[k].valid || states[k].result == undefined)
-          return undefined;
+          return;
       const ret = mapobj(states, f => f.result!);
-      reset();
-      return ret as any as FormResultTypes<T>;
+      onSubmit(ret as FormResultTypes<T>);
     }
   };
 }
