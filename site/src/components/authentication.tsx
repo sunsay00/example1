@@ -97,6 +97,7 @@ export const Authentication = (props: {}) => {
           const ret = form.validate();
           ret && logIn(ret.emailOrUsername, ret.password);
         }}
+        onSignUp={() => { }}
         onEmailOrUsernameChangeText={form.changeText('emailOrUsername')}
         emailOrUsernameValue={form.value('emailOrUsername')}
         emailOrUsernameMessage={form.message('emailOrUsername')}

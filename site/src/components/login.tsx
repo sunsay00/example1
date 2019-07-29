@@ -3,6 +3,7 @@ import * as UI from 'gatsby-theme-core-ui';
 
 export const LogIn = (props: {
   onForgot: () => void,
+  onSignUp?: () => void,
 
   onLogIn: () => void,
 
@@ -45,10 +46,19 @@ export const LogIn = (props: {
     />
     <UI.Spacer size="md" />
     <UI.View style={{ width: '100%' }}>
-      <UI.Button testID="SIGN_IN" disabled={props.loading} onPress={props.onLogIn} loading={props.loading}>Sign In</UI.Button>
+      <UI.Button testID="LOG_IN" disabled={props.loading} onPress={props.onLogIn} loading={props.loading}>Log in</UI.Button>
     </UI.View>
-    <UI.Spacer size='sm' />
-    <UI.View style={{ alignItems: 'center' }}>
-      <UI.Link testID="FORGOT" onPress={props.onForgot} disabled={props.loading}>Forgot your password?</UI.Link>
-    </UI.View>
+    {props.onForgot && <>
+      <UI.Spacer size="sm" />
+      <UI.View style={{ alignItems: 'center' }}>
+        <UI.Link testID="FORGOT" size="sm" onPress={props.onForgot} disabled={props.loading}>Forgot your password?</UI.Link>
+      </UI.View>
+    </>}
+    {props.onSignUp && <>
+      <UI.HRule />
+      <UI.View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+        <UI.Text>Don't have an account?</UI.Text>
+        <UI.Link testID="SIGN_UP" size="md" onPress={props.onSignUp} disabled={props.loading}>Sign up</UI.Link>
+      </UI.View>
+    </>}
   </UI.View>

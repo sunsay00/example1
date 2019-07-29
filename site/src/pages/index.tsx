@@ -66,9 +66,7 @@ export default () => {
       </UI.WebNavBar>
     }>
       <FullModal visible={opened} onDismiss={() => setOpened(false)}>
-        <UI.View style={{ padding: 32, backgroundColor: UI.Colors.white }}>
-          <Authentication />
-        </UI.View>
+        <Authentication />
       </FullModal>
 
       <UI.Section>
