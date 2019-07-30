@@ -58,6 +58,8 @@ type ModalState = {
 };
 
 export class Modal extends React.Component<ModalProps, ModalState> {
+  private thetop = 0;
+
   static defaultProps = {
     animationType: 'none',
     transparent: false,
@@ -90,9 +92,11 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     if (!visible && this.props.visible) this.handleClose();
   }
 
+  scrollLeft = 0;
+  scrollTop = 0;
+
   handleShow() {
     const { animationType, onShow = () => { } } = this.props;
-
     if (animationType === 'slide') {
       this.animateSlideIn(onShow);
     } else if (animationType === 'fade') {
@@ -100,11 +104,24 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     } else {
       onShow();
     }
+
+    // lock body scrolling
+    this.scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+    this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.overflowY = 'scroll';
+    document.body.style.top = `-${this.scrollTop}px`;
   }
 
   handleClose = () => {
-    const { animationType, onDismiss = () => { } } = this.props;
+    // unlock body scolling
+    document.body.style.position = 'unset';
+    document.body.style.width = 'unset';
+    document.body.style.overflowY = 'unset';
+    window.scrollTo(this.scrollLeft, this.scrollTop);
 
+    const { animationType, onDismiss = () => { } } = this.props;
     if (animationType === 'slide') {
       this.animateSlideOut(onDismiss);
     } else if (animationType === 'fade') {

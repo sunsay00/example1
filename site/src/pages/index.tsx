@@ -65,8 +65,8 @@ export default () => {
         <UI.WebNavLink>Disabled</UI.WebNavLink>
       </UI.WebNavBar>
     }>
-      <FullModal visible={opened} onDismiss={() => setOpened(false)}>
-        <Authentication />
+      <FullModal style={{ maxWidth: 500 }} visible={opened} onDismiss={() => setOpened(false)}>
+        <Authentication onLoggedIn={() => { }} />
       </FullModal>
 
       <UI.Section>

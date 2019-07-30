@@ -1,79 +1,28 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { LogIn } from '../components/login';
-
+import { SignUp } from '../components/signup';
+import { ResetPassword } from '../components/resetpassword';
+import { Forgot } from '../components/forgot';
+import { useAccount } from '../hooks/useaccount';
 import { useForm } from '../hooks/useform';
-
-const useToast = () => {
-  return {
-    info: (msg: string) => {
-      console.log(msg);
-    },
-    error: (msg: string) => {
-      console.error(msg);
-    },
-  };
-}
-
-export type SignInProps = {
-  onBack: () => void,
-  onRegisterDealership: () => void,
-  onForgot: () => void,
-  onContinue: (username: string, password: string) => Promise<void>,
-  onNeedsConfirmation: (username: string) => void,
-};
-
-const useLogIn = () => {
-  const toast = useToast();
-  const [loading, setLoading] = useState(false);
-  const resendConfirmation = async (username: string) => {
-    /*
-    try {
-      setLoading(true);
-      await Root.account().resendConfirmationCode();
-      this.props.onNeedsConfirmation(username);
-    } catch (err) {
-      Toast.error(err);
-    } finally {
-      setLoading(false);
-    }
-    */
-  }
-
-  const logIn = async (emailOrUsername: string, password: string) => {
-    /*
-    try {
-      setLoading(true);
-      await this.props.onContinue(emailOrUsername.trim(), password);
-    } catch (err) {
-      if (err.code === 'UserNotFoundException' || err.code === 'NotAuthorizedException') {
-        toast.info(err.message);
-      } else if (err.code === 'UserNotConfirmedException') {
-        UI.Alert.alert('User not confirmed', 'This user has not been confirmed, resend confirmation code?', [
-          { text: 'Cancel', onPress: () => { } },
-          { text: 'Resend', onPress: () => this.onResendConfirmation(values.emailOrUsername) },
-        ])
-      } else {
-        toast.info(`${err.message} (${err.code})`);
-      }
-    } finally {
-      setLoading(false);
-    }
-    */
-  };
-
-  return { loading, resendConfirmation, logIn };
-}
-
-//export const emailPattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-//export const usernamePattern = /^[a-zA-Z0-9_-]{2,30}$/;
+import { FullModalContext } from '../components/fullmodal';
 
 export const Authentication = (props: { onLoggedIn: () => void }) => {
-  const { loading, resendConfirmation, logIn } = useLogIn();
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
+  const { loading, resendConfirmation, logIn, signUp, sendRecoveryEmail, resetPassword } = useAccount();
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'resetpassword'>('login');
+  const { modalVisible } = useContext(FullModalContext);
 
-  const loginform = useForm({
+  useEffect(() => {
+    if (!modalVisible) {
+      setEmailOrUsername(undefined);
+      setMode('login');
+    }
+  }, [modalVisible]);
+
+  const logInForm = useForm({
     emailOrUsername: {
       type: 'text',
       pattern: /^.{2,}$/,
@@ -91,19 +40,73 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
     props.onLoggedIn();
   });
 
+  const signUpForm = useForm({
+    username: {
+      type: 'username',
+      message: 'Invalid Username',
+      default: '',
+    },
+    email: {
+      type: 'email',
+      message: 'Invalid Email address',
+      default: '',
+    },
+    password: {
+      type: 'password',
+      pattern: /^.{8,}$/,
+      message: 'Password too short',
+      default: '',
+    },
+  }, async ({ username, email, password }) => {
+    await signUp(username, email, password);
+    setMode('login');
+  });
+
+  const forgotForm = useForm({
+    emailOrUsername: {
+      type: 'text',
+      pattern: /^.{2,}$/,
+      message: 'Invalid Email or Username',
+      default: '',
+    },
+  }, async ({ emailOrUsername }) => {
+    await sendRecoveryEmail(emailOrUsername);
+    setEmailOrUsername(emailOrUsername);
+    setMode('resetpassword');
+  });
+
+  const resetPasswordForm = useForm({
+    code: {
+      type: 'text',
+      message: 'Invalid Username',
+      pattern: /.+/,
+      default: '',
+    },
+    newPassword: {
+      type: 'password',
+      message: 'Password too short',
+      pattern: /^.{8,}$/,
+      default: '',
+    },
+  }, async ({ code, newPassword }) => {
+    if (!emailOrUsername) throw new Error('invalid emailOrUsername');
+    await resetPassword(emailOrUsername, code, newPassword);
+    setMode('login');
+  });
+
   if (mode == 'login') {
     return (
       <LogIn
-        onForgot={() => resendConfirmation('')}
-        onLogIn={() => loginform.submit()}
-        onSignUp={() => setMode('signup')}
-        onEmailOrUsernameChangeText={loginform.changeText('emailOrUsername')}
-        emailOrUsernameValue={loginform.value('emailOrUsername')}
-        emailOrUsernameMessage={loginform.message('emailOrUsername')}
-        onPasswordChangeText={loginform.changeText('password')}
-        passwordValue={loginform.value('password')}
-        passwordMessage={loginform.message('password')}
         loading={loading}
+        onLogIn={() => logInForm.submit()}
+        onForgot={() => setMode('forgot')}
+        onSignUp={() => setMode('signup')}
+        onEmailOrUsernameChangeText={logInForm.changeText('emailOrUsername')}
+        emailOrUsernameValue={logInForm.value('emailOrUsername')}
+        emailOrUsernameMessage={logInForm.message('emailOrUsername')}
+        onPasswordChangeText={logInForm.changeText('password')}
+        passwordValue={logInForm.value('password')}
+        passwordMessage={logInForm.message('password')}
         renderLogo={() =>
           <UI.View />//<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />
         }
@@ -111,8 +114,46 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
     );
   } else if (mode == 'signup') {
     return (
-      <UI.View />
+      <SignUp
+        loading={loading}
+        onSignUp={() => signUpForm.submit()}
+        onLogIn={() => setMode('login')}
+        onUsernameChangeText={signUpForm.changeText('username')}
+        usernameValue={signUpForm.value('username')}
+        usernameMessage={signUpForm.message('username')}
+        onEmailChangeText={signUpForm.changeText('email')}
+        emailValue={signUpForm.value('email')}
+        emailMessage={signUpForm.message('email')}
+        onPasswordChangeText={signUpForm.changeText('password')}
+        passwordValue={signUpForm.value('password')}
+        passwordMessage={signUpForm.message('password')}
+        onVersion={() => { }}
+        version={'0.0.1'}
+      />
     );
+  } else if (mode == 'forgot') {
+    return (
+      <Forgot
+        loading={loading}
+        onSend={() => sendRecoveryEmail}
+        onEmailOrUsernameChangeText={forgotForm.changeText('emailOrUsername')}
+        emailOrUsernameValue={forgotForm.value('emailOrUsername')}
+        emailOrUsernameMessage={forgotForm.message('emailOrUsername')}
+      />
+    );
+  } else if (mode == 'resetpassword') {
+    return (
+      <ResetPassword
+        loading={loading}
+        onReset={() => resetPasswordForm.submit()}
+        onCodeChangeText={resetPasswordForm.changeText('code')}
+        codeValue={resetPasswordForm.value('code')}
+        codeMessage={resetPasswordForm.message('code')}
+        onNewPasswordChangeText={resetPasswordForm.changeText('newPassword')}
+        newPasswordValue={resetPasswordForm.value('newPassword')}
+        newPasswordMessage={resetPasswordForm.message('newPassword')}
+      />
+    )
   } else {
     return null;
   }

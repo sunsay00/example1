@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
-type FormFieldType = 'text' | 'password' | 'unsigned';
+type FormFieldType = 'email' | 'username' | 'text' | 'password' | 'unsigned';
 
 type FormResultType<T extends FormFieldType> =
+  T extends 'email' ? string :
+  T extends 'username' ? string :
   T extends 'text' ? string :
   T extends 'password' ? string :
   T extends 'unsigned' ? number :
@@ -29,6 +31,20 @@ type FormFields<T> = {
     default: FormResultTypes<T>[k],
   }
 };
+
+const isValid = (value: string, type: FormFieldType, pattern?: RegExp) => {
+  if (pattern) {
+    return value.match(pattern) != null;
+  } else {
+    if (type == 'email') {
+      return value.match(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i) != null;
+    } else if (type == 'username') {
+      return value.match(/^[a-zA-Z0-9_-]{2,30}$/) != null;
+    } else {
+      return true;
+    }
+  }
+}
 
 const parseFormValue = <T extends unknown>(type: FormFieldType, val: string, prev: T): T => {
   if (type == 'unsigned' && typeof prev == 'number') {
@@ -75,7 +91,7 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
     message: (k: L) => hasValidated && !states[k].valid && opts[k].message || undefined,
     changeText: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L) => (value: string) => {
       const opt = opts[k];
-      const valid = !opt.pattern || value.match(opt.pattern) != null;
+      const valid = isValid(value, opt.type, opt.pattern);
       setStates(state => {
         const prev = state[k];
         const prevvalue = (prev.result as R | undefined) || opt.default as R;
