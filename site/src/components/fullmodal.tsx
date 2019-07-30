@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 
-export const FullModalContext = React.createContext({ modalVisible: false });
+export const FullModalContext = React.createContext({ visible: false });
 
 export const FullModal = (props: {
   style?: UI.ViewStyle,
@@ -10,7 +10,7 @@ export const FullModal = (props: {
 }) => {
   return (
     <UI.Modal animationType="fade" transparent visible={props.visible} onDismiss={() => props.onDismiss && props.onDismiss()}>
-      <FullModalContext.Provider value={{ modalVisible: props.visible }}>
+      <FullModalContext.Provider value={{ visible: props.visible }}>
         <UI.Breakable
           renderSmall={children =>
             <UI.TouchableWithoutFeedback>

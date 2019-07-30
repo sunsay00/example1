@@ -55,68 +55,71 @@ const Services = () =>
 
 export default () => {
   const [opened, setOpened] = useState(false);
+
   return (
-    <UI.WebNavLayout renderNavBar={() =>
-      <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-        <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
-        <UI.WebNavLink to="#services">Services</UI.WebNavLink>
-        <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
-        <UI.WebNavLink onPress={() => setOpened(true)}>Log in</UI.WebNavLink>
-        <UI.WebNavLink>Disabled</UI.WebNavLink>
-      </UI.WebNavBar>
-    }>
+    <>
+      <UI.WebNavLayout renderNavBar={() =>
+        <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
+          <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
+          <UI.WebNavLink to="#services">Services</UI.WebNavLink>
+          <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => setOpened(true)}>Log in</UI.WebNavLink>
+          <UI.WebNavLink>Disabled</UI.WebNavLink>
+        </UI.WebNavBar>
+      }>
+        <UI.Section>
+          <Cover />
+        </UI.Section>
+
+        <UI.Section>
+          <UI.Grid stride={3}>
+            <UI.View>
+              <UI.View style={{ alignItems: 'center' }}>
+                <UI.Icon name="server" color={UI.Colors.accentBlue} />
+                <UI.Spacer />
+                <UI.Header3 serifed>Experienced IT</UI.Header3>
+              </UI.View>
+              <UI.Text weight="thin">Infinage specializes in project management, software development, network infrastructure design and implementation, IT security assessment, and IT consulting services.</UI.Text>
+            </UI.View>
+            <UI.View>
+              <UI.View style={{ alignItems: 'center' }} >
+                <UI.Icon name="bolt" color={UI.Colors.accentGreen} />
+                <UI.Spacer />
+                <UI.Header3 serifed>Efficiency driven</UI.Header3>
+              </UI.View>
+              <UI.Text weight="thin">Our highly trained staffs provide end-to-end IT solutions to our clients from a variety of industries based on their specific needs.</UI.Text>
+            </UI.View>
+            <UI.View>
+              <UI.View style={{ alignItems: 'center' }}>
+                <UI.Icon name="globe" color={UI.Colors.accentRed} />
+                <UI.Spacer />
+                <UI.Header3 serifed>Global solutions</UI.Header3>
+              </UI.View>
+              <UI.Text weight="thin">We are steadily growing and evolving into a global IT Solutions firm as we continue to fulfill our clients’ escalating exigencies in the international markets.</UI.Text>
+            </UI.View>
+          </UI.Grid>
+        </UI.Section>
+
+        <UI.WebNavAnchor id="services" />
+
+        <UI.View style={{ backgroundColor: UI.rgba(UI.Colors.black, .05), marginHorizontal: -32, paddingHorizontal: 32 }}>
+          <UI.Section>
+            <Services />
+          </UI.Section>
+        </UI.View>
+
+        <UI.WebNavAnchor id="contact" />
+
+        <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32 }}>
+          <UI.Section><ContactUs /></UI.Section>
+          <UI.Section><Footer /></UI.Section>
+        </UI.ImageBackground>
+
+      </UI.WebNavLayout>
+
       <FullModal style={{ maxWidth: 500 }} visible={opened} onDismiss={() => setOpened(false)}>
         <Authentication onLoggedIn={() => { }} />
       </FullModal>
-
-      <UI.Section>
-        <Cover />
-      </UI.Section>
-
-      <UI.Section>
-        <UI.Grid stride={3}>
-          <UI.View>
-            <UI.View style={{ alignItems: 'center' }}>
-              <UI.Icon name="server" color={UI.Colors.accentBlue} />
-              <UI.Spacer />
-              <UI.Header3 serifed>Experienced IT</UI.Header3>
-            </UI.View>
-            <UI.Text weight="thin">Infinage specializes in project management, software development, network infrastructure design and implementation, IT security assessment, and IT consulting services.</UI.Text>
-          </UI.View>
-          <UI.View>
-            <UI.View style={{ alignItems: 'center' }} >
-              <UI.Icon name="bolt" color={UI.Colors.accentGreen} />
-              <UI.Spacer />
-              <UI.Header3 serifed>Efficiency driven</UI.Header3>
-            </UI.View>
-            <UI.Text weight="thin">Our highly trained staffs provide end-to-end IT solutions to our clients from a variety of industries based on their specific needs.</UI.Text>
-          </UI.View>
-          <UI.View>
-            <UI.View style={{ alignItems: 'center' }}>
-              <UI.Icon name="globe" color={UI.Colors.accentRed} />
-              <UI.Spacer />
-              <UI.Header3 serifed>Global solutions</UI.Header3>
-            </UI.View>
-            <UI.Text weight="thin">We are steadily growing and evolving into a global IT Solutions firm as we continue to fulfill our clients’ escalating exigencies in the international markets.</UI.Text>
-          </UI.View>
-        </UI.Grid>
-      </UI.Section>
-
-      <UI.WebNavAnchor id="services" />
-
-      <UI.View style={{ backgroundColor: UI.rgba(UI.Colors.black, .05), marginHorizontal: -32, paddingHorizontal: 32 }}>
-        <UI.Section>
-          <Services />
-        </UI.Section>
-      </UI.View>
-
-      <UI.WebNavAnchor id="contact" />
-
-      <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32 }}>
-        <UI.Section><ContactUs /></UI.Section>
-        <UI.Section><Footer /></UI.Section>
-      </UI.ImageBackground>
-
-    </UI.WebNavLayout>
+    </>
   );
 }

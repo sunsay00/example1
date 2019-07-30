@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useContext } from 'react';
+import { useRef, useState, useEffect, useContext } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signup';
@@ -13,14 +13,23 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
   const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
   const { loading, resendConfirmation, logIn, signUp, sendRecoveryEmail, resetPassword } = useAccount();
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'resetpassword'>('login');
-  const { modalVisible } = useContext(FullModalContext);
+  const modalContext = useContext(FullModalContext);
 
-  useEffect(() => {
-    if (modalVisible) {
+  /*useEffect(() => {
+    console.log('!!>', modalContext.visible);
+    if (modalContext.visible) {
       setEmailOrUsername(undefined);
       setMode('login');
     }
-  }, [modalVisible]);
+  }, [modalContext.visible]);
+  */
+
+  useEffect(() => {
+    logInForm.reset();
+    signUpForm.reset();
+    forgotForm.reset();
+    resetPasswordForm.reset();
+  }, [mode]);
 
   const logInForm = useForm({
     emailOrUsername: {
