@@ -1,3 +1,3 @@
 // @ts-check
 
-export { wrapPageElement } from './index';
+export { wrapPageElement } from './gatsby-index';

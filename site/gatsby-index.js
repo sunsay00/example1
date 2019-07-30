@@ -17,6 +17,8 @@ import { setContext } from 'apollo-link-context';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faChevronLeft, faTimes, faGlobe, faServer, faBolt, faQuestion, faBars, faPlay, faPause, faTimesCircle, faUpload, faRedo, faVideo, faSync } from '@fortawesome/free-solid-svg-icons';
 
+import { BreakableProvider } from 'gatsby-theme-core-ui';
+
 library.add(faChevronLeft);
 library.add(faTimes);
 library.add(faGlobe);
@@ -116,7 +118,9 @@ const Root = props => {
 
   return (
     <ApolloProvider client={client}>
-      {props.children}
+      <BreakableProvider>
+        {props.children}
+      </BreakableProvider>
     </ApolloProvider>
   );
 }

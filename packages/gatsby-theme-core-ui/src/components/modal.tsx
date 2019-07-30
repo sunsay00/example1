@@ -80,16 +80,13 @@ export class Modal extends React.Component<ModalProps, ModalState> {
       opacityFade: new Animated.Value(0),
       slideTranslation: new Animated.Value(0),
     };
-    console.log('M-CTOR');
   }
 
   componentDidMount() {
-    console.log('M-CDM', this.props.visible);
     if (this.props.visible) this.handleShow();
   }
 
   componentWillReceiveProps({ visible }: ModalProps) {
-    console.log('M-WRP', visible, this.props.visible);
     if (visible && !this.props.visible) this.handleShow();
     if (!visible && this.props.visible) this.handleClose();
   }
