@@ -136,6 +136,7 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
       <Forgot
         loading={loading}
         onSend={() => sendRecoveryEmail}
+        onLogIn={() => setMode('login')}
         onEmailOrUsernameChangeText={forgotForm.changeText('emailOrUsername')}
         emailOrUsernameValue={forgotForm.value('emailOrUsername')}
         emailOrUsernameMessage={forgotForm.message('emailOrUsername')}

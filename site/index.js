@@ -15,8 +15,9 @@ import { getMainDefinition } from 'apollo-utilities';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { setContext } from 'apollo-link-context';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faTimes, faGlobe, faServer, faBolt, faQuestion, faBars, faPlay, faPause, faTimesCircle, faUpload, faRedo, faVideo, faSync } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faTimes, faGlobe, faServer, faBolt, faQuestion, faBars, faPlay, faPause, faTimesCircle, faUpload, faRedo, faVideo, faSync } from '@fortawesome/free-solid-svg-icons';
 
+library.add(faChevronLeft);
 library.add(faTimes);
 library.add(faGlobe);
 library.add(faServer);

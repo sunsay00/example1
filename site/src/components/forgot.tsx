@@ -3,6 +3,7 @@ import * as UI from 'core-ui';
 
 export const Forgot = (props: {
   onSend: () => void,
+  onLogIn?: () => void,
   loading: boolean,
   onEmailOrUsernameChangeText: (text: string) => void,
   emailOrUsernameValue: string,
@@ -29,7 +30,13 @@ export const Forgot = (props: {
       message={props.emailOrUsernameMessage}
     />
     <UI.Spacer size="md" />
-    <UI.View style={{ width: '100%' }}>
+    <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      {props.onLogIn && <>
+        <UI.Link testID="LOGIN" size="md" disabled={props.loading} onPress={props.onLogIn}>
+          <UI.Icon size="sm" name="chevronLeft" color={UI.Colors.green} />
+          Back to Login
+          </UI.Link>
+      </>}
       <UI.Button disabled={props.loading} loading={props.loading} onPress={props.onSend}>Send Recovery Email</UI.Button>
     </UI.View>
   </UI.View>

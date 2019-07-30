@@ -67,6 +67,7 @@ export const SignUp = (props: {
       <UI.HRule />
       <UI.View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
         <UI.Text>Already have an account?</UI.Text>
+        <UI.Spacer />
         <UI.Link testID="LOGIN" size="md" onPress={props.onLogIn} disabled={props.loading}>Log in</UI.Link>
       </UI.View>
     </>}

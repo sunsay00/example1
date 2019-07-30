@@ -18,6 +18,7 @@ export const FullModal = (props: {
                 padding: 40,
                 backgroundColor: UI.Colors.white,
                 alignItems: 'stretch',
+                flex: 1,
               }}>
                 <UI.View style={{ alignSelf: 'flex-start' }}>
                   <UI.Icon size="xs" name="times" onPress={() => props.onDismiss && props.onDismiss()} />
