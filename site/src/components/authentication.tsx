@@ -9,20 +9,22 @@ import { useAccount } from '../hooks/useaccount';
 import { useForm } from '../hooks/useform';
 import { FullModalContext } from '../components/fullmodal';
 
-export const Authentication = (props: { onLoggedIn: () => void }) => {
-  const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
-  const { loading, resendConfirmation, logIn, signUp, sendRecoveryEmail, resetPassword } = useAccount();
-  const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'resetpassword'>('login');
-  const modalContext = useContext(FullModalContext);
+export type AuthenticationMode = 'login' | 'signup' | 'forgot' | 'resetpassword';
 
-  /*useEffect(() => {
-    console.log('!!>', modalContext.visible);
+export const Authentication = (props: {
+  onLoggedIn: () => void
+}) => {
+  const [mode, setMode] = useState<AuthenticationMode>('login');
+  const { loading, resendConfirmation, logIn, signUp, sendRecoveryEmail, resetPassword } = useAccount();
+  const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
+
+  const modalContext = useContext(FullModalContext);
+  useEffect(() => {
     if (modalContext.visible) {
       setEmailOrUsername(undefined);
       setMode('login');
     }
   }, [modalContext.visible]);
-  */
 
   useEffect(() => {
     logInForm.reset();
@@ -102,7 +104,6 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
     await resetPassword(emailOrUsername, code, newPassword);
     setMode('login');
   });
-
   if (mode == 'login') {
     return (
       <LogIn
