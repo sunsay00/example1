@@ -9,6 +9,8 @@ import * as UI from 'core-ui';
 export const ResetPassword = (props: {
   loading: boolean,
   onReset: () => void,
+  onLogIn: () => void,
+  onResend: () => void,
   onCodeChangeText: (text: string) => void,
   codeValue: string,
   codeMessage?: string,
@@ -24,6 +26,8 @@ export const ResetPassword = (props: {
     justifyContent: 'center',
     flex: 1,
   }} >
+    <UI.Text size="sm">Please enter the code you received in your email below.</UI.Text>
+    <UI.Spacer size="xl" />
     <UI.NumericInput
       onChangeText={props.onCodeChangeText}
       value={props.codeValue}
@@ -39,8 +43,16 @@ export const ResetPassword = (props: {
       placeholder='New Password'
     />
     <UI.Spacer size="md" />
-    <UI.View style={{ width: '100%' }}>
+    <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <UI.Link testID="LOGIN" size="md" disabled={props.loading} onPress={props.onLogIn}>
+        <UI.Icon size="sm" name="chevronLeft" color={UI.Colors.green} />Back to Login</UI.Link>
       <UI.Button disabled={props.loading} onPress={props.onReset} loading={props.loading}>Reset Password</UI.Button>
+    </UI.View>
+    <UI.HRule />
+    <UI.View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+      <UI.Text>Didn't receive an email?</UI.Text>
+      <UI.Spacer />
+      <UI.Link testID="RESEND" size="md" onPress={props.onResend} disabled={props.loading}>Resend Email</UI.Link>
     </UI.View>
   </UI.View>
 

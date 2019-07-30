@@ -16,7 +16,7 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
   const { modalVisible } = useContext(FullModalContext);
 
   useEffect(() => {
-    if (!modalVisible) {
+    if (modalVisible) {
       setEmailOrUsername(undefined);
       setMode('login');
     }
@@ -147,6 +147,11 @@ export const Authentication = (props: { onLoggedIn: () => void }) => {
       <ResetPassword
         loading={loading}
         onReset={() => resetPasswordForm.submit()}
+        onLogIn={() => setMode('login')}
+        onResend={() => {
+          if (!emailOrUsername) throw new Error('invalid emailOrUsername');
+          resendConfirmation(emailOrUsername);
+        }}
         onCodeChangeText={resetPasswordForm.changeText('code')}
         codeValue={resetPasswordForm.value('code')}
         codeMessage={resetPasswordForm.message('code')}
