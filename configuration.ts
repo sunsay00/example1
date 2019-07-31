@@ -28,7 +28,9 @@ const configuration: Configuration = {
       }
     },
     /*{
+      type: 'cloudformation',
       name: 'cf-cert',
+      key: 'CRT',
       inputs: {
         Domain: config.DOMAIN
       },

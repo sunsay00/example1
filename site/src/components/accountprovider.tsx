@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { AsyncStorage } from 'react-native';
+import * as UI from 'gatsby-theme-core-ui';
 import { Account, UserPoolMode } from 'cf-cognito';
 
 const _account = new Account(UserPoolMode.Web, AsyncStorage);
@@ -11,10 +12,13 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
 
   React.useEffect(() => {
     _account.init(props.region)
-      .then(ready => setReady(ready))
+      .then(() => setReady(true))
       .catch(console.error);
   }, []);
 
-  if (!ready) return null;
+  console.log('ready', ready);
+
+  if (!ready) return <UI.Loading />;
+
   return <AccountContext.Provider value={_account}>{props.children}</AccountContext.Provider>;
 }

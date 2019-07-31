@@ -44,12 +44,10 @@ export default class AWSClient {
     return new AuthenticationDetails(authenticationData);
   }
 
-  static createCognitoUser = (region: string, mode: UserPoolMode, username: string) => {
+  static createCognitoUser = (region: string, mode: UserPoolMode, Username: string) => {
     AWSClient.setCognitoIdentityPoolDetails(region);
-    return new CognitoUser({
-      Username: username,
-      Pool: AWSClient.createCognitoUserPool(mode),
-    });
+    const Pool = AWSClient.createCognitoUserPool(mode);
+    return new CognitoUser({ Username, Pool });
   }
 
   static cognitoIdentityId = (): string => {

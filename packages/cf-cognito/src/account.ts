@@ -22,7 +22,7 @@ export class Account {
       set: (key: string, value?: string) => new Promise<void>((resolve, reject) =>
         storage.setItem(key, value || '', err => err ? reject(err) : resolve())),
       get: (key: string) => new Promise<string | undefined>((resolve, reject) =>
-        storage.getItem(key, (err, val) => err ? reject(err) : resolve(val))),
+        storage.getItem(key, (err, val) => err ? reject(err) : resolve(val === null ? undefined : val))),
       setObject: (key: string, value: object) => new Promise<void>((resolve, reject) =>
         storage.setItem(key, JSON.stringify(value), err => err ? reject(err) : resolve())),
       getObject: (key: string) => new Promise<object | undefined>((resolve, reject) =>
@@ -39,7 +39,8 @@ export class Account {
     this._reg = new UserRegistration(this._mode, this._util);
     this._profile = new UserProfile(this._util, this._storage);
     this._login = new UserLogin(region, this._profile, this._util, this._storage);
-    this._initialized = await this._util.sync();
+    await this._util.sync();
+    this._initialized = true;
     return this._initialized;
   }
   authToken = async (tagAsExpired: boolean = false): Promise<string> => {
