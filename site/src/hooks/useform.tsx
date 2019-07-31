@@ -85,6 +85,7 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
   })) as FormStates<T>);
 
   const reset = () => {
+    setHasValidated(false);
     setStates(mapobj(opts, x => ({
       value: '',
       valid: false,
@@ -93,7 +94,6 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
   }
 
   useEffect(() => {
-    setHasValidated(false);
     reset();
   }, []);
 

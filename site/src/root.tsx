@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { useState } from 'react';
 import { AsyncStorage } from 'react-native';
 import gql from 'graphql-tag';
 import * as UI from 'gatsby-theme-core-ui';
 import { BreakableProvider } from 'gatsby-theme-core-ui';
-import { AccountProvider } from './components/accountprovider';
-import { FullModal } from './components/fullmodal';
+import { AccountProvider } from './hooks/useaccount';
+import { useModal, ModalProvider } from './hooks/usemodal';
 import { Authentication } from './components/authentication';
 import { ApolloProvider } from 'react-apollo-hooks';
 import { ApolloClient } from 'apollo-client';
@@ -124,32 +123,26 @@ main().catch(err => console.error(err.message || err));
 */
 
 const Application = (props: { children?: React.ReactNode }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-
+  const { setCurrent } = useModal();
   //const [authToken/*, refresh*/] = useAuthToken({ region: process.env.AWS_REGION, email: 'guest@guest.com', username: 'guest', password: 'guestguest' });
   //if (!authToken) return null;
   //localStorage.setItem('token', authToken);
 
   return (
-    <>
-      <UI.WebNavLayout renderNavBar={() =>
-        <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32, paddingHorizontal: 32 }}>
-          <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-            <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
-            <UI.WebNavLink to="#services">Services</UI.WebNavLink>
-            <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
-            <UI.WebNavLink onPress={() => setModalVisible(true)}>Log in</UI.WebNavLink>
-            <UI.WebNavLink>Disabled</UI.WebNavLink>
-          </UI.WebNavBar>
-        </UI.ImageBackground>
-      }>
-        {props.children}
-      </UI.WebNavLayout>
-
-      <FullModal style={{ maxWidth: 500 }} visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-        <Authentication onLogInComplete={() => { }} />
-      </FullModal>
-    </>
+    <UI.WebNavLayout renderNavBar={() =>
+      <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32, paddingHorizontal: 32 }}>
+        <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
+          <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
+          <UI.WebNavLink to="#services">Services</UI.WebNavLink>
+          <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => {
+            console.log('!');
+            setCurrent(<Authentication onLogInComplete={() => { }} />);
+          }}>Log in</UI.WebNavLink>
+          <UI.WebNavLink>Disabled</UI.WebNavLink>
+        </UI.WebNavBar>
+      </UI.ImageBackground>
+    }>{props.children}</UI.WebNavLayout>
   );
 }
 
@@ -161,7 +154,9 @@ export const Root = (props: { children?: React.ReactNode }) => {
     <ApolloProvider client={client}>
       <AccountProvider region="us-east-1">
         <BreakableProvider>
-          <Application>{props.children}</Application>
+          <ModalProvider style={{ maxWidth: 500 }}>
+            <Application>{props.children}</Application>
+          </ModalProvider>
         </BreakableProvider>
       </AccountProvider>
     </ApolloProvider >

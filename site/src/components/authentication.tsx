@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signup';
 import { ResetPassword } from '../components/resetpassword';
 import { Forgot } from '../components/forgot';
 import { Confirmation } from '../components/confirmation';
-import { FullModalContext } from '../components/fullmodal';
 import { useLocale } from '../hooks/uselocale';
 import { ChangePassword } from '../components/changepassword';
 
@@ -24,14 +23,6 @@ export const Authentication = (props: {
   const locale = useLocale();
   const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
   const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
-
-  //const modalContext = useContext(FullModalContext);
-  //useEffect(() => {
-  //if (modalContext.visible) {
-  //setEmailOrUsername(undefined);
-  //setMode('login');
-  //}
-  //}, []);//modalContext.visible]);
 
   if (!locale) return null;
 

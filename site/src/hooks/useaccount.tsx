@@ -1,6 +1,9 @@
+import * as React from 'react';
 import { useState, useContext } from 'react';
+import { AsyncStorage } from 'react-native';
 import { useToast } from './usetoast';
-import { AccountContext } from '../components/accountprovider';
+import { Account, UserPoolMode } from 'cf-cognito';
+import * as UI from 'gatsby-theme-core-ui';
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 
@@ -104,4 +107,22 @@ export const useAccount = () => {
   }
 
   return { loading, resendConfirmationCode, logIn, signUp, sendRecoveryEmail, resetPassword, confirmSignUp, changePassword };
+}
+
+const _account = new Account(UserPoolMode.Web, AsyncStorage);
+
+const AccountContext = React.createContext<Account>(_account);
+
+export const AccountProvider = (props: { region: string, children?: React.ReactNode }) => {
+  const [ready, setReady] = React.useState(false);
+
+  React.useEffect(() => {
+    _account.init(props.region)
+      .then(() => setReady(true))
+      .catch(console.error);
+  }, []);
+
+  if (!ready) return <UI.Loading />;
+
+  return <AccountContext.Provider value={_account}>{props.children}</AccountContext.Provider>;
 }
