@@ -16,3 +16,4 @@ build/
 envs
 .secrets*
 packages/cf-*/index.ts
+packages/cf-*/src/vars.ts
