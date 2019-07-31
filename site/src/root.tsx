@@ -131,7 +131,6 @@ const Application = (props: { children?: React.ReactNode }) => {
 
   return (
     <>
-
       <UI.WebNavLayout renderNavBar={() =>
         <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32, paddingHorizontal: 32 }}>
           <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>

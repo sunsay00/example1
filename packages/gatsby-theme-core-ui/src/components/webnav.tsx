@@ -118,7 +118,8 @@ export const WebNavLink = (props: {
 
   if (props.to) {
     const to = props.to;
-    if (props.to.startsWith('#')) {
+    const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*/, '');
+    if (props.to.startsWith('#') && rel.startsWith('/#')) {
       return (
         <NavContext.Consumer>{setOpened =>
           <TouchableOpacity onPress={() => {
