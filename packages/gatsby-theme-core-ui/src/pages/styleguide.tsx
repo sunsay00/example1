@@ -1,9 +1,5 @@
 import * as React from 'react';
-import {
-  Image, Section, View, Header1, Header2, Header3, Header4, Header5, Header6,
-  Code, Paragraph, InlineCode
-} from 'core-ui';
-import { WebNavLayout, WebNavBar, WebNavLink } from '../components/webnav';
+import { Section, View, Header1, Header2, Header3, Header4, Header5, Header6, Code } from 'core-ui';
 
 /*
   p: Paragraph,
@@ -31,13 +27,7 @@ import { WebNavLayout, WebNavBar, WebNavLink } from '../components/webnav';
 
 
 export default (props: {}) =>
-  <WebNavLayout renderNavBar={() =>
-    <WebNavBar renderLogo={() => <Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-      <WebNavLink to="/styleguide/">Styleguide</WebNavLink>
-      <WebNavLink to="/#services">Services</WebNavLink>
-      <WebNavLink to="/#contact">Contact</WebNavLink>
-    </WebNavBar>
-  }>
+  <>
     <Section>
       <View style={{ marginVertical: 32, marginHorizontal: 16 }}>
 
@@ -196,4 +186,4 @@ export default (props: {}) =>
       */}
       </View>
     </Section>
-  </WebNavLayout>
+  </>

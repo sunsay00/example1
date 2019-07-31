@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
+import * as UI from 'core-ui';
 import { Link } from 'gatsby';
 
 const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
@@ -175,17 +176,14 @@ export const WebNavLayout = (props: { navHeight?: number, children?: React.React
       <View style={{ minWidth: 300, marginHorizontal: 32, flex: 1, minHeight: '100vh' }}>
         <Breakable
           renderSmall={children => <>
-            <ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32, paddingHorizontal: 32 }}>
-              {props.renderNavBar && props.renderNavBar()}
-            </ImageBackground>
-            {children}
+            {props.renderNavBar && props.renderNavBar()}
+            <View key={1} style={{ flex: 1 }}>{children}</View>
           </>}
           renderMedium={children => <>
-            <View style={{ marginTop: navHeight, marginBottom: -navHeight }}>
-              {children}
-            </View>
+            <View key={1} style={{ marginTop: navHeight, marginBottom: -navHeight }}>{children}</View>
             {props.renderNavBar && props.renderNavBar()}
-          </>}>
+          </>}
+        >
           <View style={{ backgroundColor: rgba(Colors.black, .03), marginHorizontal: -32, paddingHorizontal: 32, flexGrow: 1 }}>
             {props.children}
           </View>

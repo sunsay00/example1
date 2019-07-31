@@ -1,3 +1,4 @@
 // @ts-check
-
-export { wrapPageElement } from './gatsby-index';
+import * as React from 'react';
+import { Root } from './src/root';
+export const wrapPageElement = ({ element }) => <Root>{element}</Root>
