@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef, useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signup';
