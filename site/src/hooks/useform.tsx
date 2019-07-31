@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type FormFieldType = 'email' | 'username' | 'text' | 'password' | 'unsigned';
 
@@ -60,6 +60,15 @@ const parseFormValue = <T extends unknown>(type: FormFieldType, val: string, pre
   }
 }
 
+const cleanFormResult = <T extends unknown>(type: FormFieldType, result: T): T => {
+  if (type == 'unsigned' && typeof result == 'number') {
+    return result;
+  } else if (typeof result == 'string') {
+    return result.trim() as T;
+  } else {
+    throw new Error('failed to parse value')
+  }
+}
 export const mapobj = <T, U, V, K extends keyof T>(obj: { [k in K]: U }, fn: (v: U) => V): { [k in K]: V } => {
   const ret = {} as { [k in K]: V };
   for (let k in obj) ret[k] = fn(obj[k]);
@@ -76,16 +85,19 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
   })) as FormStates<T>);
 
   const reset = () => {
-    setHasValidated(false);
     setStates(mapobj(opts, x => ({
       value: '',
       valid: false,
       result: undefined,
     })) as FormStates<T>);
-  };
+  }
+
+  useEffect(() => {
+    setHasValidated(false);
+    reset();
+  }, []);
 
   return {
-    reset,
     value: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L): FormResultTypes<T>[L] =>
       (states[k].result as R | undefined) || opts[k].default as R,
     message: (k: L) => hasValidated && !states[k].valid && opts[k].message || undefined,
@@ -105,8 +117,9 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
       for (let k in states)
         if (!states[k].valid || states[k].result == undefined)
           return;
-      const ret = mapobj(states, f => f.result!);
-      onSubmit(ret as FormResultTypes<T>);
+      const ret = mapobj(states, f => cleanFormResult(f.type, f.result!));
+      onSubmit(ret as FormResultTypes<T>)
+        .then(reset);
     }
   };
 }

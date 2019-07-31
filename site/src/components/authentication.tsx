@@ -1,173 +1,89 @@
 import * as React from 'react';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signup';
 import { ResetPassword } from '../components/resetpassword';
 import { Forgot } from '../components/forgot';
-import { useAccount } from '../hooks/useaccount';
-import { useForm } from '../hooks/useform';
+import { Confirmation } from '../components/confirmation';
 import { FullModalContext } from '../components/fullmodal';
+import { useLocale } from '../hooks/uselocale';
+import { ChangePassword } from '../components/changepassword';
 
-export type AuthenticationMode = 'login' | 'signup' | 'forgot' | 'resetpassword';
+// [ STATE FLOWS ]
+// signUp -> confirmation -> logIn
+// logIn -> forgot -> reset -> logIn
+// logIn -> changePassword -> logIn
+// logIn -> [DONE]
+
+enum AuthenticationMode { LogIn, SignUp, Confirmation, Forgot, ResetPassword, ChangePassword };
 
 export const Authentication = (props: {
-  onLoggedIn: () => void
+  onLogInComplete: () => void
 }) => {
-  const [mode, setMode] = useState<AuthenticationMode>('login');
-  const { loading, resendConfirmation, logIn, signUp, sendRecoveryEmail, resetPassword } = useAccount();
+  const locale = useLocale();
+  const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
   const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
 
-  const modalContext = useContext(FullModalContext);
-  useEffect(() => {
-    if (modalContext.visible) {
-      setEmailOrUsername(undefined);
-      setMode('login');
-    }
-  }, [modalContext.visible]);
+  //const modalContext = useContext(FullModalContext);
+  //useEffect(() => {
+  //if (modalContext.visible) {
+  //setEmailOrUsername(undefined);
+  //setMode('login');
+  //}
+  //}, []);//modalContext.visible]);
 
-  useEffect(() => {
-    logInForm.reset();
-    signUpForm.reset();
-    forgotForm.reset();
-    resetPasswordForm.reset();
-  }, [mode]);
+  if (!locale) return null;
 
-  const logInForm = useForm({
-    emailOrUsername: {
-      type: 'text',
-      pattern: /^.{2,}$/,
-      message: 'Invalid Email or Username',
-      default: '',
-    },
-    password: {
-      type: 'password',
-      pattern: /^.{8,}$/,
-      message: 'Password too short',
-      default: '',
-    },
-  }, async ({ emailOrUsername, password }) => {
-    await logIn(emailOrUsername, password);
-    props.onLoggedIn();
-  });
-
-  const signUpForm = useForm({
-    username: {
-      type: 'username',
-      message: 'Invalid Username',
-      default: '',
-    },
-    email: {
-      type: 'email',
-      message: 'Invalid Email address',
-      default: '',
-    },
-    password: {
-      type: 'password',
-      pattern: /^.{8,}$/,
-      message: 'Password too short',
-      default: '',
-    },
-  }, async ({ username, email, password }) => {
-    await signUp(username, email, password);
-    setMode('login');
-  });
-
-  const forgotForm = useForm({
-    emailOrUsername: {
-      type: 'text',
-      pattern: /^.{2,}$/,
-      message: 'Invalid Email or Username',
-      default: '',
-    },
-  }, async ({ emailOrUsername }) => {
-    await sendRecoveryEmail(emailOrUsername);
-    setEmailOrUsername(emailOrUsername);
-    setMode('resetpassword');
-  });
-
-  const resetPasswordForm = useForm({
-    code: {
-      type: 'text',
-      message: 'Invalid Username',
-      pattern: /.+/,
-      default: '',
-    },
-    newPassword: {
-      type: 'password',
-      message: 'Password too short',
-      pattern: /^.{8,}$/,
-      default: '',
-    },
-  }, async ({ code, newPassword }) => {
-    if (!emailOrUsername) throw new Error('invalid emailOrUsername');
-    await resetPassword(emailOrUsername, code, newPassword);
-    setMode('login');
-  });
-  if (mode == 'login') {
+  if (mode == AuthenticationMode.LogIn) {
     return (
       <LogIn
-        loading={loading}
-        onLogIn={() => logInForm.submit()}
-        onForgot={() => setMode('forgot')}
-        onSignUp={() => setMode('signup')}
-        onEmailOrUsernameChangeText={logInForm.changeText('emailOrUsername')}
-        emailOrUsernameValue={logInForm.value('emailOrUsername')}
-        emailOrUsernameMessage={logInForm.message('emailOrUsername')}
-        onPasswordChangeText={logInForm.changeText('password')}
-        passwordValue={logInForm.value('password')}
-        passwordMessage={logInForm.message('password')}
-        renderLogo={() =>
-          <UI.View />//<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />
-        }
+        onLogInComplete={() => props.onLogInComplete()}
+        onGoToForgot={() => setMode(AuthenticationMode.Forgot)}
+        onGoToSignUp={() => setMode(AuthenticationMode.SignUp)}
+        onGoToChangePassword={() => setMode(AuthenticationMode.ChangePassword)}
+        renderLogo={() => <UI.View />/*<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />*/}
       />
     );
-  } else if (mode == 'signup') {
+  } else if (mode == AuthenticationMode.SignUp) {
     return (
       <SignUp
-        loading={loading}
-        onSignUp={() => signUpForm.submit()}
-        onLogIn={() => setMode('login')}
-        onUsernameChangeText={signUpForm.changeText('username')}
-        usernameValue={signUpForm.value('username')}
-        usernameMessage={signUpForm.message('username')}
-        onEmailChangeText={signUpForm.changeText('email')}
-        emailValue={signUpForm.value('email')}
-        emailMessage={signUpForm.message('email')}
-        onPasswordChangeText={signUpForm.changeText('password')}
-        passwordValue={signUpForm.value('password')}
-        passwordMessage={signUpForm.message('password')}
+        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+        onGoToConfirmation={() => setMode(AuthenticationMode.Confirmation)}
         onVersion={() => { }}
+        role="default"
+        locale={locale}
         version={'0.0.1'}
       />
     );
-  } else if (mode == 'forgot') {
+  } else if (mode == AuthenticationMode.Confirmation && emailOrUsername) {
     return (
-      <Forgot
-        loading={loading}
-        onSend={() => sendRecoveryEmail}
-        onLogIn={() => setMode('login')}
-        onEmailOrUsernameChangeText={forgotForm.changeText('emailOrUsername')}
-        emailOrUsernameValue={forgotForm.value('emailOrUsername')}
-        emailOrUsernameMessage={forgotForm.message('emailOrUsername')}
+      <Confirmation
+        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
       />
     );
-  } else if (mode == 'resetpassword') {
+  } else if (mode == AuthenticationMode.Forgot) {
+    return (
+      <Forgot
+        onGoToResetPassword={emailOrUsername => {
+          setEmailOrUsername(emailOrUsername);
+          setMode(AuthenticationMode.ResetPassword);
+        }}
+        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+      />
+    );
+  } else if (mode == AuthenticationMode.ResetPassword && emailOrUsername) {
     return (
       <ResetPassword
-        loading={loading}
-        onReset={() => resetPasswordForm.submit()}
-        onLogIn={() => setMode('login')}
-        onResend={() => {
-          if (!emailOrUsername) throw new Error('invalid emailOrUsername');
-          resendConfirmation(emailOrUsername);
-        }}
-        onCodeChangeText={resetPasswordForm.changeText('code')}
-        codeValue={resetPasswordForm.value('code')}
-        codeMessage={resetPasswordForm.message('code')}
-        onNewPasswordChangeText={resetPasswordForm.changeText('newPassword')}
-        newPasswordValue={resetPasswordForm.value('newPassword')}
-        newPasswordMessage={resetPasswordForm.message('newPassword')}
+        emailOrUsername={emailOrUsername}
+        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+      />
+    );
+  } else if (mode == AuthenticationMode.ChangePassword) {
+    return (
+      <ChangePassword
+        locale={locale}
+        onToGoLogIn={() => setMode(AuthenticationMode.LogIn)}
       />
     )
   } else {

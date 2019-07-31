@@ -12,7 +12,7 @@ export type LocalStorage = {
   remove: (key: string) => Promise<void>;
 }
 
-export type UserPoolMode = 'Web' | 'Mobile';
+export enum UserPoolMode { Web, Mobile };
 
 export type AccountCredentials = {
   accessKeyId: string,

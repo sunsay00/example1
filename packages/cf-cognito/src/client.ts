@@ -31,7 +31,7 @@ export default class AWSClient {
     // Initialize Cognito User Pool
     const poolData = {
       UserPoolId: outputs.UserPoolId,
-      ClientId: mode == 'Web' ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId
+      ClientId: mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId
     };
 
     //// Initialize AWS config object with dummy keys - required if unauthenticated access is not enabled for identity pool

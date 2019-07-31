@@ -61,7 +61,7 @@ export default class UserRegistration {
   resendConfirmationCode = async (): Promise<void> => {
     const Username = await this._util.getUserName();
     if (Username === undefined) throw new Error('failed to resend confirmation code');
-    const ClientId = this._mode == 'Web' ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
+    const ClientId = this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
     const cognitoParams = { ClientId, Username };
     await Client.createCognitoServiceProvider().resendConfirmationCode(cognitoParams).promise();
   }

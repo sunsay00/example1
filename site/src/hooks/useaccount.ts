@@ -1,75 +1,107 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { useToast } from './usetoast';
+import { AccountContext } from '../components/accountprovider';
 
-const useToast = () => {
-  return {
-    info: (msg: string) => {
-      console.log(msg);
-    },
-    error: (msg: string) => {
-      console.error(msg);
-    },
-  };
-}
+export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 
 export const useAccount = () => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
-  const resendConfirmation = async (username: string) => {
-    /*
+  const account = useContext(AccountContext);
+
+  const resendConfirmationCode = async () => {
     try {
       setLoading(true);
-      await Root.account().resendConfirmationCode();
-      this.props.onNeedsConfirmation(username);
+      await account.resendConfirmationCode();
+      toast.success('A confirmation code has been resent');
     } catch (err) {
-      Toast.error(err);
+      toast.error(err);
     } finally {
       setLoading(false);
     }
-    */
   }
 
-  const logIn = async (emailOrUsername: string, password: string) => {
-    /*
+  const logIn = async (emailOrUsername: string, password: string): Promise<LogInResult> => {
     try {
       setLoading(true);
-      await this.props.onContinue(emailOrUsername.trim(), password);
+      const result = await account.signIn(emailOrUsername, password);
+      if (result == 'changepassword') {
+        return LogInResult.ChangePassword;
+      } else {
+        return LogInResult.Success;
+      }
     } catch (err) {
-      if (err.code === 'UserNotFoundException' || err.code === 'NotAuthorizedException') {
-        toast.info(err.message);
+      if (err.code === 'UserNotFoundException') {
+        return LogInResult.UserNotFound;
+      } else if (err.code === 'NotAuthorizedException') {
+        return LogInResult.NotAuthorized;
       } else if (err.code === 'UserNotConfirmedException') {
-        UI.Alert.alert('User not confirmed', 'This user has not been confirmed, resend confirmation code?', [
-          { text: 'Cancel', onPress: () => { } },
-          { text: 'Resend', onPress: () => this.onResendConfirmation(values.emailOrUsername) },
-        ])
+        return LogInResult.UserNotConfirmed;
       } else {
         toast.info(`${err.message} (${err.code})`);
+        return LogInResult.Unknown;
       }
     } finally {
       setLoading(false);
     }
-    */
   };
 
-  const signUp = async (username: string, email: string, password: string) => {
+  const signUp = async (username: string, email: string, password: string, locale: string, role: string) => {
+    try {
+      setLoading(true);
+      await account.signUp(username, email, password, locale, role);
+    } catch (err) {
+      toast.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const sendRecoveryEmail = async (emailOrUsername: string) => {
+    try {
+      setLoading(true);
+      await account.forgotPassword(emailOrUsername);
+    } catch (err) {
+      toast.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const resetPassword = async (emailOrUsername: string, code: string, newPassword: string) => {
-    /*
     try {
-      this.setState({ loading: true });
-      await Root.account().confirmForgotPassword(this.props.username, values.code, values.newPassword);
-      Toast.info('Password has successfully been reset');
-      await this.props.onComplete(this.state.newPassword);
+      setLoading(true);
+      await account.confirmForgotPassword(emailOrUsername, code, newPassword);
+      toast.info('Password has successfully been reset');
     } catch (err) {
-      Toast.error(err);
+      toast.error(err);
     } finally {
-      this.setState({ loading: false, newPassword: '', code: '' });
+      setLoading(false);
     }
-    */
   }
 
-  return { loading, resendConfirmation, logIn, signUp, sendRecoveryEmail, resetPassword };
+  const confirmSignUp = async (code: string) => {
+    try {
+      setLoading(true);
+      if (!await account.confirmSignUp(code))
+        toast.error('Confirmation failed');
+    } catch (err) {
+      toast.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const changePassword = async (newPassword: string, locale: string) => {
+    try {
+      setLoading(true);
+      await account.completeNewPasswordChallenge(newPassword, locale);
+    } catch (err) {
+      toast.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return { loading, resendConfirmationCode, logIn, signUp, sendRecoveryEmail, resetPassword, confirmSignUp, changePassword };
 }

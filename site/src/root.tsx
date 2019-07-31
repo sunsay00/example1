@@ -4,6 +4,7 @@ import { AsyncStorage } from 'react-native';
 import gql from 'graphql-tag';
 import * as UI from 'gatsby-theme-core-ui';
 import { BreakableProvider } from 'gatsby-theme-core-ui';
+import { AccountProvider } from './components/accountprovider';
 import { FullModal } from './components/fullmodal';
 import { Authentication } from './components/authentication';
 import { ApolloProvider } from 'react-apollo-hooks';
@@ -146,7 +147,7 @@ const Application = (props: { children?: React.ReactNode }) => {
       </UI.WebNavLayout>
 
       <FullModal style={{ maxWidth: 500 }} visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-        <Authentication onLoggedIn={() => { }} />
+        <Authentication onLogInComplete={() => { }} />
       </FullModal>
     </>
   );
@@ -158,9 +159,11 @@ export const Root = (props: { children?: React.ReactNode }) => {
   //client.resetStore();
   return (
     <ApolloProvider client={client}>
-      <BreakableProvider>
-        <Application>{props.children}</Application>
-      </BreakableProvider>
-    </ApolloProvider>
+      <AccountProvider region="us-east-1">
+        <BreakableProvider>
+          <Application>{props.children}</Application>
+        </BreakableProvider>
+      </AccountProvider>
+    </ApolloProvider >
   );
 }
