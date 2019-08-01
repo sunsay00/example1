@@ -7,7 +7,7 @@ interface CognitoIdentityCredentials {
   sessionToken?: string;
 }
 
-declare module 'aws-sdk/dist/aws-sdk-react-native' {
+declare module 'aws-sdk-rn/dist/aws-sdk-react-native' {
   export const Config: any;
   export const CognitoIdentityCredentials: any;
   export const CognitoIdentityServiceProvider: any;

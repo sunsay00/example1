@@ -77,6 +77,7 @@ export default class CognitoUtil {
         });
       } else {
         console.warn('cognito user stoage is undefined');
+        resolve(true);
       }
     });
   }

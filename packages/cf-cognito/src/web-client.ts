@@ -1,33 +1,25 @@
 import * as AWS from 'aws-sdk';
-import { AuthenticationDetails as AWSAuthenticationDetails, CognitoUserSession as AWSCognitoUserSession, ICognitoUser, CognitoUserPool as AWSCognitoUserPool, CognitoUser as AWSCognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
+import { AuthenticationDetails as AWSAuthenticationDetails, ICognitoUser, CognitoUserPool as AWSCognitoUserPool, CognitoUser as AWSCognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import { vars } from './vars';
-import { AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPoolMode, UserPool } from './types';
-
-//export type CognitoUserSession = AWSCognitoUserSession;
-//export type CognitoUserAttribute = CognitoUserAttribute;
-//export type ICognitoUserPool = ICognitoUserPool;
-//export type ICognitoUser = ICognitoUser;
+import { CompleteNewPasswordChallengeHandler, AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPoolMode, UserPool } from './types';
 
 class UserAdaptor implements CognitoUser {
-  _user: AWSCognitoUser;
-  constructor(user: AWSCognitoUser) {
-    console.assert(user != undefined);
-    this._user = user;
-  }
-  getUsername = this._user.getUsername;
-  confirmRegistration = this._user.confirmRegistration;
-  getSession = this._user.getSession;
-  updateAttributes = this._user.updateAttributes;
-  getAttributeVerificationCode = this._user.getAttributeVerificationCode;
-  verifyAttribute = this._user.verifyAttribute;
-  getUserAttributes = this._user.getUserAttributes;
-  signOut = this._user.signOut;
-  changePassword = this._user.changePassword;
-  globalSignOut = this._user.globalSignOut;
-  forgotPassword = this._user.forgotPassword;
-  confirmPassword = this._user.confirmPassword;
-  refreshSession = this._user.refreshSession;
-  completeNewPasswordChallenge = this._user.completeNewPasswordChallenge
+  private _user: AWSCognitoUser;
+  constructor(user: AWSCognitoUser) { this._user = user; }
+  getUsername = () => this._user.getUsername();
+  confirmRegistration = (confirmationCode: string, b: boolean, next: (err: Error, data: any) => void) => this._user.confirmRegistration(confirmationCode, b, next);
+  getSession = (next: (err: Error, session: any) => void) => this._user.getSession(next);
+  updateAttributes = (attributeList: any[], next: (err: Error, result: string) => void) => this._user.updateAttributes(attributeList, next);
+  getAttributeVerificationCode = (username: string, params: { onFailure: (err: any) => void, inputVerificationCode: (data: object) => void }) => this._user.getAttributeVerificationCode(username, params);
+  verifyAttribute = (attribute: any, verificationCode: string, params: { onFailure: (err: any) => void, onSuccess: (data: string) => void }) => this._user.verifyAttribute(attribute, verificationCode, params);
+  getUserAttributes = (next: (err: Error, result: CognitoUserAttribute[]) => void) => this._user.getUserAttributes(next);
+  signOut = () => this._user.signOut();
+  changePassword = (previousPassword: string, proposedPassword: string, next: (err: Error, result: any) => void) => this._user.changePassword(previousPassword, proposedPassword, next);
+  completeNewPasswordChallenge = (newPassword: string, requiredAttributeData: { [_: string]: string | undefined }, handler: CompleteNewPasswordChallengeHandler) => this._user.completeNewPasswordChallenge(newPassword, requiredAttributeData, handler);
+  globalSignOut = (next: { onSuccess: (msg: string) => void, onFailure: (err: Error) => void }) => this._user.globalSignOut(next);
+  forgotPassword = (next: { onSuccess: (result: any) => void, onFailure: (err: Error) => void, inputVerificationCode: (result: any) => void }) => this._user.forgotPassword(next);
+  confirmPassword = (verificationCode: string, password: string, next: { onSuccess: () => void, onFailure: (err: Error) => void }) => this._user.confirmPassword(verificationCode, password, next);
+  refreshSession = (refreshToken: any, next: (err: Error, session: any) => void) => this._user.refreshSession(refreshToken, next);
   authenticateUser = (details: AuthenticationDetails, callbacks: {
     newPasswordRequired: (userAttributes: any, requiredAttributes: any) => void,
     customChallenge: (challengeParameters: any) => void,
@@ -36,11 +28,11 @@ class UserAdaptor implements CognitoUser {
     onFailure: (err: any) => void
   }) => {
     this._user.authenticateUser(details, {
-      newPasswordRequired: callbacks.newPasswordRequired,
-      customChallenge: callbacks.customChallenge,
-      mfaRequired: callbacks.mfaRequired,
-      onFailure: callbacks.onFailure,
-      onSuccess: (session: AWSCognitoUserSession) => {
+      newPasswordRequired: (a, b) => callbacks.newPasswordRequired(a, b),
+      customChallenge: a => callbacks.customChallenge(a),
+      mfaRequired: (a, b) => callbacks.mfaRequired(a, b),
+      onFailure: a => callbacks.onFailure(a),
+      onSuccess: session => {
         callbacks.onSuccess({
           getAccessToken: () => ({ getJwtToken: async () => session.getAccessToken().getJwtToken() }),
           getIdToken: () => ({ getJwtToken: async () => session.getIdToken().getJwtToken() }),
@@ -52,13 +44,13 @@ class UserAdaptor implements CognitoUser {
 }
 
 class UserPoolAdaptor implements UserPool {
-  _pool: AWSCognitoUserPool;
-  _user: UserAdaptor;
+  private _pool: AWSCognitoUserPool;
+  private _user: UserAdaptor;
   constructor(pool: AWSCognitoUserPool) {
     this._pool = pool;
     this._user = new UserAdaptor(pool.getCurrentUser());
   }
-  signUp = this._pool.signUp;
+  signUp = (username: string, password: string, attributeList: any[], validationData: any[], fn: (err: any, result: any) => void) => this._pool.signUp(username, password, attributeList, validationData, fn);
   getCurrentUser = () => this._user
 };
 
@@ -97,7 +89,9 @@ export class Client implements CognitoClient {
     //AWSCognito.config.update({accessKeyId: 'dummyvalue', secretAccessKey: 'dummyvalue'});
     return new AWSCognitoUserPool(poolData);
   }
-  createCognitoUserPool = (): UserPool => new UserPoolAdaptor(this._createCognitoUserPool());
+  createCognitoUserPool = (): UserPool => {
+    return new UserPoolAdaptor(this._createCognitoUserPool());
+  }
 
   createAuthenticationDetails = (Username: string, Password: string) => {
     const authenticationData = { Username, Password };
@@ -110,14 +104,15 @@ export class Client implements CognitoClient {
       Username: username,
       Pool: this._createCognitoUserPool(),
     };
-    return new UserAdaptor(new AWSCognitoUser(userData));
+    const user = new AWSCognitoUser(userData);
+    const ret = new UserAdaptor(user);
+    return ret;
   }
 
   cognitoIdentityId = (): string => {
     const credentials = AWS.config.credentials;
-    if (!(credentials instanceof AWS.CognitoIdentityCredentials)) {
+    if (!(credentials instanceof AWS.CognitoIdentityCredentials))
       throw new Error('failed to get cognito identity id');
-    }
     return credentials.identityId;
   }
 

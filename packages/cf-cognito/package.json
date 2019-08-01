@@ -8,9 +8,10 @@
     "@types/sjcl": "1.0.27"
   },
   "dependencies": {
-    "sjcl": "git+https://github.com/kyunghoon/react-native-sjcl.git",
-    "aws-sdk": "git://github.com/aws/aws-sdk-js.git#react-native",
     "amazon-cognito-identity-js": "git+https://github.com/kobmic/amazon-cognito-identity-js.git#fix-declarations",
-    "react-native-aws-cognito-js": "0.0.4"
+    "aws-sdk": "2.177.0",
+    "aws-sdk-rn": "git://github.com/aws/aws-sdk-js.git#react-native",
+    "react-native-aws-cognito-js": "0.0.4",
+    "sjcl": "git+https://github.com/kyunghoon/react-native-sjcl.git"
   }
 }
