@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 
-export enum ToastType { Info, Success, Error };
+export enum ToastType { Info, Success, Warn, Error };
 
 export const Toast = (props: {
   duration?: number,
@@ -32,7 +32,6 @@ export const Toast = (props: {
         animRef.current = undefined;
         props.onClose && props.onClose();
         props.onAnimationEnd && props.onAnimationEnd();
-        console.log('END');
         setCurrent(undefined);
       }
     });
@@ -104,8 +103,21 @@ export const ToastProvider = (props: {
 export const useToast = () => {
   const { setCurrent } = React.useContext(ToastContext);
   return {
-    info: (msg: string) => setCurrent(<Toast type={ToastType.Info}>{msg}</Toast>),
-    error: (msg: string) => setCurrent(<Toast type={ToastType.Error}>{msg}</Toast>),
-    success: (msg: string) => setCurrent(<Toast type={ToastType.Success}>{msg}</Toast>),
+    info: (msg: string) => {
+      console.log(`Toast:Info: ${msg}`)
+      setCurrent(<Toast type={ToastType.Info}>{msg}</Toast>);
+    },
+    warn: (msg: string) => {
+      console.warn(`Toast:Warn: ${msg}`)
+      setCurrent(<Toast type={ToastType.Warn}>{msg}</Toast>);
+    },
+    error: (msg: string) => {
+      console.error(`Toast:Error: ${msg}`)
+      setCurrent(<Toast type={ToastType.Error}>{msg}</Toast>);
+    },
+    success: (msg: string) => {
+      console.log(`Toast:Success: ${msg}`)
+      setCurrent(<Toast type={ToastType.Success}>{msg}</Toast>);
+    },
   };
 }
