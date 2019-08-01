@@ -36,7 +36,7 @@ export const Forgot = (props: {
       <UI.Text size="sm">Enter the email address or username associated with your account, and we’ll email you a code to reset your password.</UI.Text>
       <UI.Spacer size="xl" />
       <UI.UserNameInput
-        placeholder='Username or Email'
+        placeholder='Email or Username'
         onChangeText={form.changeText('emailOrUsername')}
         value={form.value('emailOrUsername')}
         message={form.message('emailOrUsername')}

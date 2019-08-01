@@ -92,8 +92,7 @@ export const ApolloProvider = (props: { children?: React.ReactNode }) => {
 
   if (!client) return <UI.Loading />;
 
-  //client.resetStore();
   return (
-    <Apollo client={client}>{props.children}></Apollo>
+    <Apollo client={client}>{props.children}</Apollo>
   );
 }

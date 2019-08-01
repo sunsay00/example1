@@ -3,6 +3,7 @@ import * as UI from 'gatsby-theme-core-ui';
 import { BreakableProvider } from 'gatsby-theme-core-ui';
 import { AccountProvider } from './hooks/useaccount';
 import { useModal, ModalProvider } from './hooks/usemodal';
+import { useToast } from './hooks/usetoast';
 import { ApolloProvider } from './hooks/useapollo';
 import { Authentication } from './components/authentication';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -24,6 +25,7 @@ library.add(faVideo);
 library.add(faSync);
 
 const Application = (props: { children?: React.ReactNode }) => {
+  const toast = useToast();
   const { setCurrent } = useModal();
   //const [authToken/*, refresh*/] = useAuthToken({ region: process.env.AWS_REGION, email: 'guest@guest.com', username: 'guest', password: 'guestguest' });
   //if (!authToken) return null;
@@ -36,11 +38,8 @@ const Application = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
           <UI.WebNavLink to="#services">Services</UI.WebNavLink>
           <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
-          <UI.WebNavLink onPress={() => {
-            console.log('!');
-            setCurrent(<Authentication onLogInComplete={() => { }} />);
-          }}>Log in</UI.WebNavLink>
-          <UI.WebNavLink>Disabled</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => setCurrent(<Authentication onLogInComplete={() => { }} />)}>Log in</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => toast.info('YAY')}>Disabled</UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
     }>{props.children}</UI.WebNavLayout>
