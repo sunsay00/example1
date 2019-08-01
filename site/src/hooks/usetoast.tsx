@@ -88,17 +88,12 @@ export const ToastProvider = (props: { children?: React.ReactNode }) => {
   const [current, setCurrent] = React.useState<JSX.Element | undefined>(undefined);
 
   return (
-    <>
-      <ToastContext.Provider value={{ current, setCurrent }}>
-        <UI.View style={{ flex: 1, height: '100vh' }}>
-          {props.children}
-          {current && <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>{current}</div>}
-        </UI.View>
-      </ToastContext.Provider>
-      <UI.View>
+    <ToastContext.Provider value={{ current, setCurrent }}>
+      <UI.View style={{ flex: 1, height: '100vh' }}>
+        {props.children}
         {current && <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>{current}</div>}
-      </UI.View>, [current]);
-    </>
+      </UI.View>
+    </ToastContext.Provider>
   );
 };
 

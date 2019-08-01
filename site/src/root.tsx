@@ -3,7 +3,7 @@ import * as UI from 'gatsby-theme-core-ui';
 import { BreakableProvider } from 'gatsby-theme-core-ui';
 import { AccountProvider } from './hooks/useaccount';
 import { useModal, ModalProvider } from './hooks/usemodal';
-import { useToast } from './hooks/usetoast';
+import { useToast, ToastProvider } from './hooks/usetoast';
 import { ApolloProvider } from './hooks/useapollo';
 import { Authentication } from './components/authentication';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -51,7 +51,9 @@ export const Root = (props: { children?: React.ReactNode }) =>
     <AccountProvider region="us-east-1">
       <BreakableProvider>
         <ModalProvider style={{ maxWidth: 500 }}>
-          <Application>{props.children}</Application>
+          <ToastProvider>
+            <Application>{props.children}</Application>
+          </ToastProvider>
         </ModalProvider>
       </BreakableProvider>
     </AccountProvider>
