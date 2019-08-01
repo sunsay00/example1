@@ -80,7 +80,7 @@ const writeTs = (outPath: string, key: string, data: { [k: string]: string }) =>
   Object.entries(data).map(([k, v]) => {
     out += `  ${k}: ${JSON.stringify(v)},\n`;
   });
-  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const outputs = {\n${out}};`);
+  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const vars = {\n${out}};`);
 };
 
 const main = async (cmd: string) => {
