@@ -245,7 +245,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
               right: 0,
               bottom: 0,
               left: 0,
-              zIndex: 9999,
+              //zIndex: 9999,
               backgroundColor: transparent ? 'transparent' : '#ffffff',
               ...this.getAnimationStyle()
             }}

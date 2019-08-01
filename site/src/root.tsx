@@ -50,7 +50,10 @@ export const Root = (props: { children?: React.ReactNode }) =>
   <ApolloProvider>
     <AccountProvider region="us-east-1">
       <BreakableProvider>
-        <ModalProvider style={{ maxWidth: 500 }}>
+        <ModalProvider
+          style={{ maxWidth: 500 }}
+          renderModal={children => <ToastProvider>{children}</ToastProvider>}
+        >
           <ToastProvider>
             <Application>{props.children}</Application>
           </ToastProvider>
