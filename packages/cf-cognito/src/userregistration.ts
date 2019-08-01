@@ -1,6 +1,6 @@
 import CognitoUtil from './cognitoutil';
 import { CognitoUserAttribute, UserPoolMode, CognitoClient } from './types';
-import { outputs as vars } from './vars';
+import { vars } from './vars';
 
 export default class UserRegistration {
   private _client: CognitoClient;

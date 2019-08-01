@@ -1,7 +1,7 @@
 import { AuthenticationDetails as AuthDetails, CognitoUserPool, CognitoUser, CognitoUserAttribute } from 'react-native-aws-cognito-js';
 import { Config as AWSConfig, CognitoIdentityCredentials, CognitoIdentityServiceProvider } from 'aws-sdk/dist/aws-sdk-react-native';
 import { AuthenticationDetails, Obj, UserPoolMode, UserPool, CognitoClient } from './types';
-import { outputs as vars } from './vars';
+import { vars } from './vars';
 
 export class Client implements CognitoClient {
   private _mode: UserPoolMode;

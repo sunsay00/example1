@@ -1,6 +1,6 @@
 import * as AWS from 'aws-sdk';
 import { AuthenticationDetails as AWSAuthenticationDetails, CognitoUserSession as AWSCognitoUserSession, ICognitoUser, CognitoUserPool as AWSCognitoUserPool, CognitoUser as AWSCognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
-import { outputs as vars } from './vars';
+import { vars } from './vars';
 import { AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPoolMode, UserPool } from './types';
 
 //export type CognitoUserSession = AWSCognitoUserSession;

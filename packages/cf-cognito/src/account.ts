@@ -3,7 +3,7 @@ import UserLogin from './userlogin';
 import UserProfile from './userprofile';
 import UserRegistration from './userregistration';
 import { CognitoUserSession, CognitoClient, CognitoUser, UserPoolMode, AccountCredentials, UserState, Obj, LocalStorage, Storage } from './types';
-import { outputs } from './vars';
+import { vars } from './vars';
 
 export class Account {
   private _mode: UserPoolMode;
@@ -139,7 +139,7 @@ export class Account {
     // does not expose an easy way to disable this. by surveying its sourcecode, clearing out the LastAuthUser value from
     // the storage used by the cognito-user object will fix.
     const user = await this._util.getCurrentUser();
-    const clientId = this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
+    const clientId = this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId;
     const lastUserKeyKey = `CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
     const lastUserKey = (user as any).storage.getItem(lastUserKeyKey);
     if (lastUserKey)
