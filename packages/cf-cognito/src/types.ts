@@ -40,11 +40,12 @@ export type CognitoUserAttribute = {
 export type CompleteNewPasswordChallengeHandler = {
   onSuccess: (result: any) => void,
   onFailure: (err: Error) => void,
-  mfaRequired: (codeDeliveryDetails: any) => void,
+  mfaRequired: (codeDeliveryDetails: any, challengeParameters: any) => void,
+  customChallenge: (challengeParameters: any) => void
 };
 
 export type UserPool = {
-  signUp: (username: string, password: string, attributeList: any[], a: any, fn: (err: any, result: any) => void) => void,
+  signUp: (username: string, password: string, attributeList: any[], validationData: any[], fn: (err: any, result: any) => void) => void,
   getCurrentUser: () => CognitoUser,
 }
 
@@ -70,7 +71,7 @@ export type CognitoUser = {
     onSuccess: (data: string) => void
   }) => void,
   getUserAttributes: (next: (err: Error, result: CognitoUserAttribute[]) => void) => void,
-  authenticateUser: (details: AuthenticationDetails, params: {
+  authenticateUser: (details: AuthenticationDetails, callbacks: {
     newPasswordRequired: (userAttributes: any, requiredAttributes: any) => void,
     customChallenge: (challengeParameters: any) => void,
     mfaRequired: (challengeName: any, challengeParameter: any) => void,
@@ -96,18 +97,21 @@ export type CognitoUser = {
   refreshSession: (refreshToken: any, next: (err: Error, session: any) => void) => void,
 }
 
+export type ResendConfirmationCodeResponse = {
+};
+
 export type CognitoIdentityServiceProvider = {
-  resendConfirmationCode(params: { ClientId: string, Username: string }): { promise: () => Promise<void> }
+  resendConfirmationCode(params: { ClientId: string, Username: string }): { promise: () => Promise<ResendConfirmationCodeResponse> }
 };
 export type AuthenticationDetails = {};
 
 export type CognitoClient = {
-  refreshCredentials(accessKeyId: string, secretAccessKey: string, sessionToken: string): void;
-  setCognitoIdentityPoolDetails(region: string, logins?: Obj<string>): CognitoIdentityCredentials;
-  createCognitoUserPool(mode: UserPoolMode): UserPool;
-  createCognitoUser(region: string, mode: UserPoolMode, Username: string): CognitoUser;
+  //refreshCredentials(accessKeyId: string, secretAccessKey: string, sessionToken: string): void;
+  setCognitoIdentityPoolDetails(logins?: { [_: string]: string }): CognitoIdentityCredentials;
+  createCognitoUserPool(): UserPool;
+  createCognitoUser(Username: string): CognitoUser;
   cognitoIdentityId(): string;
-  currentUser(region: string, mode: UserPoolMode): CognitoUser;
+  currentUser(): CognitoUser;
   accessKeyId(): string | undefined;
   secretAccessKey(): string | undefined;
   sessionToken(): string | undefined;

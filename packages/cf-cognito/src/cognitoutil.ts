@@ -61,15 +61,15 @@ export default class CognitoUtil {
   }
 
   getUserPool = (): UserPool => {
-    this._client.setCognitoIdentityPoolDetails(this._region);
-    return this._client.createCognitoUserPool(this._mode);
+    this._client.setCognitoIdentityPoolDetails();
+    return this._client.createCognitoUserPool();
   }
 
   sync = async (): Promise<boolean> => {
     return new Promise<boolean>(async (resolve, reject) => {
       const username = await this._localStorageService.get('userName');
       if (username === undefined) { return resolve(false); }
-      const user = this._client.createCognitoUser(this._region, this._mode, username);
+      const user = this._client.createCognitoUser(username);
       if ((user as any).storage) {
         (user as any).storage.sync(async (err: any, result: any) => {
           if (err) { return reject(err); }
@@ -84,10 +84,8 @@ export default class CognitoUtil {
   getCognitoUser = async (): Promise<CognitoUser | undefined> => {
     const username = await this._localStorageService.get('userName');
     if (username === undefined) return undefined;
-    return this._client.createCognitoUser(this._region, this._mode, username);
+    return this._client.createCognitoUser(username);
   }
 
-  getCurrentUser = () => {
-    return this._client.currentUser(this._region, this._mode);
-  }
+  getCurrentUser = () => this._client.currentUser();
 }

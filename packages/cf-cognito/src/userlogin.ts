@@ -257,10 +257,11 @@ export default class UserLogin {
       cognitoUser.completeNewPasswordChallenge(newPassword, attributeList, {
         onSuccess: resolve,
         onFailure: reject,
-        mfaRequired: (codeDeliveryDetails: any) => {
+        mfaRequired: (codeDeliveryDetails, params) => {
           console.error(JSON.stringify(codeDeliveryDetails));
           reject('mfa not supported');
-        }
+        },
+        customChallenge: params => { }
       });
     });
   }
@@ -315,7 +316,7 @@ export default class UserLogin {
 
   getAwsCredentials = async (): Promise<CognitoIdentityCredentials> => {
     // TODO: Integrate this method as needed into the overall module
-    const logins: Obj<string> = {};
+    const logins: { [_: string]: string } = {};
 
     return new Promise<CognitoIdentityCredentials>(async (resolve, reject) => {
       // Check if user session exists
@@ -327,7 +328,7 @@ export default class UserLogin {
         logins[`cognito-idp.${this._region}.amazonaws.com/${outputs.UserPoolId}`] = result.getIdToken().getJwtToken();
 
         // Add the User's Id token to the Cognito credentials login map
-        const credentials = this._client.setCognitoIdentityPoolDetails(this._region, logins);
+        const credentials = this._client.setCognitoIdentityPoolDetails(logins);
 
         // Call refresh method to authenticate user and get new temp AWS credentials
         if (credentials.needsRefresh()) {

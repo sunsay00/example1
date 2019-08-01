@@ -10,6 +10,7 @@
   "dependencies": {
     "sjcl": "git+https://github.com/kyunghoon/react-native-sjcl.git",
     "aws-sdk": "git://github.com/aws/aws-sdk-js.git#react-native",
+    "amazon-cognito-identity-js": "git+https://github.com/kobmic/amazon-cognito-identity-js.git#fix-declarations",
     "react-native-aws-cognito-js": "0.0.4"
   }
 }

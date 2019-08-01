@@ -1,66 +1,119 @@
-/*
 import * as AWS from 'aws-sdk';
-import { AuthenticationDetails, CognitoUserSession, ICognitoUserPool, ICognitoUser, CognitoUserPool, CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
+import { AuthenticationDetails as AWSAuthenticationDetails, CognitoUserSession as AWSCognitoUserSession, ICognitoUser, CognitoUserPool as AWSCognitoUserPool, CognitoUser as AWSCognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
+import { outputs as vars } from './vars';
+import { AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPoolMode, UserPool } from './types';
 
-export const init = async () => {
-  AWS.config.update({ region: config('AWS_REGION') });
+//export type CognitoUserSession = AWSCognitoUserSession;
+//export type CognitoUserAttribute = CognitoUserAttribute;
+//export type ICognitoUserPool = ICognitoUserPool;
+//export type ICognitoUser = ICognitoUser;
+
+class UserAdaptor implements CognitoUser {
+  _user: AWSCognitoUser;
+  constructor(user: AWSCognitoUser) {
+    console.assert(user != undefined);
+    this._user = user;
+  }
+  getUsername = this._user.getUsername;
+  confirmRegistration = this._user.confirmRegistration;
+  getSession = this._user.getSession;
+  updateAttributes = this._user.updateAttributes;
+  getAttributeVerificationCode = this._user.getAttributeVerificationCode;
+  verifyAttribute = this._user.verifyAttribute;
+  getUserAttributes = this._user.getUserAttributes;
+  signOut = this._user.signOut;
+  changePassword = this._user.changePassword;
+  globalSignOut = this._user.globalSignOut;
+  forgotPassword = this._user.forgotPassword;
+  confirmPassword = this._user.confirmPassword;
+  refreshSession = this._user.refreshSession;
+  completeNewPasswordChallenge = this._user.completeNewPasswordChallenge
+  authenticateUser = (details: AuthenticationDetails, callbacks: {
+    newPasswordRequired: (userAttributes: any, requiredAttributes: any) => void,
+    customChallenge: (challengeParameters: any) => void,
+    mfaRequired: (challengeName: any, challengeParameter: any) => void,
+    onSuccess: (session: CognitoUserSession) => void,
+    onFailure: (err: any) => void
+  }) => {
+    this._user.authenticateUser(details, {
+      newPasswordRequired: callbacks.newPasswordRequired,
+      customChallenge: callbacks.customChallenge,
+      mfaRequired: callbacks.mfaRequired,
+      onFailure: callbacks.onFailure,
+      onSuccess: (session: AWSCognitoUserSession) => {
+        callbacks.onSuccess({
+          getAccessToken: () => ({ getJwtToken: async () => session.getAccessToken().getJwtToken() }),
+          getIdToken: () => ({ getJwtToken: async () => session.getIdToken().getJwtToken() }),
+          getRefreshToken: () => ({ getToken: async () => session.getRefreshToken().getToken() }),
+        });
+      },
+    });
+  }
+}
+
+class UserPoolAdaptor implements UserPool {
+  _pool: AWSCognitoUserPool;
+  _user: UserAdaptor;
+  constructor(pool: AWSCognitoUserPool) {
+    this._pool = pool;
+    this._user = new UserAdaptor(pool.getCurrentUser());
+  }
+  signUp = this._pool.signUp;
+  getCurrentUser = () => this._user
 };
 
-export type CognitoUserSession = CognitoUserSession;
-export type CognitoUserAttribute = CognitoUserAttribute;
-export type ICognitoUserPool = ICognitoUserPool;
-export type ICognitoUser = ICognitoUser;
-
-export default class AWSClient {
-  constructor(region: string) {
-
+export class Client implements CognitoClient {
+  private _mode: UserPoolMode;
+  constructor(region: string, mode: UserPoolMode) {
+    AWS.config.update({ region });
+    this._mode = mode;
   }
 
-  public static AWS_REGION = () => config('AWS_REGION');
-  public static AWS_COGNITO_USER_POOL_ID = () => config('AWS_COGNITO_USER_POOL_ID');
-  public static AWS_COGNITO_APP_CLIENT_ID = () => config('AWS_COGNITO_APP_CLIENT_ID');
-  public static AWS_COGNITO_IDENTITY_POOL_ID = () => config('AWS_COGNITO_IDENTITY_POOL_ID');
+  refreshCredentials = (accessKeyId: string, secretAccessKey: string, sessionToken: string) => {
+    AWS.config.accessKeyId = accessKeyId;
+    AWS.config.secretAccessKey = secretAccessKey;
+    AWS.config.sessionToken = sessionToken;
+  }
 
-  public static setCognitoIdentityPoolDetails = (logins?: Hash<string>) => {
+  setCognitoIdentityPoolDetails = (Logins?: { [_: string]: string }): CognitoIdentityCredentials => {
     // Set Cognito Identity Pool details
-    AWS.config.region = config('AWS_REGION');
-    const params = logins === undefined ? {
-      IdentityPoolId: config('AWS_COGNITO_IDENTITY_POOL_ID'),
-    } : {
-        IdentityPoolId: config('AWS_COGNITO_IDENTITY_POOL_ID'),
-        Logins: logins,
-      };
+    const params: AWS.CognitoIdentityCredentials.CognitoIdentityOptions = {
+      IdentityPoolId: vars.CognitoIdentityPoolId,
+      Logins
+    };
     const credentials = new AWS.CognitoIdentityCredentials(params);
     AWS.config.credentials = credentials;
     return credentials;
   }
-  public static createCognitoUserPool = () => {
+
+  private _createCognitoUserPool = (): AWSCognitoUserPool => {
     // Initialize Cognito User Pool
     const poolData = {
-      UserPoolId: config('AWS_COGNITO_USER_POOL_ID'),
-      ClientId: config('AWS_COGNITO_APP_CLIENT_ID'),
+      UserPoolId: vars.UserPoolId,
+      ClientId: this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId,
     };
 
     //// Initialize AWS config object with dummy keys - required if unauthenticated access is not enabled for identity pool
     //AWSCognito.config.update({accessKeyId: 'dummyvalue', secretAccessKey: 'dummyvalue'});
-    return new CognitoUserPool(poolData);
+    return new AWSCognitoUserPool(poolData);
   }
+  createCognitoUserPool = (): UserPool => new UserPoolAdaptor(this._createCognitoUserPool());
 
-  public static createAuthenticationDetails = (Username: string, Password: string) => {
+  createAuthenticationDetails = (Username: string, Password: string) => {
     const authenticationData = { Username, Password };
-    return new AuthenticationDetails(authenticationData);
+    return new AWSAuthenticationDetails(authenticationData);
   }
 
-  public static createCognitoUser = (username: string) => {
-    AWSClient.setCognitoIdentityPoolDetails();
+  createCognitoUser = (username: string): CognitoUser => {
+    this.setCognitoIdentityPoolDetails();
     const userData: ICognitoUser = {
       Username: username,
-      Pool: AWSClient.createCognitoUserPool(),
+      Pool: this._createCognitoUserPool(),
     };
-    return new CognitoUser(userData);
+    return new UserAdaptor(new AWSCognitoUser(userData));
   }
 
-  public static cognitoIdentityId = (): string => {
+  cognitoIdentityId = (): string => {
     const credentials = AWS.config.credentials;
     if (!(credentials instanceof AWS.CognitoIdentityCredentials)) {
       throw new Error('failed to get cognito identity id');
@@ -68,39 +121,38 @@ export default class AWSClient {
     return credentials.identityId;
   }
 
-  public static currentUser = () => {
-    AWSClient.setCognitoIdentityPoolDetails();
-    return AWSClient.createCognitoUserPool().getCurrentUser();
+  currentUser = () => {
+    this.setCognitoIdentityPoolDetails();
+    return this.createCognitoUserPool().getCurrentUser();
   }
 
-  public static accessKeyId = (): string | undefined => {
+  accessKeyId = (): string | undefined => {
     if (!AWS.config.credentials) return undefined;
     return AWS.config.credentials.accessKeyId;
   }
 
-  public static secretAccessKey = (): string | undefined => {
+  secretAccessKey = (): string | undefined => {
     if (!AWS.config.credentials) return undefined;
     return AWS.config.credentials.secretAccessKey;
   }
 
-  public static sessionToken = (): string | undefined => {
+  sessionToken = (): string | undefined => {
     if (!AWS.config.credentials) return undefined;
     return AWS.config.credentials.sessionToken || undefined;
   }
 
-  public static clearCachedId = () => {
+  clearCachedId = () => {
     const credentials = AWS.config.credentials;
     if (credentials instanceof AWS.CognitoIdentityCredentials) {
       credentials.clearCachedId();
     }
   }
 
-  public static createCognitoUserAttribute = (Name: string, Value: string) => {
+  createCognitoUserAttribute = (Name: string, Value: string) => {
     return new CognitoUserAttribute({ Name, Value });
   }
 
-  public static createCognitoServiceProvider = () => {
+  createCognitoServiceProvider = (): CognitoIdentityServiceProvider => {
     return new AWS.CognitoIdentityServiceProvider();
   }
 };
-*/

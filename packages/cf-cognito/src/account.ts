@@ -35,8 +35,8 @@ export class Account {
   }
   init = async (region: string): Promise<boolean> => {
     if (this._initialized) return true;
-    const { Client } = await import('./rn-client');
-    this._client = new Client();
+    const { Client } = this._mode == UserPoolMode.Web ? await import('./web-client') : await import('./rn-client');
+    this._client = new Client(region, this._mode);
     this._util = new CognitoUtil(this._client, region, this._mode, this._storage);
     this._reg = new UserRegistration(this._client, this._mode, this._util);
     this._profile = new UserProfile(this._client, this._util, this._storage);

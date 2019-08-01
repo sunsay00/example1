@@ -1801,6 +1801,13 @@ alphanum-sort@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
 
+"amazon-cognito-identity-js@git+https://github.com/kobmic/amazon-cognito-identity-js.git#fix-declarations":
+  version "1.13.0"
+  resolved "git+https://github.com/kobmic/amazon-cognito-identity-js.git#e03ad3d5c1ad791758603f09ab32f99e6c0554f8"
+  dependencies:
+    aws-sdk "^2.6.0"
+    jsbn "^0.1.0"
+
 ansi-align@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-align/-/ansi-align-2.0.0.tgz#c36aeccba563b89ceb556f3690f0b1d9e3547f7f"
@@ -2193,7 +2200,7 @@ aws-lambda@^0.1.2:
     commander "^2.5.0"
     dotenv "^0.4.0"
 
-aws-sdk@^*, aws-sdk@^2.468.0, aws-sdk@^2.496.0:
+aws-sdk@^*, aws-sdk@^2.468.0, aws-sdk@^2.496.0, aws-sdk@^2.6.0:
   version "2.501.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.501.0.tgz#611d900fae284bfe8175fe9ee3d101e01a877f06"
   dependencies:
@@ -7011,7 +7018,7 @@ js-yaml@^3.10.0, js-yaml@^3.13.0, js-yaml@^3.13.1, js-yaml@^3.5.2, js-yaml@^3.8.
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-jsbn@~0.1.0:
+jsbn@^0.1.0, jsbn@~0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
 
