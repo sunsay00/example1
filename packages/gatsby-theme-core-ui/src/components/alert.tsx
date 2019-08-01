@@ -56,13 +56,13 @@ export const AlertProvider = (props: { children?: React.ReactNode }) => {
         <UI.View style={{ flex: 1, height: '100vh' }}>
           <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
             <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: UI.rgba('#000000', .65) }}>
-              <UI.View style={{ overflow: 'hidden', backgroundColor: UI.Colors.white, paddingVertical: 16, paddingHorizontal: 32 }}>
+              <UI.View style={{ overflow: 'hidden', backgroundColor: UI.Colors.white, paddingVertical: 32, paddingHorizontal: 32 }}>
                 <UI.Header3>{title}</UI.Header3>
                 <UI.Text>{message}</UI.Text>
-                <UI.Spacer />
+                <UI.Spacer size="lg" />
                 <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
                   {buttons.map(({ text, onPress }, i) =>
-                    <UI.Link key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
+                    <UI.Link style={{ paddingHorizontal: 16 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
                 </UI.View>
               </UI.View>
             </UI.View>

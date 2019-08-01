@@ -39,7 +39,13 @@ const Application = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink to="#services">Services</UI.WebNavLink>
           <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
           <UI.WebNavLink onPress={() => setCurrent(<Authentication onLogInComplete={() => { }} />)}>Log in</UI.WebNavLink>
-          <UI.WebNavLink onPress={() => Alert.alert('Title', 'message')}>Disabled</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => Alert.alert('Title', 'message', [{
+            text: 'Button 1',
+            onPress: () => alert('button1 pressed')
+          }, {
+            text: 'Button 2',
+            onPress: () => alert('button2 pressed')
+          }])}>Disabled</UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
     }>{props.children}</UI.WebNavLayout>
