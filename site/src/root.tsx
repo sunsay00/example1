@@ -52,7 +52,7 @@ export const Root = (props: { children?: React.ReactNode }) =>
       <BreakableProvider>
         <ModalProvider
           style={{ maxWidth: 500 }}
-          renderModal={children => <ToastProvider>{children}</ToastProvider>}
+          renderWrapper={modal => <ToastProvider>{modal}</ToastProvider>}
         >
           <ToastProvider>
             <Application>{props.children}</Application>

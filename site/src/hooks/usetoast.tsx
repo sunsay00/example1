@@ -84,14 +84,18 @@ type ContextValue = {
 
 const ToastContext = React.createContext<ContextValue>({ current: undefined, setCurrent: _ => console.warn('toast context undefined') });
 
-export const ToastProvider = (props: { children?: React.ReactNode }) => {
+export const ToastProvider = (props: {
+  children?: React.ReactNode,
+  renderWrapper?: (toast: JSX.Element) => JSX.Element,
+}) => {
+  const wrapper = props.renderWrapper || (x => x);
   const [current, setCurrent] = React.useState<JSX.Element | undefined>(undefined);
 
   return (
     <ToastContext.Provider value={{ current, setCurrent }}>
       <UI.View style={{ flex: 1, height: '100vh' }}>
         {props.children}
-        {current && <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>{current}</div>}
+        {current && <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>{wrapper(current)}</div>}
       </UI.View>
     </ToastContext.Provider>
   );

@@ -13,9 +13,9 @@ export const useModal = () => React.useContext(ModalContext);
 export const ModalProvider = (props: {
   style?: UI.ViewStyle,
   children?: React.ReactNode,
-  renderModal?: (elem: JSX.Element) => JSX.Element,
+  renderWrapper?: (modal: JSX.Element) => JSX.Element,
 }) => {
-  const wrapper = props.renderModal || ((elem: JSX.Element) => elem);
+  const wrapper = props.renderWrapper || (x => x);
   const [current, setCurrent] = React.useState<JSX.Element | undefined>(undefined);
   return (
     <>
