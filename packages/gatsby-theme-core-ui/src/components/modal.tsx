@@ -2,41 +2,22 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Animated, Dimensions, Easing, TouchableWithoutFeedback } from '..';
 
-type ModalPortalProps = {
-  children: React.ReactNode
-};
+const ModalPortal = (props: {
+  children?: React.ReactNode
+}) => {
+  const [elem, setElem] = React.useState<HTMLElement>();
 
-type ModalPortalState = {
-  el: HTMLElement | null,
-  target: HTMLElement | null
-}
-
-class ModalPortal extends React.Component<ModalPortalProps, ModalPortalState> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = {
-      el: null,
-      target: null
+  React.useEffect(() => {
+    const e = document.createElement('div');
+    document.body.append(e);
+    setElem(e);
+    return () => {
+      document.body.removeChild(e);
     };
-  }
-  componentDidMount() {
-    this.setState({ el: document.createElement('div'), target: document.body },
-      () => {
-        if (this.state.target && this.state.el)
-          this.state.target.appendChild(this.state.el);
-      }
-    );
-  }
-  componentWillUnmount() {
-    if (this.state.target && this.state.el)
-      this.state.target.removeChild(this.state.el);
-  }
-  render() {
-    const { children } = this.props;
-    if (this.state.el)
-      return ReactDOM.createPortal(children, this.state.el);
-    return null;
-  }
+  }, []);
+
+  if (!elem) return null;
+  return ReactDOM.createPortal(props.children, elem);
 }
 
 export type ModalProps = {
@@ -245,7 +226,6 @@ export class Modal extends React.Component<ModalProps, ModalState> {
               right: 0,
               bottom: 0,
               left: 0,
-              //zIndex: 9999,
               backgroundColor: transparent ? 'transparent' : '#ffffff',
               ...this.getAnimationStyle()
             }}

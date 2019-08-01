@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
-import { BreakableProvider } from 'gatsby-theme-core-ui';
+import { AlertProvider, BreakableProvider, Alert } from 'gatsby-theme-core-ui';
 import { AccountProvider } from './hooks/useaccount';
 import { useModal, ModalProvider } from './hooks/usemodal';
 import { useToast, ToastProvider } from './hooks/usetoast';
@@ -39,7 +39,7 @@ const Application = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink to="#services">Services</UI.WebNavLink>
           <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
           <UI.WebNavLink onPress={() => setCurrent(<Authentication onLogInComplete={() => { }} />)}>Log in</UI.WebNavLink>
-          <UI.WebNavLink onPress={() => toast.info('YAY')}>Disabled</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => Alert.alert('Title', 'message')}>Disabled</UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
     }>{props.children}</UI.WebNavLayout>
@@ -49,15 +49,17 @@ const Application = (props: { children?: React.ReactNode }) => {
 export const Root = (props: { children?: React.ReactNode }) =>
   <ApolloProvider>
     <AccountProvider region="us-east-1">
-      <BreakableProvider>
-        <ModalProvider
-          style={{ maxWidth: 500 }}
-          renderWrapper={modal => <ToastProvider>{modal}</ToastProvider>}
-        >
-          <ToastProvider>
-            <Application>{props.children}</Application>
-          </ToastProvider>
-        </ModalProvider>
-      </BreakableProvider>
+      <AlertProvider>
+        <BreakableProvider>
+          <ModalProvider
+            style={{ maxWidth: 500 }}
+            renderWrapper={modal => <ToastProvider>{modal}</ToastProvider>}
+          >
+            <ToastProvider>
+              <Application>{props.children}</Application>
+            </ToastProvider>
+          </ModalProvider>
+        </BreakableProvider>
+      </AlertProvider>
     </AccountProvider>
   </ApolloProvider>

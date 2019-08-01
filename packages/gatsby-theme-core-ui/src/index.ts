@@ -8,6 +8,7 @@ export { Image } from './components/image';
 export { ImageBackground } from './components/imagebackground';
 export { Modal } from './components/modal';
 export { Icon } from './components/icon';
+export { AlertProvider, Alert } from './components/alert';
 
 export { WebNavBar, WebNavAnchor, WebNavLayout, WebNavLink } from './components/webnav';
 export { WebAnchor } from './components/webanchor';
