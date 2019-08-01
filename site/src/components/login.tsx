@@ -32,13 +32,18 @@ export const LogIn = (props: {
       props.onLogInComplete();
     } else if (result == LogInResult.ChangePassword) {
       props.onGoToChangePassword();
-    } else if (result == LogInResult.UserNotFound || result == LogInResult.NotAuthorized) {
-      toast.info(`${result}`);
+    } else if (result == LogInResult.UserNotFound) {
+      toast.warn('User not found');
+    } else if (result == LogInResult.NotAuthorized) {
+      toast.warn('User not authorized');
     } else if (result == LogInResult.UserNotConfirmed) {
+      console.log('----');
       UI.Alert.alert('User not confirmed', 'This user has not been confirmed, resend confirmation code?', [
         { text: 'Cancel', onPress: () => { } },
         { text: 'Resend', onPress: () => resendConfirmationCode() },
       ])
+    } else if (result == LogInResult.Unknown) {
+      throw new Error('unknown signup error');
     }
   });
 

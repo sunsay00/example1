@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useForm } from '../hooks/useform';
+import { useToast } from '../hooks/usetoast';
 import * as UI from 'core-ui';
-import { useAccount } from '../hooks/useaccount';
+import { useAccount, SignUpResult } from '../hooks/useaccount';
 
 export const SignUp = (props: {
   onGoToLogIn: () => void,
-  onGoToConfirmation: () => void,
+  onGoToConfirmation: (verifiedUsername: string) => void,
   onVersion: () => void;
   role: string,
   locale: string,
@@ -13,6 +14,7 @@ export const SignUp = (props: {
   renderLogo?: () => JSX.Element,
 }) => {
   const { loading, signUp } = useAccount();
+  const toast = useToast();
 
   const form = useForm({
     username: {
@@ -32,8 +34,14 @@ export const SignUp = (props: {
       default: '',
     },
   }, async ({ username, email, password }) => {
-    await signUp(username, email, password, props.role, props.locale);
-    props.onGoToConfirmation();
+    const result = await signUp(username, email, password, props.role, props.locale);
+    if (result == SignUpResult.Success) {
+      props.onGoToConfirmation(username);
+    } else if (result == SignUpResult.UsernameExists) {
+      toast.warn('User already exists');
+    } else if (result == SignUpResult.Unknown) {
+      throw new Error('unknown signup error');
+    }
   });
 
   return (

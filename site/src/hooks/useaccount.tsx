@@ -6,6 +6,7 @@ import { Account, UserPoolMode } from 'cf-cognito';
 import * as UI from 'gatsby-theme-core-ui';
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
+export enum SignUpResult { Success, UsernameExists, Unknown };
 
 export const useAccount = () => {
   const toast = useToast();
@@ -34,14 +35,14 @@ export const useAccount = () => {
         return LogInResult.Success;
       }
     } catch (err) {
-      if (err.code === 'UserNotFoundException') {
+      if (err.code == 'UserNotFoundException') {
         return LogInResult.UserNotFound;
-      } else if (err.code === 'NotAuthorizedException') {
+      } else if (err.code == 'NotAuthorizedException') {
         return LogInResult.NotAuthorized;
-      } else if (err.code === 'UserNotConfirmedException') {
+      } else if (err.code == 'UserNotConfirmedException') {
         return LogInResult.UserNotConfirmed;
       } else {
-        toast.info(`${err.message} (${err.code})`);
+        toast.error(`${err.message} (${err.code})`);
         return LogInResult.Unknown;
       }
     } finally {
@@ -49,12 +50,19 @@ export const useAccount = () => {
     }
   };
 
-  const signUp = async (username: string, email: string, password: string, locale: string, role: string) => {
+  const signUp = async (username: string, email: string, password: string, locale: string, role: string): Promise<SignUpResult> => {
     try {
       setLoading(true);
-      await account.signUp(username, email, password, locale, role);
+      const verifiedUsername = await account.signUp(username, email, password, locale, role);
+      if (verifiedUsername != username) throw new Error('username mismatch');
+      return SignUpResult.Success;
     } catch (err) {
-      toast.error(err);
+      if (err.code == 'UsernameExistsException') {
+        return SignUpResult.UsernameExists
+      } else {
+        toast.error(`${err.message} (${err.code})`);
+        return SignUpResult.Unknown;
+      }
     } finally {
       setLoading(false);
     }

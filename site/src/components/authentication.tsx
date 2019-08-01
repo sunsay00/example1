@@ -22,7 +22,8 @@ export const Authentication = (props: {
 }) => {
   const locale = useLocale();
   const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
-  const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>(undefined);
+  const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>();
+  const [verifiedUsername, setVerifiedUsername] = useState<string | undefined>();
 
   if (!locale) return null;
 
@@ -40,14 +41,17 @@ export const Authentication = (props: {
     return (
       <SignUp
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
-        onGoToConfirmation={() => setMode(AuthenticationMode.Confirmation)}
+        onGoToConfirmation={verifiedUsername => {
+          setMode(AuthenticationMode.Confirmation);
+          setVerifiedUsername(verifiedUsername);
+        }}
         onVersion={() => { }}
         role="default"
         locale={locale}
         version={'0.0.1'}
       />
     );
-  } else if (mode == AuthenticationMode.Confirmation && emailOrUsername) {
+  } else if (mode == AuthenticationMode.Confirmation && verifiedUsername) {
     return (
       <Confirmation
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}

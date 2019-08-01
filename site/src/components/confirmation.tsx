@@ -11,7 +11,7 @@ export const Confirmation = (props: {
   const form = useForm({
     code: {
       type: 'text',
-      message: 'Invalid Username',
+      message: 'Invalid code',
       pattern: /.+/,
       default: '',
     }
