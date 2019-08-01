@@ -1,13 +1,13 @@
-import Client, { CognitoUserSession } from './client';
 import CognitoUtil from './cognitoutil';
 import UserLogin from './userlogin';
 import UserProfile from './userprofile';
 import UserRegistration from './userregistration';
-import { User, UserPoolMode, AccountCredentials, UserState, Obj, LocalStorage, Storage } from './types';
+import { CognitoUserSession, CognitoClient, CognitoUser, UserPoolMode, AccountCredentials, UserState, Obj, LocalStorage, Storage } from './types';
 import { outputs } from './vars';
 
 export class Account {
   private _mode: UserPoolMode;
+  private _client: CognitoClient | undefined;
   private _util: CognitoUtil | undefined;
   private _reg: UserRegistration | undefined;
   private _login: UserLogin | undefined;
@@ -35,10 +35,12 @@ export class Account {
   }
   init = async (region: string): Promise<boolean> => {
     if (this._initialized) return true;
-    this._util = new CognitoUtil(region, this._mode, this._storage);
-    this._reg = new UserRegistration(this._mode, this._util);
-    this._profile = new UserProfile(this._util, this._storage);
-    this._login = new UserLogin(region, this._profile, this._util, this._storage);
+    const { Client } = await import('./rn-client');
+    this._client = new Client();
+    this._util = new CognitoUtil(this._client, region, this._mode, this._storage);
+    this._reg = new UserRegistration(this._client, this._mode, this._util);
+    this._profile = new UserProfile(this._client, this._util, this._storage);
+    this._login = new UserLogin(this._client, region, this._profile, this._util, this._storage);
     await this._util.sync();
     this._initialized = true;
     return this._initialized;
@@ -79,7 +81,7 @@ export class Account {
     if (!this._util) throw new Error('not initialized');
     return await this._util.getUserState();
   }
-  currentUser = async (): Promise<User> => {
+  currentUser = async (): Promise<CognitoUser> => {
     if (!this._util) throw new Error('not initialized');
     return await this._util.getCurrentUser();
   }
@@ -128,7 +130,8 @@ export class Account {
     return await this._profile.verifyAttribute(attribute, verificationCode);
   }
   refreshCredentials = async (): Promise<void> => {
-    if (!this._util || !this._profile || !this._login) throw new Error('not initialized');
+    if (!this._client || !this._util || !this._profile || !this._login) throw new Error('not initialized');
+    const client = this._client;
     const util = this._util;
     const profile = this._profile;
     const login = this._login;
@@ -158,9 +161,9 @@ export class Account {
             await profile.getUserAttributes();
             await login.getAwsCredentials();
             await this._storage.set('userId', util.getCognitoIdentityId());
-            await this._storage.set('userTokens.awsAccessKeyId', Client.accessKeyId());
-            await this._storage.set('userTokens.awsSecretAccessKey', Client.secretAccessKey());
-            await this._storage.set('userTokens.awsSessionToken', Client.sessionToken());
+            await this._storage.set('userTokens.awsAccessKeyId', client.accessKeyId());
+            await this._storage.set('userTokens.awsSecretAccessKey', client.secretAccessKey());
+            await this._storage.set('userTokens.awsSessionToken', client.sessionToken());
             resolve();
           } catch (err) {
             reject(err);

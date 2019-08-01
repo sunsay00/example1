@@ -1,13 +1,14 @@
-import Client, { CognitoUserAttribute } from './client';
 import CognitoUtil from './cognitoutil';
-import { UserPoolMode } from './types';
-import { outputs } from './vars';
+import { CognitoUserAttribute, UserPoolMode, CognitoClient } from './types';
+import { outputs as vars } from './vars';
 
 export default class UserRegistration {
+  private _client: CognitoClient;
   private _mode: UserPoolMode;
   private _util: CognitoUtil;
 
-  constructor(mode: UserPoolMode, util: CognitoUtil) {
+  constructor(client: CognitoClient, mode: UserPoolMode, util: CognitoUtil) {
+    this._client = client;
     this._mode = mode;
     this._util = util;
   }
@@ -16,17 +17,17 @@ export default class UserRegistration {
     return new Promise<string>((resolve, reject) => {
       const attributeList: CognitoUserAttribute[] = [];
 
-      const attributePreferredUsername = Client.createCognitoUserAttribute('preferred_username', username);
+      const attributePreferredUsername = this._client.createCognitoUserAttribute('preferred_username', username);
       attributeList.push(attributePreferredUsername);
 
-      const attributeEmail = Client.createCognitoUserAttribute('email', email);
+      const attributeEmail = this._client.createCognitoUserAttribute('email', email);
       attributeList.push(attributeEmail);
 
-      const attributeLocale = Client.createCognitoUserAttribute('locale', locale);
+      const attributeLocale = this._client.createCognitoUserAttribute('locale', locale);
       attributeList.push(attributeLocale);
 
       if (role != undefined) {
-        const attributeRole = Client.createCognitoUserAttribute('custom:role', role);
+        const attributeRole = this._client.createCognitoUserAttribute('custom:role', role);
         attributeList.push(attributeRole);
       }
 
@@ -61,8 +62,8 @@ export default class UserRegistration {
   resendConfirmationCode = async (): Promise<void> => {
     const Username = await this._util.getUserName();
     if (Username === undefined) throw new Error('failed to resend confirmation code');
-    const ClientId = this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
+    const ClientId = this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId;
     const cognitoParams = { ClientId, Username };
-    await Client.createCognitoServiceProvider().resendConfirmationCode(cognitoParams).promise();
+    await this._client.createCognitoServiceProvider().resendConfirmationCode(cognitoParams).promise();
   }
 }

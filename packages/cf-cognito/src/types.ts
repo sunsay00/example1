@@ -20,7 +20,7 @@ export type AccountCredentials = {
   sessionToken: string,
 };
 
-export type AWSCognitoUserSession = {
+export type CognitoUserSession = {
   getAccessToken: () => {
     getJwtToken(): Promise<string>
   },
@@ -32,7 +32,7 @@ export type AWSCognitoUserSession = {
   },
 }
 
-export type AWSCognitoUserAttribute = {
+export type CognitoUserAttribute = {
   getName: () => string;
   getValue: () => any;
 }
@@ -43,7 +43,20 @@ export type CompleteNewPasswordChallengeHandler = {
   mfaRequired: (codeDeliveryDetails: any) => void,
 };
 
-export type User = {
+export type UserPool = {
+  signUp: (username: string, password: string, attributeList: any[], a: any, fn: (err: any, result: any) => void) => void,
+  getCurrentUser: () => CognitoUser,
+}
+
+export type Storage = {
+  getItem(key: string, callback?: (error?: Error, result?: string) => void): Promise<string | null>;
+  setItem(key: string, value: string, callback?: (error?: Error) => void): Promise<void>;
+  removeItem(key: string, callback?: (error?: Error) => void): Promise<void>;
+  clear(callback?: (error?: Error) => void): Promise<void>;
+  getAllKeys(callback?: (error?: Error, keys?: string[]) => void): Promise<string[]>;
+}
+
+export type CognitoUser = {
   getUsername: () => string,
   confirmRegistration(confirmationCode: string, b: boolean, next: (err: Error, data: any) => void): void,
   getSession(next: (err: Error, session: any) => void): void,
@@ -56,12 +69,12 @@ export type User = {
     onFailure: (err: any) => void,
     onSuccess: (data: string) => void
   }) => void,
-  getUserAttributes: (next: (err: Error, result: AWSCognitoUserAttribute[]) => void) => void,
+  getUserAttributes: (next: (err: Error, result: CognitoUserAttribute[]) => void) => void,
   authenticateUser: (details: AuthenticationDetails, params: {
     newPasswordRequired: (userAttributes: any, requiredAttributes: any) => void,
     customChallenge: (challengeParameters: any) => void,
     mfaRequired: (challengeName: any, challengeParameter: any) => void,
-    onSuccess: (session: AWSCognitoUserSession) => void,
+    onSuccess: (session: CognitoUserSession) => void,
     onFailure: (err: any) => void
   }) => void,
   signOut: () => void,
@@ -83,15 +96,23 @@ export type User = {
   refreshSession: (refreshToken: any, next: (err: Error, session: any) => void) => void,
 }
 
-export type UserPool = {
-  signUp: (username: string, password: string, attributeList: any[], a: any, fn: (err: any, result: any) => void) => void,
-  getCurrentUser: () => User,
-}
+export type CognitoIdentityServiceProvider = {
+  resendConfirmationCode(params: { ClientId: string, Username: string }): { promise: () => Promise<void> }
+};
+export type AuthenticationDetails = {};
 
-export type Storage = {
-  getItem(key: string, callback?: (error?: Error, result?: string) => void): Promise<string | null>;
-  setItem(key: string, value: string, callback?: (error?: Error) => void): Promise<void>;
-  removeItem(key: string, callback?: (error?: Error) => void): Promise<void>;
-  clear(callback?: (error?: Error) => void): Promise<void>;
-  getAllKeys(callback?: (error?: Error, keys?: string[]) => void): Promise<string[]>;
-}
+export type CognitoClient = {
+  refreshCredentials(accessKeyId: string, secretAccessKey: string, sessionToken: string): void;
+  setCognitoIdentityPoolDetails(region: string, logins?: Obj<string>): CognitoIdentityCredentials;
+  createCognitoUserPool(mode: UserPoolMode): UserPool;
+  createCognitoUser(region: string, mode: UserPoolMode, Username: string): CognitoUser;
+  cognitoIdentityId(): string;
+  currentUser(region: string, mode: UserPoolMode): CognitoUser;
+  accessKeyId(): string | undefined;
+  secretAccessKey(): string | undefined;
+  sessionToken(): string | undefined;
+  clearCachedId(): void;
+  createCognitoUserAttribute(Name: string, Value: string): CognitoUserAttribute;
+  createCognitoServiceProvider(): CognitoIdentityServiceProvider;
+  createAuthenticationDetails(Name: string, Password: String): AuthenticationDetails;
+};

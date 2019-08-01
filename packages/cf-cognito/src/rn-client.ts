@@ -1,37 +1,34 @@
-import { AuthenticationDetails, CognitoUserPool, CognitoUser, CognitoUserAttribute } from 'react-native-aws-cognito-js';
+import { AuthenticationDetails as AuthDetails, CognitoUserPool, CognitoUser, CognitoUserAttribute } from 'react-native-aws-cognito-js';
 import { Config as AWSConfig, CognitoIdentityCredentials, CognitoIdentityServiceProvider } from 'aws-sdk/dist/aws-sdk-react-native';
-import { Obj, UserPoolMode, AWSCognitoUserAttribute, AWSCognitoUserSession, UserPool } from './types';
-import { outputs } from './vars';
+import { AuthenticationDetails, Obj, UserPoolMode, UserPool, CognitoClient } from './types';
+import { outputs as vars } from './vars';
 
-export type CognitoUserSession = AWSCognitoUserSession;
-export type CognitoUserAttribute = AWSCognitoUserAttribute;
+export class Client implements CognitoClient {
 
-export default class AWSClient {
-
-  static refreshCredentials = (accessKeyId: string, secretAccessKey: string, sessionToken: string) => {
+  refreshCredentials = (accessKeyId: string, secretAccessKey: string, sessionToken: string) => {
     AWSConfig.credentials.accessKeyId = accessKeyId;
     AWSConfig.credentials.secretAccessKey = secretAccessKey;
     AWSConfig.credentials.sessionToken = sessionToken;
   }
 
-  static setCognitoIdentityPoolDetails = (region: string, logins?: Obj<string>): CognitoIdentityCredentials => {
+  setCognitoIdentityPoolDetails = (region: string, logins?: Obj<string>): CognitoIdentityCredentials => {
     // Set Cognito Identity Pool details
     AWSConfig.region = region;
     const params = logins === undefined ? {
-      IdentityPoolId: outputs.CognitoIdentityPoolId,
+      IdentityPoolId: vars.CognitoIdentityPoolId,
     } : {
-        IdentityPoolId: outputs.CognitoIdentityPoolId,
+        IdentityPoolId: vars.CognitoIdentityPoolId,
         Logins: logins,
       };
     const credentials = new CognitoIdentityCredentials(params);
     AWSConfig.credentials = credentials;
     return credentials;
   }
-  static createCognitoUserPool = (mode: UserPoolMode): UserPool => {
+  createCognitoUserPool = (mode: UserPoolMode): UserPool => {
     // Initialize Cognito User Pool
     const poolData = {
-      UserPoolId: outputs.UserPoolId,
-      ClientId: mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId
+      UserPoolId: vars.UserPoolId,
+      ClientId: mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId
     };
 
     //// Initialize AWS config object with dummy keys - required if unauthenticated access is not enabled for identity pool
@@ -39,18 +36,18 @@ export default class AWSClient {
     return new CognitoUserPool(poolData);
   }
 
-  static createAuthenticationDetails = (Username: string, Password: string): AuthenticationDetails => {
+  createAuthenticationDetails = (Username: string, Password: string): AuthenticationDetails => {
     const authenticationData = { Username, Password };
-    return new AuthenticationDetails(authenticationData);
+    return new AuthDetails(authenticationData) as AuthenticationDetails;
   }
 
-  static createCognitoUser = (region: string, mode: UserPoolMode, Username: string) => {
-    AWSClient.setCognitoIdentityPoolDetails(region);
-    const Pool = AWSClient.createCognitoUserPool(mode);
+  createCognitoUser = (region: string, mode: UserPoolMode, Username: string) => {
+    this.setCognitoIdentityPoolDetails(region);
+    const Pool = this.createCognitoUserPool(mode);
     return new CognitoUser({ Username, Pool });
   }
 
-  static cognitoIdentityId = (): string => {
+  cognitoIdentityId = (): string => {
     const credentials = AWSConfig.credentials;
     if (!(credentials instanceof CognitoIdentityCredentials)) {
       throw new Error('failed to get cognito identity id');
@@ -58,42 +55,42 @@ export default class AWSClient {
     return credentials.identityId;
   }
 
-  static currentUser = (region: string, mode: UserPoolMode) => {
-    AWSClient.setCognitoIdentityPoolDetails(region);
-    const user = AWSClient.createCognitoUserPool(mode).getCurrentUser();
+  currentUser = (region: string, mode: UserPoolMode) => {
+    this.setCognitoIdentityPoolDetails(region);
+    const user = this.createCognitoUserPool(mode).getCurrentUser();
     if (user == null) {
       throw new Error('current cognito user is null, perhaps there was a mix up of environment state? (eg. ClientId)');
     }
     return user;
   }
 
-  static accessKeyId = (): string | undefined => {
+  accessKeyId = (): string | undefined => {
     if (!AWSConfig.credentials) return undefined;
     return AWSConfig.credentials.accessKeyId;
   }
 
-  static secretAccessKey = (): string | undefined => {
+  secretAccessKey = (): string | undefined => {
     if (!AWSConfig.credentials) return undefined;
     return AWSConfig.credentials.secretAccessKey;
   }
 
-  static sessionToken(): string | undefined {
+  sessionToken(): string | undefined {
     if (!AWSConfig.credentials) return undefined;
     return AWSConfig.credentials.sessionToken || undefined;
   }
 
-  static clearCachedId() {
+  clearCachedId() {
     const credentials = AWSConfig.credentials;
     if (credentials instanceof CognitoIdentityCredentials) {
       credentials.clearCachedId();
     }
   }
 
-  static createCognitoUserAttribute(Name: string, Value: string) {
+  createCognitoUserAttribute(Name: string, Value: string) {
     return new CognitoUserAttribute({ Name, Value });
   }
 
-  static createCognitoServiceProvider = () => {
+  createCognitoServiceProvider = () => {
     return new CognitoIdentityServiceProvider();
   }
 };

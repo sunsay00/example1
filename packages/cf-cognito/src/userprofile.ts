@@ -1,12 +1,13 @@
-import Client, { CognitoUserAttribute } from './client';
 import CognitoUtil from './cognitoutil';
-import { LocalStorage, Obj } from './types';
+import { CognitoClient, LocalStorage, Obj, CognitoUserAttribute } from './types';
 
 export default class UserProfile {
+  private _client: CognitoClient;
   private _util: CognitoUtil;
   private _localStorage: LocalStorage;
 
-  constructor(util: CognitoUtil, localStorage: LocalStorage) {
+  constructor(client: CognitoClient, util: CognitoUtil, localStorage: LocalStorage) {
+    this._client = client;
     this._localStorage = localStorage;
     this._util = util;
   }
@@ -14,11 +15,8 @@ export default class UserProfile {
   setUserAttributes = async (attributes: Obj<string>): Promise<string> => {
     return new Promise<string>(async (resolve, reject) => {
       const attributeList = Object.entries(attributes)
-        .map(([key, value]) => {
-          if (value != undefined) {
-            return Client.createCognitoUserAttribute(key, value);
-          }
-        });
+        .map(([key, value]) => value && this._client.createCognitoUserAttribute(key, value) || undefined)
+        .filter(x => x != undefined);
       const cognitoUser = await this._util.getCognitoUser();
       if (cognitoUser === undefined) return reject('user currently not logged in');
       cognitoUser.getSession((err: Error, session: any) => {

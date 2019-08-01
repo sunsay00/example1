@@ -1,11 +1,11 @@
 import * as sjcl from 'sjcl';
-import Client, { CognitoUserSession } from './client';
 import CognitoUtil from './cognitoutil';
 import UserProfileService from './userprofile';
-import { Obj, LocalStorage, User } from './types';
+import { CognitoClient, Obj, LocalStorage, CognitoUser, CognitoUserSession } from './types';
 import { outputs } from './vars';
 
 export default class UserLogin {
+  private _client: CognitoClient;
   private _region: string;
   private _profile: UserProfileService;
   private _util: CognitoUtil;
@@ -13,9 +13,10 @@ export default class UserLogin {
   private _idToken?: string;
   private _refreshToken?: string;
   private _localStorage: LocalStorage;
-  private _currentSignInUser?: User;
+  private _currentSignInUser?: CognitoUser;
 
-  constructor(region: string, profile: UserProfileService, util: CognitoUtil, localStorage: LocalStorage) {
+  constructor(client: CognitoClient, region: string, profile: UserProfileService, util: CognitoUtil, localStorage: LocalStorage) {
+    this._client = client;
     this._region = region;
     this._profile = profile;
     this._util = util;
@@ -62,15 +63,15 @@ export default class UserLogin {
   }
 
   getAwsAccessKey = async (): Promise<string | undefined> => {
-    return Client.accessKeyId() || await this._localStorage.get('userTokens.awsAccessKeyId');
+    return this._client.accessKeyId() || await this._localStorage.get('userTokens.awsAccessKeyId');
   }
 
   getAwsSecretAccessKey = async (): Promise<string | undefined> => {
-    return Client.secretAccessKey() || await this._localStorage.get('userTokens.awsSecretAccessKey');
+    return this._client.secretAccessKey() || await this._localStorage.get('userTokens.awsSecretAccessKey');
   }
 
   getAwsSessionToken = async (): Promise<string | undefined> => {
-    return Client.sessionToken() || await this._localStorage.get('userTokens.awsSessionToken');
+    return this._client.sessionToken() || await this._localStorage.get('userTokens.awsSessionToken');
   }
 
   private clearUserState = async (): Promise<void> => {
@@ -98,7 +99,7 @@ export default class UserLogin {
   };
 
   signIn = async (emailOrUsername: string, password: string): Promise<'success' | 'changepassword'> => {
-    const authenticationDetails = Client.createAuthenticationDetails(emailOrUsername, password);
+    const authenticationDetails = this._client.createAuthenticationDetails(emailOrUsername, password);
 
     // set username (could also be email at this point)
     await this._util.setUsername(emailOrUsername);
@@ -167,9 +168,9 @@ export default class UserLogin {
 
             // Read user attributes and write to console
             await this.getAwsCredentials();
-            const accessKeyId = Client.accessKeyId();
-            const secretAccessKey = Client.secretAccessKey();
-            const sessionToken = Client.sessionToken();
+            const accessKeyId = this._client.accessKeyId();
+            const secretAccessKey = this._client.secretAccessKey();
+            const sessionToken = this._client.sessionToken();
             if (accessKeyId && secretAccessKey && sessionToken) {
               //console.log('AWS Access Key ID: ', accessKeyId);
               await this._localStorage.set('userTokens.awsSecretAccessKey', secretAccessKey);
@@ -212,7 +213,7 @@ export default class UserLogin {
     if (cognitoUser !== undefined) {
       cognitoUser.signOut();
     }
-    Client.clearCachedId();
+    this._client.clearCachedId();
   }
 
   globalSignOut = async (): Promise<void> => {
@@ -226,7 +227,7 @@ export default class UserLogin {
         onFailure: (err: Error) => { },
       });
     }
-    Client.clearCachedId();
+    this._client.clearCachedId();
   }
 
   changePassword = async (previousPassword: string, proposedPassword: string): Promise<void> => {
@@ -326,7 +327,7 @@ export default class UserLogin {
         logins[`cognito-idp.${this._region}.amazonaws.com/${outputs.UserPoolId}`] = result.getIdToken().getJwtToken();
 
         // Add the User's Id token to the Cognito credentials login map
-        const credentials = Client.setCognitoIdentityPoolDetails(this._region, logins);
+        const credentials = this._client.setCognitoIdentityPoolDetails(this._region, logins);
 
         // Call refresh method to authenticate user and get new temp AWS credentials
         if (credentials.needsRefresh()) {

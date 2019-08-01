@@ -104,19 +104,19 @@ export const useToast = () => {
   const { setCurrent } = React.useContext(ToastContext);
   return {
     info: (msg: string) => {
-      console.log(`Toast:Info: ${msg}`)
+      console.log(`Toast-Info: ${msg}`)
       setCurrent(<Toast type={ToastType.Info}>{msg}</Toast>);
     },
     warn: (msg: string) => {
-      console.warn(`Toast:Warn: ${msg}`)
+      console.warn(`Toast-Warn: ${msg}`)
       setCurrent(<Toast type={ToastType.Warn}>{msg}</Toast>);
     },
     error: (msg: string) => {
-      console.error(`Toast:Error: ${msg}`)
+      console.error(`Toast-Error: ${msg}`)
       setCurrent(<Toast type={ToastType.Error}>{msg}</Toast>);
     },
     success: (msg: string) => {
-      console.log(`Toast:Success: ${msg}`)
+      console.log(`Toast-Success: ${msg}`)
       setCurrent(<Toast type={ToastType.Success}>{msg}</Toast>);
     },
   };
