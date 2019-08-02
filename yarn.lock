@@ -1801,11 +1801,11 @@ alphanum-sort@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
 
-"amazon-cognito-identity-js@git+https://github.com/kobmic/amazon-cognito-identity-js.git#fix-declarations":
+"amazon-cognito-identity-js@git+https://github.com/kyunghoon/amazon-cognito-identity-js.git#khk2":
   version "1.13.0"
-  resolved "git+https://github.com/kobmic/amazon-cognito-identity-js.git#e03ad3d5c1ad791758603f09ab32f99e6c0554f8"
+  resolved "git+https://github.com/kyunghoon/amazon-cognito-identity-js.git#f5d6e82c2c80be70bee4019f452fbfee33f8d959"
   dependencies:
-    aws-sdk "^2.6.0"
+    aws-sdk "2.177.0"
     jsbn "^0.1.0"
 
 ansi-align@^2.0.0:
@@ -2229,7 +2229,7 @@ aws-sdk@2.177.0:
     xml2js "0.4.17"
     xmlbuilder "4.2.1"
 
-aws-sdk@^*, aws-sdk@^2.468.0, aws-sdk@^2.496.0, aws-sdk@^2.6.0:
+aws-sdk@^*, aws-sdk@^2.468.0, aws-sdk@^2.496.0:
   version "2.501.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.501.0.tgz#611d900fae284bfe8175fe9ee3d101e01a877f06"
   dependencies:

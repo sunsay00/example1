@@ -37,8 +37,7 @@ export const LogIn = (props: {
     } else if (result == LogInResult.NotAuthorized) {
       toast.warn('User not authorized');
     } else if (result == LogInResult.UserNotConfirmed) {
-      console.log('----');
-      UI.Alert.alert('User not confirmed', 'This user has not been confirmed, resend confirmation code?', [
+      UI.Alert.alert('Unconfirmed user', 'This user has not been confirmed, resend confirmation code?', [
         { text: 'Cancel', onPress: () => { } },
         { text: 'Resend', onPress: () => resendConfirmationCode() },
       ])

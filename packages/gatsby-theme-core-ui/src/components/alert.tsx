@@ -7,7 +7,11 @@ type ButtonOption = { text: string, onPress?: () => void };
 
 let _alert: ((title: string, message: string | undefined, buttons: ButtonOption[], options: Options | undefined) => void) | undefined;
 
-export const AlertProvider = (props: { children?: React.ReactNode }) => {
+export const AlertProvider = (props: {
+  children?: React.ReactNode,
+  renderWrapper?: (modal: JSX.Element) => JSX.Element,
+}) => {
+  const wrapper = props.renderWrapper || (x => x);
   const [title, setTitle] = React.useState('');
   const [message, setMessage] = React.useState<string>();
   const [options, setOptions] = React.useState<Options>();
@@ -56,15 +60,16 @@ export const AlertProvider = (props: { children?: React.ReactNode }) => {
         <UI.View style={{ flex: 1, height: '100vh' }}>
           <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
             <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: UI.rgba('#000000', .65) }}>
-              <UI.View style={{ overflow: 'hidden', backgroundColor: UI.Colors.white, paddingVertical: 32, paddingHorizontal: 32 }}>
-                <UI.Header3>{title}</UI.Header3>
-                <UI.Text>{message}</UI.Text>
-                <UI.Spacer size="lg" />
-                <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
-                  {buttons.map(({ text, onPress }, i) =>
-                    <UI.Link style={{ paddingHorizontal: 16 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
-                </UI.View>
-              </UI.View>
+              {wrapper(
+                <UI.View style={{ overflow: 'hidden', backgroundColor: UI.Colors.white, paddingVertical: 32, paddingHorizontal: 32 }}>
+                  <UI.Header3>{title}</UI.Header3>
+                  <UI.Text>{message}</UI.Text>
+                  <UI.Spacer size="lg" />
+                  <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
+                    {buttons.map(({ text, onPress }, i) =>
+                      <UI.Link style={{ paddingLeft: 32 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
+                  </UI.View>
+                </UI.View>)}
             </UI.View>
           </div>
         </UI.View>

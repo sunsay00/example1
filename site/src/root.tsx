@@ -55,17 +55,23 @@ const Application = (props: { children?: React.ReactNode }) => {
 export const Root = (props: { children?: React.ReactNode }) =>
   <ApolloProvider>
     <AccountProvider region="us-east-1">
-      <AlertProvider>
-        <BreakableProvider>
-          <ModalProvider
-            style={{ maxWidth: 500 }}
-            renderWrapper={modal => <ToastProvider>{modal}</ToastProvider>}
-          >
+      <BreakableProvider>
+        <ModalProvider
+          style={{ maxWidth: 500 }}
+          renderWrapper={modal =>
             <ToastProvider>
+              <AlertProvider>
+                {modal}
+              </AlertProvider>
+            </ToastProvider>}
+        >
+          <ToastProvider renderWrapper={toast =>
+            <AlertProvider>{toast}</AlertProvider>}>
+            <AlertProvider>
               <Application>{props.children}</Application>
-            </ToastProvider>
-          </ModalProvider>
-        </BreakableProvider>
-      </AlertProvider>
+            </AlertProvider>
+          </ToastProvider>
+        </ModalProvider>
+      </BreakableProvider>
     </AccountProvider>
   </ApolloProvider>
