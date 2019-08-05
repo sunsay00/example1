@@ -1,9 +1,33 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
+import { useTopViewStack } from '../hooks/usetopviewstack';
+
+type ContextValue = {
+  setCurrent: (c: React.ReactNode) => void,
+};
 
 export enum ToastType { Info, Success, Warn, Error };
 
-export const Toast = (props: {
+const ToastContext = React.createContext<ContextValue>({
+  setCurrent: _ => console.warn('toast context undefined')
+});
+
+export const ToastProvider = (props: {
+  children?: React.ReactNode,
+}) => {
+  const { display, dismiss } = useTopViewStack(ToastProvider, { disableBackground: true });
+  const setCurrent = (node: React.ReactNode) => {
+    if (node) display(() => node);
+    else dismiss();
+  }
+  return (
+    <ToastContext.Provider value={{ setCurrent }}>
+      {props.children}
+    </ToastContext.Provider>
+  );
+};
+
+const Toast = (props: {
   duration?: number,
   onClose?: () => void,
   mask?: boolean,
@@ -32,7 +56,7 @@ export const Toast = (props: {
         animRef.current = undefined;
         props.onClose && props.onClose();
         props.onAnimationEnd && props.onAnimationEnd();
-        setCurrent(undefined);
+        setCurrent(null);
       }
     });
     return () => {
@@ -44,61 +68,22 @@ export const Toast = (props: {
   }, []);
 
   return (
-    <UI.View style={{
-      position: 'absolute',
-      top: UI.Platform.OS === 'ios' ? 64 : 54,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      backgroundColor: 'transparent',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }} pointerEvents={props.mask ? undefined : 'box-none'} >
-      <UI.View style={{ backgroundColor: 'transparent' }}>
-        <UI.Animated.View style={{ opacity: fadeAnimRef.current }}>
-          <UI.View style={{
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, .8)',
-            minWidth: 100,
-            borderRadius: 3,
-            paddingVertical: 9,
-            paddingHorizontal: 15
-          }}>
-            <UI.Text style={{
-              color: 'white',
-              fontSize: 15,
-              textAlign: 'center'
-            }}>{props.children}</UI.Text>
-          </UI.View>
-        </UI.Animated.View>
+    <UI.Animated.View style={{ opacity: fadeAnimRef.current }}>
+      <UI.View style={{
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, .8)',
+        minWidth: 100,
+        borderRadius: 3,
+        paddingVertical: 9,
+        paddingHorizontal: 15
+      }}>
+        <UI.Text style={{ color: 'white', textAlign: 'center' }}>
+          {props.children}
+        </UI.Text>
       </UI.View>
-    </UI.View>
+    </UI.Animated.View>
   );
 }
-
-type ContextValue = {
-  current: JSX.Element | undefined,
-  setCurrent: (c: JSX.Element | undefined) => void,
-};
-
-const ToastContext = React.createContext<ContextValue>({ current: undefined, setCurrent: _ => console.warn('toast context undefined') });
-
-export const ToastProvider = (props: {
-  children?: React.ReactNode,
-  renderWrapper?: (toast: JSX.Element) => JSX.Element,
-}) => {
-  const wrapper = props.renderWrapper || (x => x);
-  const [current, setCurrent] = React.useState<JSX.Element | undefined>(undefined);
-
-  return (
-    <ToastContext.Provider value={{ current, setCurrent }}>
-      <UI.View style={{ flex: 1, height: '100vh' }}>
-        {props.children}
-        {current && <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>{wrapper(current)}</div>}
-      </UI.View>
-    </ToastContext.Provider>
-  );
-};
 
 export const useToast = () => {
   const { setCurrent } = React.useContext(ToastContext);

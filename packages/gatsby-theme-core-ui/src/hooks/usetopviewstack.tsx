@@ -1,148 +1,121 @@
 import * as React from 'react';
-import { Modal } from '../components/modal';
 import * as UI from 'core-ui';
+import { useScalarAnimation } from '../hooks/usescalaranimation';
+import { useBodyScrollLocker } from '../hooks/usebodyscrolllocker';
 
-type AnimationType = 'slide' | 'fade' | 'none';
-
-type Options = {
-  animationType?: AnimationType,
-  onDismiss?: () => void,
+type TopStackOptions = {
+  onDismissRequest?: () => void
+  disableBackground?: boolean,
 }
 
-type ElemEntry = {
-  name: string,
-  elem: JSX.Element | null,
+type OverlayParams = {
+  dismissRequested?: boolean,
+  nodeFn?: () => React.ReactNode,
+  opts: TopStackOptions
 }
 
 type ContextValue = {
-  top: JSX.Element | null,
-  register: (fn: Function, opts?: Options) => () => void,
-  push: (fn: Function, c: JSX.Element | null) => void,
-  pop: (fn: Function) => void,
+  register: (fn: Function) => () => void,
+  display: (fn: Function, nodeFn: () => React.ReactNode, params?: TopStackOptions) => void,
+  dismiss: (fn: Function) => void,
+  requestDismissal: (fn: Function) => void,
 };
 
 const TopViewStackContext = React.createContext<ContextValue>({
-  top: null,
   register: _ => () => console.warn('invalid topviewstack context'),
-  push: () => console.warn('invalid topviewstack context'),
-  pop: _ => console.warn('invalid topviewstack context'),
+  display: _ => console.warn('invalid topviewstack context'),
+  dismiss: _ => console.warn('invalid topviewstack context'),
+  requestDismissal: _ => console.warn('invalid topviewstack context'),
 });
 
-export const useTopViewStack = () => React.useContext(TopViewStackContext);
+export const useTopViewStack = (fn: Function, opts?: TopStackOptions) => {
+  const stack = React.useContext(TopViewStackContext);
+  const display = (nodeFn: () => React.ReactNode) => stack.display(fn, nodeFn, opts);
+  const dismiss = () => stack.dismiss(fn);
+  const requestDismissal = () => stack.requestDismissal(fn);
+  React.useEffect(stack.register(fn), []);
+  return { display, dismiss, requestDismissal };
+}
 
 export const TopViewStackProvider = (props: {
   style?: UI.ViewStyle,
   children?: React.ReactNode,
-  renderWrapper?: (modal: JSX.Element) => JSX.Element,
+  renderWrapper?: (modal: React.ReactNode) => JSX.Element,
 }) => {
   const wrapper = props.renderWrapper || (x => x);
-  const [stack, setStack] = React.useState<{ ents: ElemEntry[], prev: ElemEntry[] }>({ ents: [], prev: [] });
-  const [handlers, setHandlers] = React.useState<{ onShow?: () => void, onDismiss?: () => void }>({});
-  const [current, setCurrent] = React.useState<{ busy: boolean, visible: boolean, ent: ElemEntry | null }>({ busy: false, visible: false, ent: null });
-  const [opts, setOpts] = React.useState<{ [_: string]: Options | undefined }>({});
+  const [_overlays, setOverlays] = React.useState<{ key: string, params: OverlayParams }[]>([]);
+  const overlaysRef = React.useRef(_overlays);
+  overlaysRef.current = _overlays;
 
-  const register = (fn: Function, opts?: Options) => {
-    setOpts(o => ({ ...o, [fn.name]: opts }));
-    return () => {
-      setOpts(o => {
-        const ret = { ...o };
-        delete ret[fn.name];
-        return ret;
+  const setOverlay = (fn: Function, paramsFn: (prev: OverlayParams) => OverlayParams) =>
+    setOverlays(p => p.map(i => i.key == fn.name ? { ...i, params: paramsFn(i.params) } : i));
+
+  const register = (fn: Function) => {
+    if (!overlaysRef.current.find(o => o.key == fn.name)) {
+      const params: OverlayParams = { opts: {} };
+      setOverlays(p => {
+        if (p.find(i => i.key == fn.name)) {
+          return p.map(i => i.key == fn.name ? { ...i, params } : i);
+        } else {
+          return [{ key: fn.name, params }, ...p];
+        }
       });
     }
+    return () => setOverlays(p => p.filter(i => i.key != fn.name));
   };
 
-  const hide = (onHidden: () => void) => {
-    setHandlers({
-      onShow: () => setCurrent(p => ({ ...p, busy: false, })),
-      onDismiss: () => { setCurrent(p => ({ ...p, busy: false })); onHidden(); }
-    });
-    setCurrent(p => ({ ...p, busy: true, visible: false, ent: null }));
+  const display = (fn: Function, nodeFn: () => React.ReactNode, opts?: TopStackOptions) => {
+    setOverlay(fn, p => ({ ...p, dismissRequested: false, nodeFn, opts: opts || {} }));
   }
 
-  const show = (ent: ElemEntry | null, onShown: () => void) => {
-    setHandlers({
-      onShow: () => { setCurrent(p => ({ ...p, busy: false })); onShown(); },
-      onDismiss: () => setCurrent(p => ({ ...p, busy: false })),
-    });
-    setCurrent(p => ({ ...p, busy: true, visible: true, ent }));
+  const dismiss = (fn: Function) => {
+    setOverlay(fn, p => ({ ...p, nodeFn: undefined }));
   }
 
+  const requestDismissal = (fn: Function) => {
+    //const enabledOverlays = overlaysRef.current.filter(o => !!o.params.nodeFn && o.key != fn.name);
+    //const lastEnabledOverlay = enabledOverlays.length && enabledOverlays[enabledOverlays.length - 1] || undefined;
+    //const enabled = lastEnabledOverlay != undefined;
+    //!enabled &&
+    setOverlay(fn, p => ({ ...p, dismissRequested: true }));
+  }
+
+  const enabledOverlays = overlaysRef.current.filter(o => !!o.params.nodeFn);
+  const lastEnabledOverlay = enabledOverlays.length && enabledOverlays[enabledOverlays.length - 1] || undefined;
+  const dismissRequested = lastEnabledOverlay && lastEnabledOverlay.params.dismissRequested || false;
+  const enabled = lastEnabledOverlay != undefined;
+  const onDismissRequest = lastEnabledOverlay && lastEnabledOverlay.params.opts.onDismissRequest || undefined;
+  const disableBackground = enabledOverlays.filter(o => !o.params.opts.disableBackground).length == 0;
+  const bgIndex = enabledOverlays.reduce((a, o, i) => o.params.opts.disableBackground || false ? a : i, 0);
+
+  useBodyScrollLocker(enabled);
+
+  const [opacity, setOpacity] = useScalarAnimation(0);
   React.useEffect(() => {
-    if (current.busy) return;
-    if (stack.ents.length == 0) {
-      if (current.visible)
-        hide(() => { });
-    } else {
-      const last = stack.ents[stack.ents.length - 1];
-      const pushed = stack.ents.length > stack.prev.length;
-      if (pushed) {
-        if (current.visible) {
-          hide(() => {
-            show(last, () => { });
-          });
-        } else {
-          show(last, () => { });
-        }
-      } else {
-        hide(() => {
-          show(last, () => { });
-        });
-      }
-    }
-  }, [stack.ents.length]);
-
-  const push = (fn: Function, elem: JSX.Element | null) => {
-    if (current.busy) return;
-    setStack(s => ({ ents: [...s.ents, { name: fn.name, elem }], prev: s.ents }));
-  }
-
-  const pop = (fn: Function) => {
-    if (current.busy) return;
-    if (stack.ents.length == 0) return;
-    if (current.ent)
-      console.assert(fn.name == current.ent.name);
-    setStack(s => {
-      const ents = [...s.ents];
-      ents.pop();
-      return { ...s, ents };
-    });
-  }
-
-  const top = current.ent || { name: '', elem: null };
-  const o = opts[top.name];
-  const onShow = handlers.onShow || (() => setCurrent(p => ({ ...p, busy: false })));
-  const onDismiss = handlers.onDismiss || (() => setCurrent(p => ({ ...p, busy: false })));
-  const onUserDismiss = o && o.onDismiss || (() => { });
+    setOpacity(!disableBackground && !dismissRequested ? 1 : 0);
+  }, [dismissRequested, disableBackground]);
 
   return (
-    <>
-      <TopViewStackContext.Provider value={{ top: top.elem, push, pop, register }}>
-        {props.children}
-      </TopViewStackContext.Provider>
-      <div
-        style={current.visible ? {
-          ...UI.StyleSheet.absoluteFillObject,
-          //display: current.visible ? 'visible' : 'none',
-          position: 'fixed',
-          backgroundColor: UI.rgba('#000000', .65)
-        } : {}}
-      >
-        <Modal animationType={o && o.animationType || 'none'}
-          transparent
-          visible={current.visible}
-          onShow={onShow}
-          onDismiss={() => {
-            onDismiss();
-            onUserDismiss();
-          }}
-        >
-          <UI.View
-            key={top.name}>
-            {top.elem ? wrapper(top.elem) : top.elem}
-          </UI.View>
-        </Modal>
-      </div>
-    </>
+    <TopViewStackContext.Provider value={{ register, display, dismiss, requestDismissal }}>
+      {props.children ? wrapper(<>{props.children}</>) : props.children}
+      <UI.TouchableWithoutFeedback disabled={!onDismissRequest} onPress={onDismissRequest} style={enabled ? {
+        top: UI.Platform.select({ ios: 64, android: 54, web: 0 }),
+        left: 0, right: 0, bottom: 0, position: 'absolute',
+      } : {}}>
+        <UI.View>
+          {wrapper(enabledOverlays.map((o, i) =>
+            <div key={i} style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
+              {i == bgIndex &&
+                <UI.Animated.View style={{ ...UI.StyleSheet.absoluteFillObject, backgroundColor: UI.rgba('#000000', .65), opacity }} />}
+              <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' }}>
+                <UI.TouchableWithoutFeedback>
+                  {o.params.nodeFn!()}
+                </UI.TouchableWithoutFeedback>
+              </UI.View>
+            </div>
+          ))}
+        </UI.View>
+      </UI.TouchableWithoutFeedback>
+    </TopViewStackContext.Provider>
   );
 }

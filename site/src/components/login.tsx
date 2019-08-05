@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useForm } from '../hooks/useform';
 import * as UI from 'gatsby-theme-core-ui';
 import { useAccount, LogInResult } from '../hooks/useaccount';
-import { useToast } from '../hooks/usetoast';
 
 export const LogIn = (props: {
   onLogInComplete: () => void,
@@ -12,7 +11,7 @@ export const LogIn = (props: {
   renderLogo?: () => JSX.Element,
 }) => {
   const { loading, logIn, resendConfirmationCode } = useAccount();
-  const toast = useToast();
+  const toast = UI.useToast();
   const form = useForm({
     emailOrUsername: {
       type: 'text',
@@ -91,15 +90,6 @@ export const LogIn = (props: {
           <UI.Link testID="SIGNUP" size="md" onPress={props.onGoToSignUp} disabled={loading}>Sign up</UI.Link>
         </UI.View>
       </>}
-      <UI.Button size="xs" onPress={() => {
-        UI.Alert.alert('Title', 'message', [{
-          text: 'Button 1',
-          onPress: () => { },
-        }, {
-          text: 'Button 2',
-          onPress: () => { },
-        }]);
-      }}>Popup</UI.Button>
     </UI.View>
   );
 }

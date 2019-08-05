@@ -1,10 +1,8 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
-import { AlertProvider, BreakableProvider, Alert } from 'gatsby-theme-core-ui';
 import { TopViewStackProvider } from 'gatsby-theme-core-ui';
 import { AccountProvider } from './hooks/useaccount';
 import { useModal, ModalProvider } from './hooks/usemodal';
-import { useToast, ToastProvider } from './hooks/usetoast';
 import { ApolloProvider } from './hooks/useapollo';
 import { Authentication } from './components/authentication';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -26,8 +24,8 @@ library.add(faVideo);
 library.add(faSync);
 
 const Application = (props: { children?: React.ReactNode }) => {
-  const toast = useToast();
   const { setCurrent } = useModal();
+
   //const [authToken/*, refresh*/] = useAuthToken({ region: process.env.AWS_REGION, email: 'guest@guest.com', username: 'guest', password: 'guestguest' });
   //if (!authToken) return null;
   //localStorage.setItem('token', authToken);
@@ -40,15 +38,7 @@ const Application = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink to="#services">Services</UI.WebNavLink>
           <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
           <UI.WebNavLink onPress={() => setCurrent(<Authentication onLogInComplete={() => { }} />)}>Log in</UI.WebNavLink>
-          <UI.WebNavLink onPress={() => {
-            Alert.alert('Title', 'message', [{
-              text: 'Button 1',
-              onPress: () => { },
-            }, {
-              text: 'Button 2',
-              onPress: () => { },
-            }]);
-          }}>Disabled</UI.WebNavLink>
+          <UI.WebNavLink >Disabled</UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
     }>{props.children}</UI.WebNavLayout>
@@ -58,16 +48,18 @@ const Application = (props: { children?: React.ReactNode }) => {
 export const Root = (props: { children?: React.ReactNode }) =>
   <ApolloProvider>
     <AccountProvider region="us-east-1">
-      <BreakableProvider>
-        <TopViewStackProvider renderWrapper={modal => <ToastProvider>{modal}</ToastProvider>}>
-          <ModalProvider style={{ maxWidth: 500 }}>
-            <AlertProvider>
-              <ToastProvider>
-                <Application>{props.children}</Application>
-              </ToastProvider>
-            </AlertProvider>
-          </ModalProvider>
+      <UI.BreakableProvider>
+        <TopViewStackProvider renderWrapper={elem =>
+          <UI.ToastProvider>
+            <UI.AlertProvider>
+              <ModalProvider style={{ maxWidth: 500 }}>
+                {elem}
+              </ModalProvider>
+            </UI.AlertProvider>
+          </UI.ToastProvider>
+        }>
+          <Application>{props.children}</Application>
         </TopViewStackProvider>
-      </BreakableProvider>
+      </UI.BreakableProvider>
     </AccountProvider>
   </ApolloProvider>

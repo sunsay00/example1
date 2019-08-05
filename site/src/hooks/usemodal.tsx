@@ -2,8 +2,8 @@ import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 
 type ContextValue = {
-  current: JSX.Element | null,
-  setCurrent: (c: JSX.Element | null) => void,
+  current: React.ReactNode,
+  setCurrent: (c: React.ReactNode) => void,
 };
 
 const ModalContext = React.createContext<ContextValue>({ current: null, setCurrent: _ => console.warn('invalid modal context') });
@@ -14,21 +14,27 @@ export const ModalProvider = (props: {
   style?: UI.ViewStyle,
   children?: React.ReactNode,
 }) => {
-  const [current, setCurrent] = React.useState<JSX.Element | null>(null);
-  const stack = UI.useTopViewStack();
-
-  React.useEffect(() => stack.register(ModalProvider, {
-    animationType: 'fade',
-    onDismiss: () => setCurrent(null)
-  }), []);
+  const [current, setCurrent] = React.useState<React.ReactNode>(null);
+  const { display, dismiss, requestDismissal } = UI.useTopViewStack(ModalProvider, {
+    onDismissRequest: () => {
+      requestDismissal();
+      setOpacity(0, () =>
+        dismiss());
+    }
+  });
+  const [opacity, setOpacity] = UI.useScalarAnimation(0);
 
   React.useEffect(() => {
-    if (current) {
-      stack.push(ModalProvider,
-        <UI.Breakable
-          renderSmall={children =>
-            <UI.View style={{ flex: 1 }}>
-              <UI.TouchableWithoutFeedback>
+    if (!current) {
+      requestDismissal();
+      setOpacity(0, () =>
+        dismiss());
+    } else {
+      display(() =>
+        <UI.Animated.View style={{ opacity }}>
+          <UI.Breakable debug
+            renderSmall={children =>
+              <UI.View style={{ flex: 1 }}>
                 <UI.View style={{
                   padding: 40,
                   backgroundColor: UI.Colors.white,
@@ -40,12 +46,10 @@ export const ModalProvider = (props: {
                   </UI.View>
                   <UI.View key={1} style={{ flex: 1 }}>{children}</UI.View>
                 </UI.View>
-              </UI.TouchableWithoutFeedback>
-            </UI.View>
-          }
-          renderMedium={children =>
-            <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <UI.TouchableWithoutFeedback>
+              </UI.View>
+            }
+            renderMedium={children =>
+              <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <UI.View style={{
                   padding: 40,
                   backgroundColor: UI.Colors.white,
@@ -53,24 +57,23 @@ export const ModalProvider = (props: {
                 }}>
                   <UI.View key={1} style={{ flex: 1 }}>{children}</UI.View>
                 </UI.View>
-              </UI.TouchableWithoutFeedback>
-            </UI.View>
-          }
-        >
-          <UI.Breakable
-            renderMedium={() =>
-              <UI.View style={{ alignSelf: 'flex-start' }}>
-                <UI.Icon size="xs" name="times" onPress={() => setCurrent(null)} />
-                <UI.Spacer />
-              </UI.View>} />
-          <UI.Spacer />
-          {current}
-        </UI.Breakable>
+              </UI.View>
+            }
+          >
+            <UI.Breakable
+              renderMedium={() =>
+                <UI.View style={{ alignSelf: 'flex-start' }}>
+                  <UI.Icon size="xs" name="times" onPress={() => setCurrent(null)} />
+                  <UI.Spacer />
+                </UI.View>} />
+            <UI.Spacer />
+            {current}
+          </UI.Breakable>
+        </UI.Animated.View>
       );
-    } else {
-      stack.pop(ModalProvider);
+      setOpacity(1);
     }
-  }, [!!current]);
+  }, [current]);
 
   return (
     <ModalContext.Provider value={{ current, setCurrent }}>

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Animated, Dimensions, Easing, TouchableWithoutFeedback } from '..';
+import { useBodyScrollLocker } from '../hooks/usebodyscrolllocker';
 
 const ModalPortal = (props: {
   children?: React.ReactNode
@@ -25,7 +26,7 @@ export type ModalProps = {
   transparent?: boolean,
   visible?: boolean,
   onRequestClose?: () => void,
-  onShow?: () => void,
+  renderOverlayWrapper?: () => void,
   onDismiss?: () => void,
   children?: React.ReactNode,
 }
@@ -72,34 +73,19 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     if (!props.visible && this.props.visible) this.handleClose(props);
   }
 
-  scrollLeft = 0;
-  scrollTop = 0;
-
-  handleShow = (props: ModalProps) => {
+  private handleShow = (props: ModalProps) => {
     if (props.animationType === 'slide') {
-      this.animateSlideIn(() => props.onShow && props.onShow());
+      this.animateSlideIn(() => props.renderOverlayWrapper && props.renderOverlayWrapper());
     } else if (props.animationType === 'fade') {
-      this.animateFadeIn(() => props.onShow && props.onShow());
+      this.animateFadeIn(() => props.renderOverlayWrapper && props.renderOverlayWrapper());
     } else {
-      props.onShow && props.onShow();
+      props.renderOverlayWrapper && props.renderOverlayWrapper();
     }
-
-    // lock body scrolling
-    this.scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
-    this.scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.overflowY = 'scroll';
-    document.body.style.top = `-${this.scrollTop}px`;
   }
 
-  handleClose = (props: ModalProps) => {
-    // unlock body scolling
-    document.body.style.position = 'unset';
-    document.body.style.width = 'unset';
-    document.body.style.overflowY = 'unset';
-    window.scrollTo(this.scrollLeft, this.scrollTop);
+  dismiss = () => this.handleClose(this.props);
 
+  private handleClose = (props: ModalProps) => {
     if (props.animationType === 'slide') {
       this.animateSlideOut(() => props.onDismiss && props.onDismiss());
     } else if (props.animationType === 'fade') {
@@ -109,7 +95,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     }
   }
 
-  animateFadeIn = (callback: Animated.EndCallback) => {
+  private animateFadeIn = (callback: Animated.EndCallback) => {
     if (this.state.animationFade)
       this.state.animationFade.stop();
 
@@ -128,7 +114,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     );
   };
 
-  animateFadeOut = (callback: () => void) => {
+  private animateFadeOut = (callback: () => void) => {
     if (this.state.animationFade)
       this.state.animationFade.stop();
 
@@ -149,7 +135,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     );
   };
 
-  animateSlideIn = (callback: Animated.EndCallback) => {
+  private animateSlideIn = (callback: Animated.EndCallback) => {
     if (this.state.animationSlide) {
       this.state.animationSlide.stop();
     }
@@ -169,7 +155,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     });
   };
 
-  animateSlideOut = (callback: () => void) => {
+  private animateSlideOut = (callback: () => void) => {
     if (this.state.animationSlide)
       this.state.animationSlide.stop();
 
@@ -190,7 +176,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     });
   };
 
-  getAnimationStyle = () => {
+  private getAnimationStyle = () => {
     const { visible, animationType } = this.props;
     const display = this.state.displayStyle;
     if (animationType === 'slide') {

@@ -5,7 +5,9 @@ import { CompleteNewPasswordChallengeHandler, AuthenticationDetails, CognitoUser
 
 class UserAdaptor implements CognitoUser {
   private _user: AWSCognitoUser;
-  constructor(user: AWSCognitoUser) { this._user = user; }
+  constructor(user: AWSCognitoUser) {
+    this._user = user;
+  }
   getUsername = () => this._user.getUsername();
   confirmRegistration = (confirmationCode: string, b: boolean, next: (err: Error, data: any) => void) => this._user.confirmRegistration(confirmationCode, b, next);
   getSession = (next: (err: Error, session: any) => void) => this._user.getSession(next);

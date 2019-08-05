@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useContext } from 'react';
 import { AsyncStorage } from 'react-native';
-import { useToast } from './usetoast';
 import { Account, UserPoolMode } from 'cf-cognito';
 import * as UI from 'gatsby-theme-core-ui';
 
@@ -9,7 +8,7 @@ export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, 
 export enum SignUpResult { Success, UsernameExists, Unknown };
 
 export const useAccount = () => {
-  const toast = useToast();
+  const toast = UI.useToast();
   const [loading, setLoading] = useState(false);
   const account = useContext(AccountContext);
 

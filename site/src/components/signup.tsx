@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useForm } from '../hooks/useform';
-import { useToast } from '../hooks/usetoast';
-import * as UI from 'core-ui';
+import * as UI from 'gatsby-theme-core-ui';
 import { useAccount, SignUpResult } from '../hooks/useaccount';
 
 export const SignUp = (props: {
@@ -14,7 +13,7 @@ export const SignUp = (props: {
   renderLogo?: () => JSX.Element,
 }) => {
   const { loading, signUp } = useAccount();
-  const toast = useToast();
+  const toast = UI.useToast();
 
   const form = useForm({
     username: {

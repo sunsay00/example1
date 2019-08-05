@@ -76,7 +76,7 @@ export default class CognitoUtil {
           resolve(true);
         });
       } else {
-        console.warn('cognito user stoage is undefined');
+        console.warn('cognito user storage is undefined');
         resolve(true);
       }
     });
