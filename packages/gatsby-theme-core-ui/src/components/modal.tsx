@@ -64,25 +64,24 @@ export class Modal extends React.Component<ModalProps, ModalState> {
   }
 
   componentDidMount() {
-    if (this.props.visible) this.handleShow();
+    if (this.props.visible) this.handleShow(this.props);
   }
 
-  componentWillReceiveProps({ visible }: ModalProps) {
-    if (visible && !this.props.visible) this.handleShow();
-    if (!visible && this.props.visible) this.handleClose();
+  componentWillReceiveProps(props: ModalProps) {
+    if (props.visible && !this.props.visible) this.handleShow(props);
+    if (!props.visible && this.props.visible) this.handleClose(props);
   }
 
   scrollLeft = 0;
   scrollTop = 0;
 
-  handleShow() {
-    const { animationType, onShow = () => { } } = this.props;
-    if (animationType === 'slide') {
-      this.animateSlideIn(onShow);
-    } else if (animationType === 'fade') {
-      this.animateFadeIn(onShow);
+  handleShow = (props: ModalProps) => {
+    if (props.animationType === 'slide') {
+      this.animateSlideIn(() => props.onShow && props.onShow());
+    } else if (props.animationType === 'fade') {
+      this.animateFadeIn(() => props.onShow && props.onShow());
     } else {
-      onShow();
+      props.onShow && props.onShow();
     }
 
     // lock body scrolling
@@ -94,20 +93,19 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     document.body.style.top = `-${this.scrollTop}px`;
   }
 
-  handleClose = () => {
+  handleClose = (props: ModalProps) => {
     // unlock body scolling
     document.body.style.position = 'unset';
     document.body.style.width = 'unset';
     document.body.style.overflowY = 'unset';
     window.scrollTo(this.scrollLeft, this.scrollTop);
 
-    const { animationType, onDismiss = () => { } } = this.props;
-    if (animationType === 'slide') {
-      this.animateSlideOut(onDismiss);
-    } else if (animationType === 'fade') {
-      this.animateFadeOut(onDismiss);
+    if (props.animationType === 'slide') {
+      this.animateSlideOut(() => props.onDismiss && props.onDismiss());
+    } else if (props.animationType === 'fade') {
+      this.animateFadeOut(() => props.onDismiss && props.onDismiss());
     } else {
-      onDismiss();
+      props.onDismiss && props.onDismiss();
     }
   }
 
@@ -217,7 +215,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     const { transparent, children } = this.props;
     return (
       <ModalPortal>
-        <TouchableWithoutFeedback onPress={() => this.handleClose()}>
+        <TouchableWithoutFeedback onPress={() => this.handleClose(this.props)}>
           <Animated.View
             aria-modal="true"
             style={{

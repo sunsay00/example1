@@ -1,23 +1,41 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
+import { useTopViewStack } from '../hooks/usetopviewstack';
 
 type Options = { cancelable: boolean };
 
 type ButtonOption = { text: string, onPress?: () => void };
 
-let _alert: ((title: string, message: string | undefined, buttons: ButtonOption[], options: Options | undefined) => void) | undefined;
+type Opts = {
+  title: string,
+  message?: string,
+  options?: Options,
+  buttons: ButtonOption[]
+}
+
+let _alert: ((opts: Opts) => void) | undefined;
 
 export const AlertProvider = (props: {
   children?: React.ReactNode,
-  renderWrapper?: (modal: JSX.Element) => JSX.Element,
 }) => {
-  const wrapper = props.renderWrapper || (x => x);
-  const [title, setTitle] = React.useState('');
-  const [message, setMessage] = React.useState<string>();
-  const [options, setOptions] = React.useState<Options>();
   const [visible, setVisible] = React.useState(false);
-  const [buttons, setButtons] = React.useState<ButtonOption[]>([]);
-  const scrollPosRef = React.useRef({ left: 0, top: 0 });
+  const [opts, setOpts] = React.useState<Opts>({ title: '', buttons: [] });
+  const optsRef = React.useRef(opts);
+  optsRef.current = opts;
+  const stack = useTopViewStack();
+
+  React.useEffect(() => {
+    _alert = (opts: Opts) => {
+      setVisible(true);
+      setOpts(opts);
+    };
+    return () => _alert = undefined;
+  }, []);
+
+  React.useEffect(() => stack.register(AlertProvider, {
+    animationType: 'slide',
+    onDismiss: () => setVisible(false)
+  }), []);
 
   const onButtonPress = (onPress?: () => void) => () => {
     setVisible(false);
@@ -25,57 +43,36 @@ export const AlertProvider = (props: {
   };
 
   React.useEffect(() => {
-    _alert = (title: string, message: string | undefined, buttons: ButtonOption[], options: Options | undefined) => {
-      setVisible(true);
-      setTitle(title);
-      setMessage(message);
-      setButtons(buttons);
-      setOptions(options);
-    };
-    return () => _alert = undefined;
-  }, []);
-
-  React.useEffect(() => {
     if (visible) {
-      // lock body scrolling
-      scrollPosRef.current.left = document.documentElement.scrollLeft || document.body.scrollLeft;
-      scrollPosRef.current.top = document.documentElement.scrollTop || document.body.scrollTop;
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.overflowY = 'scroll';
-      document.body.style.top = `-${scrollPosRef.current.top}px`;
+      stack.push(AlertProvider,
+        <UI.View style={{ flex: 1, height: '100vh' }}>
+          <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
+            <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' }}>
+              <UI.View style={{
+                overflow: 'hidden',
+                backgroundColor: UI.Colors.white,
+                padding: 32,
+                shadowColor: UI.rgba('#000000', .65),
+                shadowOffset: { width: 0, height: 16 },
+                shadowRadius: 32,
+              }}>
+                <UI.Header3>{optsRef.current.title}</UI.Header3>
+                <UI.Text>{optsRef.current.message}</UI.Text>
+                <UI.Spacer size="lg" />
+                <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
+                  {optsRef.current.buttons.map(({ text, onPress }, i) =>
+                    <UI.Link style={{ paddingLeft: 32 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
+                </UI.View>
+              </UI.View>
+            </UI.View>
+          </div>
+        </UI.View>);
     } else {
-      // unlock body scolling
-      document.body.style.position = 'unset';
-      document.body.style.width = 'unset';
-      document.body.style.overflowY = 'unset';
-      window.scrollTo(scrollPosRef.current.left, scrollPosRef.current.top);
+      stack.pop(AlertProvider);
     }
   }, [visible]);
 
-  return (
-    <>
-      {props.children}
-      {visible &&
-        <UI.View style={{ flex: 1, height: '100vh' }}>
-          <div style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
-            <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: UI.rgba('#000000', .65) }}>
-              {wrapper(
-                <UI.View style={{ overflow: 'hidden', backgroundColor: UI.Colors.white, paddingVertical: 32, paddingHorizontal: 32 }}>
-                  <UI.Header3>{title}</UI.Header3>
-                  <UI.Text>{message}</UI.Text>
-                  <UI.Spacer size="lg" />
-                  <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
-                    {buttons.map(({ text, onPress }, i) =>
-                      <UI.Link style={{ paddingLeft: 32 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
-                  </UI.View>
-                </UI.View>)}
-            </UI.View>
-          </div>
-        </UI.View>
-      }
-    </>
-  );
+  return <>{props.children}</>;
 }
 
 export const Alert = {
@@ -83,7 +80,7 @@ export const Alert = {
     if (!_alert) {
       console.warn('alert provider not initialized');
     } else {
-      _alert(title, message, buttons, options);
+      _alert({ title, message, buttons, options });
     }
   }
 };

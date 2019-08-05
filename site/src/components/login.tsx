@@ -38,7 +38,7 @@ export const LogIn = (props: {
       toast.warn('User not authorized');
     } else if (result == LogInResult.UserNotConfirmed) {
       UI.Alert.alert('Unconfirmed user', 'This user has not been confirmed, resend confirmation code?', [
-        { text: 'Cancel', onPress: () => { } },
+        { text: 'Back', onPress: () => { } },
         { text: 'Resend', onPress: () => resendConfirmationCode() },
       ])
     } else if (result == LogInResult.Unknown) {
@@ -91,6 +91,15 @@ export const LogIn = (props: {
           <UI.Link testID="SIGNUP" size="md" onPress={props.onGoToSignUp} disabled={loading}>Sign up</UI.Link>
         </UI.View>
       </>}
+      <UI.Button size="xs" onPress={() => {
+        UI.Alert.alert('Title', 'message', [{
+          text: 'Button 1',
+          onPress: () => { },
+        }, {
+          text: 'Button 2',
+          onPress: () => { },
+        }]);
+      }}>Popup</UI.Button>
     </UI.View>
   );
 }

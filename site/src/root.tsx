@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { AlertProvider, BreakableProvider, Alert } from 'gatsby-theme-core-ui';
+import { TopViewStackProvider } from 'gatsby-theme-core-ui';
 import { AccountProvider } from './hooks/useaccount';
 import { useModal, ModalProvider } from './hooks/usemodal';
 import { useToast, ToastProvider } from './hooks/usetoast';
@@ -39,13 +40,15 @@ const Application = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink to="#services">Services</UI.WebNavLink>
           <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
           <UI.WebNavLink onPress={() => setCurrent(<Authentication onLogInComplete={() => { }} />)}>Log in</UI.WebNavLink>
-          <UI.WebNavLink onPress={() => Alert.alert('Title', 'message', [{
-            text: 'Button 1',
-            onPress: () => alert('button1 pressed')
-          }, {
-            text: 'Button 2',
-            onPress: () => alert('button2 pressed')
-          }])}>Disabled</UI.WebNavLink>
+          <UI.WebNavLink onPress={() => {
+            Alert.alert('Title', 'message', [{
+              text: 'Button 1',
+              onPress: () => { },
+            }, {
+              text: 'Button 2',
+              onPress: () => { },
+            }]);
+          }}>Disabled</UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
     }>{props.children}</UI.WebNavLayout>
@@ -56,22 +59,15 @@ export const Root = (props: { children?: React.ReactNode }) =>
   <ApolloProvider>
     <AccountProvider region="us-east-1">
       <BreakableProvider>
-        <ModalProvider
-          style={{ maxWidth: 500 }}
-          renderWrapper={modal =>
-            <ToastProvider>
-              <AlertProvider>
-                {modal}
-              </AlertProvider>
-            </ToastProvider>}
-        >
-          <ToastProvider renderWrapper={toast =>
-            <AlertProvider>{toast}</AlertProvider>}>
+        <TopViewStackProvider renderWrapper={modal => <ToastProvider>{modal}</ToastProvider>}>
+          <ModalProvider style={{ maxWidth: 500 }}>
             <AlertProvider>
-              <Application>{props.children}</Application>
+              <ToastProvider>
+                <Application>{props.children}</Application>
+              </ToastProvider>
             </AlertProvider>
-          </ToastProvider>
-        </ModalProvider>
+          </ModalProvider>
+        </TopViewStackProvider>
       </BreakableProvider>
     </AccountProvider>
   </ApolloProvider>

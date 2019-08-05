@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
-import * as UI from 'core-ui';
 import { Link } from 'gatsby';
 
 const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
@@ -141,7 +140,7 @@ export const WebNavLink = (props: {
       );
     } else {
       return (
-        <Link to={to} style={{ textDecoration: 'none' }}>
+        <Link to={to.startsWith('/') ? to : `/${to}`} style={{ textDecoration: 'none' }}>
           <Text style={{
             padding: { xs: 4, sm: 8, md: 16 }.md,
             fontFamily: Fonts.sansSerif.weightProps.bold.name,
