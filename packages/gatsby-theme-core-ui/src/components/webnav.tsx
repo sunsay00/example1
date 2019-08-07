@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
-import { Link } from 'gatsby';
+import { Link, navigateTo } from 'gatsby';
 
 const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
   const navRef = React.useRef<HTMLElement | null>(null);
@@ -37,6 +37,18 @@ export const WebNavBar = (props: {
     Animated.timing(animHeight, { toValue: opened ? height : 0, duration: 200, easing: Easing.quad }).start(() => setOpened(v => !v));
   }, [numChildren]);
 
+  const goHome = () => {
+    const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*\//, '');
+    const splits = rel.split('/');
+    if (splits.length > 1) {
+      navigateTo('/');
+    } else {
+      console.log(rel);
+      const body = document.querySelector('body');
+      body && body.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   return (
     <NavLayoutContext.Consumer>{({ height }) =>
       <NavContext.Provider value={toggleHeight}>
@@ -59,8 +71,7 @@ export const WebNavBar = (props: {
             </Animated.View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, backgroundColor: Colors.white, marginHorizontal: -32, paddingHorizontal: 16 }}>
               <TouchableOpacity onPress={() => {
-                const body = document.querySelector('body');
-                body && body.scrollIntoView({ behavior: 'smooth' });
+                goHome();
                 toggleHeight(false);
               }}>
                 {props.renderLogo && props.renderLogo()}
@@ -72,10 +83,7 @@ export const WebNavBar = (props: {
             <WebSticky offsetY={height}>
               <Section>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, marginHorizontal: 16 }}>
-                  <TouchableOpacity onPress={() => {
-                    const body = document.querySelector('body');
-                    body && body.scrollIntoView({ behavior: 'smooth' });
-                  }}>
+                  <TouchableOpacity onPress={goHome}>
                     {props.renderLogo && props.renderLogo()}
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row' }}>
