@@ -1,3 +1,5 @@
+import '../index.css';
+
 import { Image, ImageBackground, Modal } from 'core-ui';
 export const Actual = { Image, ImageBackground, Modal };
 
@@ -28,3 +30,19 @@ export * from './hooks/usemodal';
 export * from './hooks/useforms';
 
 export * from './hooks/useaccount';
+
+// icons
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+  faStroopwafel, faTimesCircle, faChevronLeft,
+  faChevronRight, faUser, faLock, faEnvelope, faCheck
+} from '@fortawesome/free-solid-svg-icons';
+
+library.add(faStroopwafel);
+library.add(faTimesCircle);
+library.add(faChevronLeft);
+library.add(faChevronRight);
+library.add(faUser);
+library.add(faLock);
+library.add(faEnvelope);
+library.add(faCheck);

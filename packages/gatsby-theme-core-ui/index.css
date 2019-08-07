@@ -1,0 +1,4 @@
+input:focus { outline: none; }
+textarea:focus { outline: none; }
+
+.__scrollbar_fix > div { overflow-x: hidden } /* firefox doesn't properly hide scrollbar */

@@ -1,6 +1,6 @@
 import { useToast } from './usetoast';
 import { useAccount, SignUpResult, LogInResult, ConfirmResult } from './useaccount';
-import { useForm } from './useform';
+import { useForm } from 'core-hooks';
 import { Alert } from '../components/alert';
 
 export const useLogInForm = (props: {

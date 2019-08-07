@@ -3,7 +3,6 @@ import { useState, useContext } from 'react';
 import { AsyncStorage } from 'react-native';
 import { Account, UserPoolMode } from 'cf-cognito';
 import { useToast } from './usetoast';
-import * as UI from 'core-ui'
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 export enum SignUpResult { Success, UsernameExists, Unknown };
@@ -227,7 +226,7 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
     }
   }, [ready, mode]);
 
-  if (!ready) return <UI.Loading />;
+  if (!ready) return null;
 
   return <AccountContext.Provider value={{
     account: _account,
