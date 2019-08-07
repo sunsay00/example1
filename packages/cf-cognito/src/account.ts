@@ -4,6 +4,33 @@ import UserProfile from './userprofile';
 import UserRegistration from './userregistration';
 import { CognitoUserSession, CognitoClient, CognitoUser, UserPoolMode, AccountCredentials, UserState, Obj, LocalStorage, Storage } from './types';
 import { vars } from './vars';
+import * as RT from 'runtypes';
+
+const UserAttributesRecord = RT.Record({
+  'custom:role': RT.String,
+  email: RT.String,
+  email_verified: RT.String,
+  locale: RT.String,
+  preferred_username: RT.String,
+  sub: RT.String
+});
+
+type UserAttributes = RT.Static<typeof UserAttributesRecord>;
+
+export type Tokens = {
+  idToken: string, accessToken: string, refreshToken: string,
+  awsSecretAccessKey: string, awsSessionToken: string, awsAccessKeyId: string
+};
+
+export type User = {
+  username: string,
+  sub: string,
+  locale: string,
+  email: string
+  role: string,
+  groups: string[],
+  tokens: Tokens
+}
 
 export class Account {
   private _mode: UserPoolMode;
@@ -51,15 +78,6 @@ export class Account {
     this._initialized = true;
     return this._initialized;
   }
-  authToken = async (tagAsExpired: boolean = false): Promise<string> => {
-    const token = await this._storage.get('userTokens.idToken');
-    return token === undefined ? 'Guest' : `Bearer ${tagAsExpired ? 'EXP ' : ''}${token}`;
-  }
-  userGroups = async (): Promise<string[]> => {
-    if (!this._util) throw new Error('not initialized');
-    return await this._util.getUserGroup();
-  }
-  signedIn = (): boolean => { throw new Error('signed in not implemented'); }
   signUp = async (username: string, email: string, password: string, locale: string, role: string): Promise<string> => {
     if (!this._reg) throw new Error('not initialized');
     const ret = await this._reg.signUp(username, email, password, locale, role);
@@ -77,25 +95,9 @@ export class Account {
   }
   signOut = async () => {
     if (!this._login) throw new Error('not initialized');
-    //const sub = await this.sub();
     await this._login.signOut();
     await this._storage.clear();
-    //console.log(`SIGN-OUT ${sub.ok}`);
     //Sentry.setUserContext({ id: sub.ok });
-  }
-  currentUserState = async (): Promise<UserState> => {
-    if (!this._util) throw new Error('not initialized');
-    return await this._util.getUserState();
-  }
-  currentUser = async (): Promise<CognitoUser | undefined> => {
-    if (!this._util) throw new Error('not initialized');
-    const accessToken = await this._storage.get('userTokens.accessToken');
-    if (accessToken) return this._util.getCurrentUser();
-    return undefined;
-  }
-  userName = async (): Promise<string | undefined> => {
-    if (!this._util) throw new Error('not initialized');
-    return await this._util.getUserName();
   }
   confirmSignUp = async (confirmationCode: string): Promise<boolean> => {
     if (!this._reg) throw new Error('not initialized');
@@ -113,29 +115,13 @@ export class Account {
     if (!this._login) throw new Error('not initialized');
     return await this._login.confirmForgotPassword(username, verificationCode, password);
   }
-  changePassword = async (previousPassword: string, proposedPassword: string): Promise<void> => {
+  changePassword = async (prevPassword: string, newPassword: string): Promise<void> => {
     if (!this._login) throw new Error('not initialized');
-    return await this._login.changePassword(previousPassword, proposedPassword);
+    return await this._login.changePassword(prevPassword, newPassword);
   }
   completeNewPasswordChallenge = async (newPassword: string, locale: string): Promise<any> => {
     if (!this._login) throw new Error('not initialized');
     return await this._login.completeNewPasswordChallenge(newPassword, locale);
-  }
-  userAttributes = async (): Promise<Obj<string>> => {
-    if (!this._profile) throw new Error('not initialized');
-    return await this._profile.getUserAttributes();
-  }
-  setUserAttributes = async (attributes: Obj<string>): Promise<string> => {
-    if (!this._profile) throw new Error('not initialized');
-    return await this._profile.setUserAttributes(attributes);
-  }
-  attributeVerificationCode = async (attribute: string): Promise<object> => {
-    if (!this._profile) throw new Error('not initialized');
-    return await this._profile.getAttributeVerificationCode(attribute);
-  }
-  verifyAttribute = async (attribute: string, verificationCode: string): Promise<string> => {
-    if (!this._profile) throw new Error('not initialized');
-    return await this._profile.verifyAttribute(attribute, verificationCode);
   }
   refreshCredentials = async (): Promise<void> => {
     if (!this._client || !this._util || !this._profile || !this._login) throw new Error('not initialized');
@@ -181,17 +167,7 @@ export class Account {
       });
     });
   }
-  credentials = async (): Promise<AccountCredentials | undefined> => {
-    if (!this._login) throw new Error('not initialized');
-    this._login.getAwsCredentials();
-    const accessKeyId = await this._login.getAwsAccessKey();
-    const secretAccessKey = await this._login.getAwsSecretAccessKey();
-    const sessionToken = await this._login.getAwsSessionToken();
-    if (accessKeyId === undefined || secretAccessKey === undefined || sessionToken === undefined)
-      return undefined;
-    return { accessKeyId, secretAccessKey, sessionToken };
-  }
-  tokens = async (): Promise<{
+  private tokens = async (): Promise<{
     idToken: string, accessToken: string, refreshToken: string,
     awsSecretAccessKey: string, awsSessionToken: string, awsAccessKeyId: string
   } | undefined> => {
@@ -206,9 +182,37 @@ export class Account {
     else
       return undefined;
   }
-  sub = async (): Promise<string | undefined> => {
-    if (!this._profile) throw new Error('not initialized');
+
+  getCurrentUser = async (): Promise<User | undefined> => {
+    if (!this._util || !this._profile) throw new Error('not initialized');
+    const accessToken = await this._storage.get('userTokens.accessToken');
+    if (!accessToken) return undefined;
+    const user = await this._util.getCurrentUser();
+    if (!user) return undefined;
+    const groups = await this._util.getUserGroup();
     const attrs = await this._profile.getUserAttributes();
-    return attrs.sub;
+    if (!UserAttributesRecord.guard(attrs)) {
+      console.error('invalid user attributes');
+      await this.signOut();
+      return undefined;
+    } else {
+      const tokens = await this.tokens();
+      if (!tokens) {
+        console.error('invalid account tokens');
+        await this.signOut();
+        return undefined;
+      } else {
+        return {
+          username: user.getUsername(),
+          sub: attrs.sub,
+          locale: attrs.locale,
+          email: attrs.email,
+          role: attrs["custom:role"],
+          groups,
+          tokens
+        };
+      }
+    }
   }
+
 }
