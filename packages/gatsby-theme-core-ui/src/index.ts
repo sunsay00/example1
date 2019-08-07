@@ -15,6 +15,7 @@ export { WebNavBar, WebNavAnchor, WebNavLayout, WebNavLink } from './components/
 export { WebAnchor } from './components/webanchor';
 export { WebEndReachedDetector } from './components/webendreacheddetector';
 export { WebTable, WebTableBody, WebTableRow, WebTableData, WebTableHeader } from './components/webtable';
+export { WebRoot } from './components/webroot';
 
 // hooks
 export * from './hooks/usetopviewstack';
@@ -23,3 +24,4 @@ export * from './hooks/usebodyscrolllocker';
 export * from './hooks/useanimation';
 export * from './hooks/useslideupanimation';
 export * from './hooks/usescalaranimation';
+export * from './hooks/usemodal';

@@ -1,5 +1,7 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
+import { useTopViewStack } from '../hooks/usetopviewstack';
+import { useScalarAnimation } from '../hooks/usescalaranimation';
 
 type ContextValue = {
   current: React.ReactNode,
@@ -15,14 +17,14 @@ export const ModalProvider = (props: {
   children?: React.ReactNode,
 }) => {
   const [current, setCurrent] = React.useState<React.ReactNode>(null);
-  const { display, dismiss, requestDismissal } = UI.useTopViewStack(ModalProvider, {
+  const { display, dismiss, requestDismissal } = useTopViewStack(ModalProvider, {
     onDismissRequest: () => {
       requestDismissal();
       setOpacity(0, () =>
         dismiss());
     }
   });
-  const [opacity, setOpacity] = UI.useScalarAnimation(0);
+  const [opacity, setOpacity] = useScalarAnimation(0);
 
   React.useEffect(() => {
     if (!current) {

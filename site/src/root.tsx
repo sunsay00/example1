@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
-import { TopViewStackProvider } from 'gatsby-theme-core-ui';
 import { AccountProvider } from './hooks/useaccount';
-import { useModal, ModalProvider } from './hooks/usemodal';
 import { ApolloProvider } from './hooks/useapollo';
 import { Authentication } from './components/authentication';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -24,7 +22,7 @@ library.add(faVideo);
 library.add(faSync);
 
 const Application = (props: { children?: React.ReactNode }) => {
-  const { setCurrent } = useModal();
+  const { setCurrent } = UI.useModal();
 
   //const [authToken/*, refresh*/] = useAuthToken({ region: process.env.AWS_REGION, email: 'guest@guest.com', username: 'guest', password: 'guestguest' });
   //if (!authToken) return null;
@@ -48,18 +46,8 @@ const Application = (props: { children?: React.ReactNode }) => {
 export const Root = (props: { children?: React.ReactNode }) =>
   <ApolloProvider>
     <AccountProvider region="us-east-1">
-      <UI.BreakableProvider>
-        <TopViewStackProvider renderWrapper={elem =>
-          <UI.ToastProvider>
-            <UI.AlertProvider>
-              <ModalProvider style={{ maxWidth: 500 }}>
-                {elem}
-              </ModalProvider>
-            </UI.AlertProvider>
-          </UI.ToastProvider>
-        }>
-          <Application>{props.children}</Application>
-        </TopViewStackProvider>
-      </UI.BreakableProvider>
+      <UI.WebRoot>
+        <Application>{props.children}</Application>
+      </UI.WebRoot>
     </AccountProvider>
   </ApolloProvider>
