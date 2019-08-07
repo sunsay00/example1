@@ -1,30 +1,13 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
-import { useForm } from '../hooks/useform';
-import { useAccount } from '../hooks/useaccount';
+import * as UI from 'gatsby-theme-core-ui';
 
 export const ResetPassword = (props: {
   emailOrUsername: string,
   onGoToLogIn: () => void,
 }) => {
-  const { loading, resetPassword } = useAccount();
-
-  const form = useForm({
-    code: {
-      type: 'text',
-      message: 'Invalid code',
-      pattern: /.+/,
-      default: '',
-    },
-    newPassword: {
-      type: 'password',
-      message: 'Password too short',
-      pattern: /^.{8,}$/,
-      default: '',
-    },
-  }, async ({ code, newPassword }) => {
-    await resetPassword(props.emailOrUsername, code, newPassword);
-    props.onGoToLogIn();
+  const { loading, form } = UI.useResetPasswordForm({
+    emailOrUsername: props.emailOrUsername,
+    onGoToLogIn: props.onGoToLogIn
   });
 
   return (
@@ -38,20 +21,8 @@ export const ResetPassword = (props: {
     }} >
       <UI.Text size="sm">Please enter the code you received in your email below.</UI.Text>
       <UI.Spacer size="xl" />
-      <UI.NumericInput
-        onChangeText={form.changeText('code')}
-        value={form.value('code')}
-        message={form.message('code')}
-        disabled={loading}
-        placeholder='Code'
-      />
-      <UI.PasswordInput
-        onChangeText={form.changeText('newPassword')}
-        value={form.value('newPassword')}
-        message={form.message('newPassword')}
-        disabled={loading}
-        placeholder='New Password'
-      />
+      <UI.NumericInput {...form.fields.code} />
+      <UI.PasswordInput {...form.fields.newPassword} />
       <UI.Spacer size="md" />
       <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <UI.Link testID="LOGIN" size="md" disabled={loading} onPress={props.onGoToLogIn}>

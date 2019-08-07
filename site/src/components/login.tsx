@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { useForm } from '../hooks/useform';
 import * as UI from 'gatsby-theme-core-ui';
-import { useAccount, LogInResult } from '../hooks/useaccount';
 
 export const LogIn = (props: {
   onLogInComplete: () => void,
@@ -11,46 +9,10 @@ export const LogIn = (props: {
   onGoToConfirmation: (verifiedUsername: string) => void,
   renderLogo?: () => JSX.Element,
 }) => {
-  const { loading, logIn, resendConfirmationCode } = useAccount();
-  const toast = UI.useToast();
-  const form = useForm({
-    emailOrUsername: {
-      type: 'text',
-      pattern: /^.{2,}$/,
-      message: 'Invalid Email or Username',
-      default: '',
-    },
-    password: {
-      type: 'password',
-      pattern: /^.{8,}$/,
-      message: 'Password too short',
-      default: '',
-    },
-  }, async ({ emailOrUsername, password }) => {
-    const result = await logIn(emailOrUsername, password);
-    if (result == LogInResult.Success) {
-      props.onLogInComplete();
-    } else if (result == LogInResult.ChangePassword) {
-      props.onGoToChangePassword();
-    } else if (result == LogInResult.UserNotFound) {
-      toast.warn('User not found');
-    } else if (result == LogInResult.NotAuthorized) {
-      toast.warn('User not authorized');
-    } else if (result == LogInResult.UserNotConfirmed) {
-      UI.Alert.alert('Unconfirmed user', 'This user has not been confirmed, resend confirmation code?', [
-        { text: 'Cancel', onPress: () => { } },
-        {
-          text: 'Resend', onPress: async () => {
-            await resendConfirmationCode();
-            props.onGoToConfirmation(emailOrUsername);
-          }
-        },
-      ])
-    } else if (result == LogInResult.Unknown) {
-      throw new Error('unknown signup error');
-    } else {
-      throw new Error(`unhandled signup error (${result})`);
-    }
+  const { loading, form } = UI.useLogInForm({
+    onLogInComplete: props.onLogInComplete,
+    onGoToChangePassword: props.onGoToChangePassword,
+    onGoToConfirmation: props.onGoToConfirmation,
   });
 
   return (
@@ -65,21 +27,9 @@ export const LogIn = (props: {
       <UI.View style={{ justifyContent: 'center', width: '100%', alignItems: 'center' }}>
         {props.renderLogo && props.renderLogo()}
       </UI.View>
-      <UI.UserNameInput
-        testID="EMAIL_OR_USERNAME"
-        placeholder='Email or Username'
-        onChangeText={form.changeText('emailOrUsername')}
-        value={form.value('emailOrUsername')}
-        message={form.message('emailOrUsername')}
-      />
+      <UI.UserNameInput {...form.fields.emailOrUsername} />
       <UI.Spacer size="sm" />
-      <UI.PasswordInput
-        testID="PASSWORD"
-        placeholder='Password'
-        onChangeText={form.changeText('password')}
-        value={form.value('password')}
-        message={form.message('password')}
-      />
+      <UI.PasswordInput {...form.fields.password} />
       <UI.Spacer size="md" />
       <UI.View style={{ width: '100%' }}>
         <UI.Button testID="LOGIN" disabled={loading} onPress={form.submit} loading={loading}>Log in</UI.Button>

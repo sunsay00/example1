@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { map, fromEntries, keys } from 'common';
 
 type FormFieldType = 'email' | 'username' | 'text' | 'password' | 'unsigned';
 
@@ -26,6 +27,7 @@ type FormStates<T> = {
 type FormFields<T> = {
   [k in keyof T]: {
     type: FormFieldType,
+    placeholder?: string,
     pattern?: RegExp,
     message?: string,
     default: FormResultTypes<T>[k],
@@ -98,20 +100,23 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
   }, []);
 
   return {
-    value: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L): FormResultTypes<T>[L] =>
-      (states[k].result as R | undefined) || opts[k].default as R,
-    message: (k: L) => hasValidated && !states[k].valid && opts[k].message || undefined,
-    changeText: <L extends keyof T, R extends FormResultTypes<T>[L]>(k: L) => (value: string) => {
-      const opt = opts[k];
-      const valid = isValid(value, opt.type, opt.pattern);
-      setStates(state => {
-        const prev = state[k];
-        const prevvalue = (prev.result as R | undefined) || opt.default as R;
-        const result = parseFormValue<R>(prev.type, value, prevvalue);
-        const next = { ...prev, valid, value, result };
-        return { ...state, [k]: next };
-      });
-    },
+    fields: fromEntries(map(keys(opts), k => [k, {
+      value: (states[k].result as FormResultTypes<T>[typeof k] | undefined) || opts[k].default as FormResultTypes<T>[typeof k],
+      message: hasValidated && !states[k].valid && opts[k].message || undefined,
+      placeholder: opts[k].placeholder || '',
+      testID: (opts[k].placeholder || '').toUpperCase().replace(/ /g, '_'),
+      onChangeText: (value: string) => {
+        const opt = opts[k];
+        const valid = isValid(value, opt.type, opt.pattern);
+        setStates(state => {
+          const prev = state[k];
+          const prevvalue = (prev.result as FormResultTypes<T>[typeof k] | undefined) || opt.default as FormResultTypes<T>[typeof k];
+          const result = parseFormValue<FormResultTypes<T>[typeof k]>(prev.type, value, prevvalue);
+          const next = { ...prev, valid, value, result };
+          return { ...state, [k]: next };
+        });
+      }
+    }] as const)),
     submit: () => {
       setHasValidated(true);
       for (let k in states)
@@ -120,6 +125,6 @@ export const useForm = <T extends FormFields<T>, L extends keyof T>(opts: T, onS
       const ret = mapobj(states, f => cleanFormResult(f.type, f.result!));
       onSubmit(ret as FormResultTypes<T>)
         .then(reset);
-    }
+    },
   };
 }

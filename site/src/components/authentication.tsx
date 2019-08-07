@@ -22,10 +22,9 @@ export const Authentication = (props: {
 }) => {
   const locale = useLocale();
   const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
-  const [emailOrUsername, setEmailOrUsername] = useState<string>();
-  const [verifiedUsername, setVerifiedUsername] = useState<string>();
+  const [name, setName] = useState<string>();
 
-  if (!locale) return null;
+  if (!locale) return <UI.Loading />;
 
   if (mode == AuthenticationMode.LogIn) {
     return (
@@ -35,7 +34,7 @@ export const Authentication = (props: {
         onGoToSignUp={() => setMode(AuthenticationMode.SignUp)}
         onGoToChangePassword={() => setMode(AuthenticationMode.ChangePassword)}
         onGoToConfirmation={verifiedUsername => {
-          setVerifiedUsername(verifiedUsername);
+          setName(verifiedUsername);
           setMode(AuthenticationMode.Confirmation);
         }}
         renderLogo={() => <UI.View />/*<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />*/}
@@ -46,7 +45,7 @@ export const Authentication = (props: {
       <SignUp
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
         onGoToConfirmation={verifiedUsername => {
-          setVerifiedUsername(verifiedUsername);
+          setName(verifiedUsername);
           setMode(AuthenticationMode.Confirmation);
         }}
         onVersion={() => { }}
@@ -55,7 +54,7 @@ export const Authentication = (props: {
         version={'0.0.1'}
       />
     );
-  } else if (mode == AuthenticationMode.Confirmation && verifiedUsername) {
+  } else if (mode == AuthenticationMode.Confirmation && name) {
     return (
       <Confirmation
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
@@ -65,16 +64,16 @@ export const Authentication = (props: {
     return (
       <Forgot
         onGoToResetPassword={emailOrUsername => {
-          setEmailOrUsername(emailOrUsername);
+          setName(emailOrUsername);
           setMode(AuthenticationMode.ResetPassword);
         }}
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
       />
     );
-  } else if (mode == AuthenticationMode.ResetPassword && emailOrUsername) {
+  } else if (mode == AuthenticationMode.ResetPassword && name) {
     return (
       <ResetPassword
-        emailOrUsername={emailOrUsername}
+        emailOrUsername={name}
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
       />
     );

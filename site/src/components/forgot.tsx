@@ -1,24 +1,11 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
-import { useForm } from '../hooks/useform';
-import { useAccount } from '../hooks/useaccount';
+import * as UI from 'gatsby-theme-core-ui';
 
 export const Forgot = (props: {
   onGoToResetPassword: (emailOrUsername: string) => void,
   onGoToLogIn?: () => void,
 }) => {
-  const { loading, sendRecoveryEmail } = useAccount();
-  const form = useForm({
-    emailOrUsername: {
-      type: 'text',
-      pattern: /^.{2,}$/,
-      message: 'Invalid Email or Username',
-      default: '',
-    },
-  }, async ({ emailOrUsername }) => {
-    await sendRecoveryEmail(emailOrUsername);
-    props.onGoToResetPassword(emailOrUsername);
-  });
+  const { loading, form } = UI.useForgotPasswordForm({ onGoToResetPassword: props.onGoToResetPassword });
 
   return (
     <UI.View style={{
@@ -35,12 +22,7 @@ export const Forgot = (props: {
       <UI.Spacer size="lg" />
       <UI.Text size="sm">Enter the email address or username associated with your account, and we’ll email you a code to reset your password.</UI.Text>
       <UI.Spacer size="xl" />
-      <UI.UserNameInput
-        placeholder='Email or Username'
-        onChangeText={form.changeText('emailOrUsername')}
-        value={form.value('emailOrUsername')}
-        message={form.message('emailOrUsername')}
-      />
+      <UI.UserNameInput {...form.fields.emailOrUsername} />
       <UI.Spacer size="md" />
       <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         {props.onGoToLogIn && <>

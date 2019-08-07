@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useState, useContext } from 'react';
 import { AsyncStorage } from 'react-native';
 import { Account, UserPoolMode } from 'cf-cognito';
-import * as UI from 'gatsby-theme-core-ui';
+import { useToast } from './usetoast';
+import * as UI from 'core-ui'
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 export enum SignUpResult { Success, UsernameExists, Unknown };
@@ -45,7 +46,7 @@ const AccountContext = React.createContext<ContextValue>({
 });
 
 export const useAccount = () => {
-  const toast = UI.useToast();
+  const toast = useToast();
   const { account, setLoading, loading, setMode, user } = useContext(AccountContext);
 
   const resendConfirmationCode = async () => {
