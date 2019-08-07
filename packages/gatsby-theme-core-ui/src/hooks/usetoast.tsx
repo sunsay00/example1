@@ -68,20 +68,24 @@ const Toast = (props: {
   }, []);
 
   return (
-    <UI.Animated.View style={{ opacity: fadeAnimRef.current }}>
-      <UI.View style={{
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, .8)',
-        minWidth: 100,
-        borderRadius: 3,
-        paddingVertical: 9,
-        paddingHorizontal: 15
-      }}>
-        <UI.Text style={{ color: 'white', textAlign: 'center' }}>
-          {props.children}
-        </UI.Text>
-      </UI.View>
-    </UI.Animated.View>
+    <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' }}>
+      <UI.TouchableWithoutFeedback>
+        <UI.Animated.View style={{ opacity: fadeAnimRef.current }}>
+          <UI.View style={{
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, .8)',
+            minWidth: 100,
+            borderRadius: 3,
+            paddingVertical: 9,
+            paddingHorizontal: 15
+          }}>
+            <UI.Text style={{ color: 'white', textAlign: 'center' }}>
+              {props.children}
+            </UI.Text>
+          </UI.View>
+        </UI.Animated.View>
+      </UI.TouchableWithoutFeedback>
+    </UI.View>
   );
 }
 

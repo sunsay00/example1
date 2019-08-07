@@ -39,24 +39,28 @@ export const AlertProvider = (props: {
   React.useEffect(() => {
     _alert = (opts: Opts) => {
       display(() =>
-        <UI.Animated.View style={{ transform: [{ translateY }] }}>
-          <UI.View style={{
-            overflow: 'hidden',
-            backgroundColor: UI.Colors.white,
-            padding: 32,
-            shadowColor: UI.rgba('#000000', .65),
-            shadowOffset: { width: 0, height: 16 },
-            shadowRadius: 32,
-          }}>
-            <UI.Header3>{opts.title}</UI.Header3>
-            <UI.Text>{opts.message}</UI.Text>
-            <UI.Spacer size="lg" />
-            <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
-              {opts.buttons.map(({ text, onPress }, i) =>
-                <UI.Link style={{ paddingLeft: 32 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
-            </UI.View>
-          </UI.View>
-        </UI.Animated.View>
+        <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' }}>
+          <UI.TouchableWithoutFeedback>
+            <UI.Animated.View style={{ transform: [{ translateY }] }}>
+              <UI.View style={{
+                overflow: 'hidden',
+                backgroundColor: UI.Colors.white,
+                padding: 32,
+                shadowColor: UI.rgba('#000000', .65),
+                shadowOffset: { width: 0, height: 16 },
+                shadowRadius: 32,
+              }}>
+                <UI.Header3>{opts.title}</UI.Header3>
+                <UI.Text>{opts.message}</UI.Text>
+                <UI.Spacer size="lg" />
+                <UI.View style={{ alignSelf: 'flex-end', flexDirection: 'row', flex: 1 }}>
+                  {opts.buttons.map(({ text, onPress }, i) =>
+                    <UI.Link style={{ paddingLeft: 32 }} key={i} onPress={onButtonPress(onPress)}>{text}</UI.Link>)}
+                </UI.View>
+              </UI.View>
+            </UI.Animated.View>
+          </UI.TouchableWithoutFeedback>
+        </UI.View>
       );
       setVisible(true);
     };

@@ -107,11 +107,7 @@ export const TopViewStackProvider = (props: {
             <div key={i} style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
               {i == bgIndex &&
                 <UI.Animated.View style={{ ...UI.StyleSheet.absoluteFillObject, backgroundColor: UI.rgba('#000000', .65), opacity }} />}
-              <UI.View style={{ ...UI.StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' }}>
-                <UI.TouchableWithoutFeedback>
-                  {o.params.nodeFn!()}
-                </UI.TouchableWithoutFeedback>
-              </UI.View>
+              {o.params.nodeFn!()}
             </div>
           ))}
         </UI.View>

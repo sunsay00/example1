@@ -32,32 +32,27 @@ export const ModalProvider = (props: {
     } else {
       display(() =>
         <UI.Animated.View style={{ opacity }}>
-          <UI.Breakable debug
+          <UI.Breakable
             renderSmall={children =>
-              <UI.View style={{ flex: 1 }}>
-                <UI.View style={{
-                  padding: 40,
-                  backgroundColor: UI.Colors.white,
-                  alignItems: 'stretch',
-                  flex: 1,
-                }}>
+              <UI.TouchableWithoutFeedback>
+                <UI.View style={{ height: '100vh', padding: 40, backgroundColor: UI.Colors.white, alignItems: 'stretch', flex: 1, }}>
                   <UI.View style={{ alignSelf: 'flex-start' }}>
                     <UI.Icon size="xs" name="times" onPress={() => setCurrent(null)} />
                   </UI.View>
-                  <UI.View key={1} style={{ flex: 1 }}>{children}</UI.View>
+                  <UI.View key={1} style={{ flex: 1 }}>
+                    {children}
+                  </UI.View>
                 </UI.View>
-              </UI.View>
+              </UI.TouchableWithoutFeedback>
             }
             renderMedium={children =>
-              <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <UI.View style={{
-                  padding: 40,
-                  backgroundColor: UI.Colors.white,
-                  ...props.style
-                }}>
-                  <UI.View key={1} style={{ flex: 1 }}>{children}</UI.View>
+              <UI.TouchableWithoutFeedback>
+                <UI.View style={{ height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
+                  <UI.View key={1} style={{ padding: 40, backgroundColor: UI.Colors.white, ...props.style }}>
+                    {children}
+                  </UI.View>
                 </UI.View>
-              </UI.View>
+              </UI.TouchableWithoutFeedback>
             }
           >
             <UI.Breakable
