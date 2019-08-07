@@ -1,12 +1,13 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { useForm } from '../hooks/useform';
-import { useAccount } from '../hooks/useaccount';
+import { useAccount, ConfirmResult } from '../hooks/useaccount';
 
 export const Confirmation = (props: {
   onGoToLogIn: () => void
 }) => {
-  const { loading, resendConfirmationCode, confirmSignUp } = useAccount();
+  const { loading, resendConfirmationCode, confirm } = useAccount();
+  const toast = UI.useToast();
 
   const form = useForm({
     code: {
@@ -16,20 +17,20 @@ export const Confirmation = (props: {
       default: '',
     }
   }, async ({ code }) => {
-    await confirmSignUp(code);
-    props.onGoToLogIn();
+    const result = await confirm(code);
+    if (result == ConfirmResult.Success) {
+      props.onGoToLogIn();
+    } else if (result == ConfirmResult.CodeMismatch) {
+      toast.warn('Your confirmation code did not match our records');
+    } else if (result == ConfirmResult.Unknown) {
+      throw new Error('unknown signup error');
+    } else {
+      throw new Error(`unhandled signup error (${result})`);
+    }
   });
 
   return (
-    <UI.View style={{
-      width: '100%',
-      height: '100%',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 40,
-      backgroundColor: UI.Colors.splash,
-    }}>
+    <>
       <UI.NumericInput
         testID="CODE"
         onChangeText={form.changeText('code')}
@@ -52,6 +53,6 @@ export const Confirmation = (props: {
           onPress={() => resendConfirmationCode()}
         >Resend Confirmation Code</UI.Link>
       </UI.View>
-    </UI.View>
+    </>
   );
 }

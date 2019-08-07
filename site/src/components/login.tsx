@@ -8,6 +8,7 @@ export const LogIn = (props: {
   onGoToForgot?: () => void,
   onGoToChangePassword: () => void,
   onGoToSignUp?: () => void,
+  onGoToConfirmation: (verifiedUsername: string) => void,
   renderLogo?: () => JSX.Element,
 }) => {
   const { loading, logIn, resendConfirmationCode } = useAccount();
@@ -37,11 +38,18 @@ export const LogIn = (props: {
       toast.warn('User not authorized');
     } else if (result == LogInResult.UserNotConfirmed) {
       UI.Alert.alert('Unconfirmed user', 'This user has not been confirmed, resend confirmation code?', [
-        { text: 'Back', onPress: () => { } },
-        { text: 'Resend', onPress: () => resendConfirmationCode() },
+        { text: 'Cancel', onPress: () => { } },
+        {
+          text: 'Resend', onPress: async () => {
+            await resendConfirmationCode();
+            props.onGoToConfirmation(emailOrUsername);
+          }
+        },
       ])
     } else if (result == LogInResult.Unknown) {
       throw new Error('unknown signup error');
+    } else {
+      throw new Error(`unhandled signup error (${result})`);
     }
   });
 

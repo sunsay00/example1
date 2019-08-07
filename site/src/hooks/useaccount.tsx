@@ -6,6 +6,7 @@ import * as UI from 'gatsby-theme-core-ui';
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 export enum SignUpResult { Success, UsernameExists, Unknown };
+export enum ConfirmResult { Success, CodeMismatch, Unknown };
 
 export const useAccount = () => {
   const toast = UI.useToast();
@@ -16,7 +17,7 @@ export const useAccount = () => {
     try {
       setLoading(true);
       await account.resendConfirmationCode();
-      toast.success('A confirmation code has been resent');
+      toast.success('Confirmation code has been resent');
     } catch (err) {
       toast.error(err);
     } finally {
@@ -90,13 +91,21 @@ export const useAccount = () => {
     }
   }
 
-  const confirmSignUp = async (code: string) => {
+  const confirm = async (code: string) => {
     try {
       setLoading(true);
-      if (!await account.confirmSignUp(code))
+      if (!await account.confirmSignUp(code)) {
         toast.error('Confirmation failed');
+        return ConfirmResult.Unknown;
+      }
+      return ConfirmResult.Success;
     } catch (err) {
-      toast.error(err);
+      if (err.code == 'CodeMismatchException') {
+        return ConfirmResult.CodeMismatch;
+      } else {
+        toast.error(`${err.message} (${err.code})`);
+        return ConfirmResult.Unknown;
+      }
     } finally {
       setLoading(false);
     }
@@ -113,7 +122,7 @@ export const useAccount = () => {
     }
   }
 
-  return { loading, resendConfirmationCode, logIn, signUp, sendRecoveryEmail, resetPassword, confirmSignUp, changePassword };
+  return { loading, resendConfirmationCode, logIn, signUp, sendRecoveryEmail, resetPassword, confirm, changePassword };
 }
 
 const _account = new Account(UserPoolMode.Web, AsyncStorage);

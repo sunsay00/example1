@@ -21,9 +21,9 @@ export const Authentication = (props: {
   onLogInComplete: () => void
 }) => {
   const locale = useLocale();
-  const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
+  const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.Confirmation);//.LogIn);
   const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>();
-  const [verifiedUsername, setVerifiedUsername] = useState<string | undefined>();
+  const [verifiedUsername, setVerifiedUsername] = useState<string | undefined>('wakka');
 
   if (!locale) return null;
 
@@ -34,6 +34,10 @@ export const Authentication = (props: {
         onGoToForgot={() => setMode(AuthenticationMode.Forgot)}
         onGoToSignUp={() => setMode(AuthenticationMode.SignUp)}
         onGoToChangePassword={() => setMode(AuthenticationMode.ChangePassword)}
+        onGoToConfirmation={verifiedUsername => {
+          setVerifiedUsername(verifiedUsername);
+          setMode(AuthenticationMode.Confirmation);
+        }}
         renderLogo={() => <UI.View />/*<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />*/}
       />
     );
@@ -42,8 +46,8 @@ export const Authentication = (props: {
       <SignUp
         onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
         onGoToConfirmation={verifiedUsername => {
-          setMode(AuthenticationMode.Confirmation);
           setVerifiedUsername(verifiedUsername);
+          setMode(AuthenticationMode.Confirmation);
         }}
         onVersion={() => { }}
         role="default"
