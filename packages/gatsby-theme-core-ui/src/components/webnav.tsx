@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
-import { Link, navigateTo } from 'gatsby';
+import { Link, navigate } from 'gatsby';
 
 const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
   const navRef = React.useRef<HTMLElement | null>(null);
@@ -45,7 +45,7 @@ export const WebNavBar = (props: {
     const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*\//, '');
     const splits = rel.split('/');
     if (splits.length > 1) {
-      navigateTo('/');
+      navigate('/');
     } else {
       const body = document.querySelector('body');
       body && body.scrollIntoView({ behavior: 'smooth' });
@@ -72,8 +72,8 @@ export const WebNavBar = (props: {
         </Animated.View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, backgroundColor: Colors.white, marginHorizontal: -32, paddingHorizontal: 16 }}>
           <TouchableOpacity onPress={() => {
-            goHome();
             setOpened(false);
+            goHome();
           }}>
             {props.renderLogo && props.renderLogo()}
           </TouchableOpacity>
@@ -144,7 +144,7 @@ export const WebNavLink = (props: {
       );
     } else {
       return (
-        <Link to={to.startsWith('/') ? to : `/${to}`} style={{ textDecoration: 'none' }}>
+        <Link to={to.startsWith('/') ? to : `/${to}`} style={{ textDecoration: 'none' }} onMouseUp={() => setOpened(false)}>
           <Text style={{
             padding: { xs: 4, sm: 8, md: 16 }.md,
             fontFamily: Fonts.sansSerif.weightProps.bold.name,
