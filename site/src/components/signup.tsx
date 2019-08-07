@@ -33,7 +33,7 @@ export const SignUp = (props: {
       default: '',
     },
   }, async ({ username, email, password }) => {
-    const result = await signUp(username, email, password, props.role, props.locale);
+    const result = await signUp(username, email, password, props.locale, props.role);
     if (result == SignUpResult.Success) {
       props.onGoToConfirmation(username);
     } else if (result == SignUpResult.UsernameExists) {

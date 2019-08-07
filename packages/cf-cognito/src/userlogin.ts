@@ -122,7 +122,7 @@ export default class UserLogin {
             // set username again (this time, the username is the username, recevied from the server)
             await this._util.setUsername(cognitoUser.getUsername());
 
-            console.log('SESSION:', JSON.stringify(session));
+            //console.log('SESSION:', JSON.stringify(session));
             // Save user tokens to local state
             const accessToken = await session.getAccessToken().getJwtToken();
             const idToken = await session.getIdToken().getJwtToken();
@@ -130,13 +130,13 @@ export default class UserLogin {
             this._accessToken = accessToken;
             this._idToken = idToken;
             this._refreshToken = refreshToken;
-            console.log(`IDTOKEN ${this._idToken} - ${idToken}`);
+            //console.log(`IDTOKEN ${this._idToken} - ${idToken}`);
             await this._localStorage.set('userTokens.idToken', this._idToken);
-            console.log('COGNITO User Pools Identity Token: ', await this.getIdToken());
+            //console.log('COGNITO User Pools Identity Token: ', await this.getIdToken());
             await this._localStorage.set('userTokens.accessToken', this._accessToken);
-            console.log('COGNITO User Pools Access Token: ', await this.getAccessToken());
+            //console.log('COGNITO User Pools Access Token: ', await this.getAccessToken());
             await this._localStorage.set('userTokens.refreshToken', this._refreshToken);
-            console.log('COGNITO User Pools Refresh Token: ', await this.getRefreshToken());
+            //console.log('COGNITO User Pools Refresh Token: ', await this.getRefreshToken());
 
             // Extract the user group from the identity token.
             // First, get the identity token payload and then perform a Base64 decoding
@@ -155,7 +155,7 @@ export default class UserLogin {
               userGroup = 'clientGroup';
               await this._localStorage.set('userGroup', userGroup);
             }
-            console.log(`Cognito User Pools User Groups: ${emailOrUsername} belongs to group ${userGroup}`);
+            //console.log(`Cognito User Pools User Groups: ${emailOrUsername} belongs to group ${userGroup}`);
 
             const userAttrs = await this._profile.getUserAttributes();
             const role = userAttrs['custom:role'];

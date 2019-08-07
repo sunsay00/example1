@@ -21,9 +21,9 @@ export const Authentication = (props: {
   onLogInComplete: () => void
 }) => {
   const locale = useLocale();
-  const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.Confirmation);//.LogIn);
-  const [emailOrUsername, setEmailOrUsername] = useState<string | undefined>();
-  const [verifiedUsername, setVerifiedUsername] = useState<string | undefined>('wakka');
+  const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
+  const [emailOrUsername, setEmailOrUsername] = useState<string>();
+  const [verifiedUsername, setVerifiedUsername] = useState<string>();
 
   if (!locale) return null;
 

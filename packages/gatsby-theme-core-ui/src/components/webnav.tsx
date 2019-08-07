@@ -102,11 +102,12 @@ export const WebNavLink = (props: {
   to?: string,
   onPress?: () => void,
   children?: React.ReactNode,
+  disabled?: boolean
 }) => {
   const { setOpened } = React.useContext(NavLayoutContext);
   if (props.onPress) {
     return (
-      <TouchableOpacity onPress={() => {
+      <TouchableOpacity disabled={props.disabled} onPress={() => {
         setOpened(false);
         props.onPress && props.onPress();
       }}>
@@ -126,7 +127,7 @@ export const WebNavLink = (props: {
     const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*/, '');
     if (props.to.startsWith('#') && rel.startsWith('/#')) {
       return (
-        <TouchableOpacity onPress={() => {
+        <TouchableOpacity disabled={props.disabled} onPress={() => {
           const anchor = document.querySelector(to);
           if (anchor) {
             setOpened(false);
@@ -144,7 +145,7 @@ export const WebNavLink = (props: {
       );
     } else {
       return (
-        <Link to={to.startsWith('/') ? to : `/${to}`} style={{ textDecoration: 'none' }} onMouseUp={() => setOpened(false)}>
+        <Link to={props.disabled ? '' : to.startsWith('/') ? to : `/${to}`} style={{ textDecoration: 'none' }} onMouseUp={() => setOpened(false)}>
           <Text style={{
             padding: { xs: 4, sm: 8, md: 16 }.md,
             fontFamily: Fonts.sansSerif.weightProps.bold.name,

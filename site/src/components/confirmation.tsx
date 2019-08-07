@@ -19,7 +19,8 @@ export const Confirmation = (props: {
   }, async ({ code }) => {
     const result = await confirm(code);
     if (result == ConfirmResult.Success) {
-      props.onGoToLogIn();
+      toast.info('Your account has been successfully confirmed', () =>
+        props.onGoToLogIn());
     } else if (result == ConfirmResult.CodeMismatch) {
       toast.warn('Your confirmation code did not match our records');
     } else if (result == ConfirmResult.Unknown) {

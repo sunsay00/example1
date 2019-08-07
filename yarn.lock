@@ -1801,9 +1801,9 @@ alphanum-sort@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
 
-"amazon-cognito-identity-js@git+https://github.com/kyunghoon/amazon-cognito-identity-js.git#khk2":
+"amazon-cognito-identity-js@git+https://github.com/kyunghoon/amazon-cognito-identity-js.git#khk3":
   version "1.13.0"
-  resolved "git+https://github.com/kyunghoon/amazon-cognito-identity-js.git#f5d6e82c2c80be70bee4019f452fbfee33f8d959"
+  resolved "git+https://github.com/kyunghoon/amazon-cognito-identity-js.git#249afa90e0b7a17af52708e06179c845d6650082"
   dependencies:
     aws-sdk "2.177.0"
     jsbn "^0.1.0"

@@ -32,7 +32,7 @@ const Toast = (props: {
   onClose?: () => void,
   mask?: boolean,
   type: ToastType,
-  onAnimationEnd?: () => void,
+  onEnd?: () => void,
   children: string
 }) => {
   const { setCurrent } = React.useContext(ToastContext);
@@ -55,7 +55,7 @@ const Toast = (props: {
       if (duration > 0) {
         animRef.current = undefined;
         props.onClose && props.onClose();
-        props.onAnimationEnd && props.onAnimationEnd();
+        props.onEnd && props.onEnd();
         setCurrent(null);
       }
     });
@@ -92,21 +92,21 @@ const Toast = (props: {
 export const useToast = () => {
   const { setCurrent } = React.useContext(ToastContext);
   return {
-    info: (msg: string) => {
+    info: (msg: string, onEnd?: () => void) => {
       console.log(`Toast-Info: ${msg}`)
-      setCurrent(<Toast type={ToastType.Info}>{msg}</Toast>);
+      setCurrent(<Toast type={ToastType.Info} onEnd={onEnd}>{msg}</Toast>);
     },
-    warn: (msg: string) => {
+    warn: (msg: string, onEnd?: () => void) => {
       console.warn(`Toast-Warn: ${msg}`)
-      setCurrent(<Toast type={ToastType.Warn}>{msg}</Toast>);
+      setCurrent(<Toast type={ToastType.Warn} onEnd={onEnd}>{msg}</Toast>);
     },
-    error: (msg: string) => {
+    error: (msg: string, onEnd?: () => void) => {
       console.error(`Toast-Error: ${msg}`)
-      setCurrent(<Toast type={ToastType.Error}>{msg}</Toast>);
+      setCurrent(<Toast type={ToastType.Error} onEnd={onEnd}>{msg}</Toast>);
     },
-    success: (msg: string) => {
+    success: (msg: string, onEnd?: () => void) => {
       console.log(`Toast-Success: ${msg}`)
-      setCurrent(<Toast type={ToastType.Success}>{msg}</Toast>);
+      setCurrent(<Toast type={ToastType.Success} onEnd={onEnd}>{msg}</Toast>);
     },
   };
 }

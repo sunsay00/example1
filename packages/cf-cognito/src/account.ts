@@ -17,20 +17,26 @@ export class Account {
 
   constructor(mode: UserPoolMode, storage: Storage) {
     this._mode = mode;
+    const prefix = '@account:';
+    const getAllKeys = () => new Promise<string[]>((resolve, reject) =>
+      storage.getAllKeys((err, keys) => err ? reject(err) : resolve((keys || []).filter(k => k.startsWith(prefix)).map(k => k.substr(prefix.length)))));
+    const remove = (key: string) => new Promise<void>((resolve, reject) =>
+      storage.removeItem(`${prefix}${key}`, err => err ? reject(err) : resolve()));
+    const clear = async () => {
+      const keys = await getAllKeys();
+      for (let key of keys)
+        await remove(key);
+    }
     this._storage = {
-      clear: () => new Promise<void>((resolve, reject) => storage.clear(err => err ? reject(err) : resolve())),
+      getAllKeys, remove, clear,
       set: (key: string, value?: string) => new Promise<void>((resolve, reject) =>
-        storage.setItem(key, value || '', err => err ? reject(err) : resolve())),
+        storage.setItem(`${prefix}${key}`, value || '', err => err ? reject(err) : resolve())),
       get: (key: string) => new Promise<string | undefined>((resolve, reject) =>
-        storage.getItem(key, (err, val) => err ? reject(err) : resolve(val === null ? undefined : val))),
+        storage.getItem(`${prefix}${key}`, (err, val) => err ? reject(err) : resolve(val === null ? undefined : val))),
       setObject: (key: string, value: object) => new Promise<void>((resolve, reject) =>
-        storage.setItem(key, JSON.stringify(value), err => err ? reject(err) : resolve())),
+        storage.setItem(`${prefix}${key}`, JSON.stringify(value), err => err ? reject(err) : resolve())),
       getObject: (key: string) => new Promise<object | undefined>((resolve, reject) =>
-        storage.getItem(key, (err, data) => err ? reject(err) : resolve(data && JSON.parse(data)))),
-      getAllKeys: () => new Promise<string[]>((resolve, reject) =>
-        storage.getAllKeys((err, keys) => err ? reject(err) : resolve(keys || []))),
-      remove: (key: string) => new Promise<void>((resolve, reject) =>
-        storage.removeItem(key, err => err ? reject(err) : resolve()))
+        storage.getItem(`${prefix}${key}`, (err, data) => err ? reject(err) : resolve(data && JSON.parse(data)))),
     };
   }
   init = async (region: string): Promise<boolean> => {
@@ -71,8 +77,8 @@ export class Account {
   }
   signOut = async () => {
     if (!this._login) throw new Error('not initialized');
-    const sub = await this.sub();
-    const ret = await this._login.signOut();
+    //const sub = await this.sub();
+    await this._login.signOut();
     await this._storage.clear();
     //console.log(`SIGN-OUT ${sub.ok}`);
     //Sentry.setUserContext({ id: sub.ok });
@@ -81,9 +87,11 @@ export class Account {
     if (!this._util) throw new Error('not initialized');
     return await this._util.getUserState();
   }
-  currentUser = async (): Promise<CognitoUser> => {
+  currentUser = async (): Promise<CognitoUser | undefined> => {
     if (!this._util) throw new Error('not initialized');
-    return await this._util.getCurrentUser();
+    const accessToken = await this._storage.get('userTokens.accessToken');
+    if (accessToken) return this._util.getCurrentUser();
+    return undefined;
   }
   userName = async (): Promise<string | undefined> => {
     if (!this._util) throw new Error('not initialized');
@@ -139,6 +147,7 @@ export class Account {
     // does not expose an easy way to disable this. by surveying its sourcecode, clearing out the LastAuthUser value from
     // the storage used by the cognito-user object will fix.
     const user = await this._util.getCurrentUser();
+    if (!user) throw new Error('invalid cognito user');
     const clientId = this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId;
     const lastUserKeyKey = `CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
     const lastUserKey = (user as any).storage.getItem(lastUserKeyKey);
@@ -181,6 +190,21 @@ export class Account {
     if (accessKeyId === undefined || secretAccessKey === undefined || sessionToken === undefined)
       return undefined;
     return { accessKeyId, secretAccessKey, sessionToken };
+  }
+  tokens = async (): Promise<{
+    idToken: string, accessToken: string, refreshToken: string,
+    awsSecretAccessKey: string, awsSessionToken: string, awsAccessKeyId: string
+  } | undefined> => {
+    const accessToken = await this._storage.get('userTokens.accessToken');
+    const idToken = await this._storage.get('userTokens.idToken');
+    const refreshToken = await this._storage.get('userTokens.refreshToken');
+    const awsAccessKeyId = await this._storage.get('userTokens.awsAccessKeyId');
+    const awsSecretAccessKey = await this._storage.get('userTokens.awsSecretAccessKey');
+    const awsSessionToken = await this._storage.get('userTokens.awsSessionToken');
+    if (accessToken && idToken && refreshToken && awsAccessKeyId && awsSecretAccessKey && awsSessionToken)
+      return { accessToken, idToken, refreshToken, awsAccessKeyId, awsSecretAccessKey, awsSessionToken };
+    else
+      return undefined;
   }
   sub = async (): Promise<string | undefined> => {
     if (!this._profile) throw new Error('not initialized');

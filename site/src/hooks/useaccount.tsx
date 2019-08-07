@@ -3,15 +3,61 @@ import { useState, useContext } from 'react';
 import { AsyncStorage } from 'react-native';
 import { Account, UserPoolMode } from 'cf-cognito';
 import * as UI from 'gatsby-theme-core-ui';
+import * as RT from 'runtypes';
+
+const UserAttributesRecord = RT.Record({
+  'custom:role': RT.String,
+  email: RT.String,
+  email_verified: RT.String,
+  locale: RT.String,
+  preferred_username: RT.String,
+  sub: RT.String
+});
+
+type UserAttributes = RT.Static<typeof UserAttributesRecord>;
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 export enum SignUpResult { Success, UsernameExists, Unknown };
 export enum ConfirmResult { Success, CodeMismatch, Unknown };
 
+enum AccountMode { LoggedIn, LoggedOut };
+
+type User = {
+  username: string,
+  sub: string,
+  locale: string,
+  email: string,
+  role: string,
+  tokens: {
+    accessToken: string,
+    idToken: string,
+    awsAccessKeyId: string,
+    awsSecretAccessKey: string,
+    refreshToken: string,
+  }
+};
+
+type ContextValue = {
+  account: Account
+  setLoading: (loading: boolean) => void,
+  loading: boolean
+  setMode: (mode: AccountMode) => void,
+  user?: User,
+};
+
+const _account = new Account(UserPoolMode.Web, AsyncStorage);
+
+const AccountContext = React.createContext<ContextValue>({
+  account: _account,
+  setLoading: () => console.error('invalid account context'),
+  loading: true,
+  setMode: () => console.error('invalid account context'),
+  user: undefined
+});
+
 export const useAccount = () => {
   const toast = UI.useToast();
-  const [loading, setLoading] = useState(false);
-  const account = useContext(AccountContext);
+  const { account, setLoading, loading, setMode, user } = useContext(AccountContext);
 
   const resendConfirmationCode = async () => {
     try {
@@ -25,15 +71,34 @@ export const useAccount = () => {
     }
   }
 
+  const loggedIn = async () => {
+    try {
+      setLoading(true);
+      const user = await account.currentUser();
+      return !!user;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const logOut = async () => {
+    try {
+      setLoading(true);
+      await account.signOut();
+      setMode(AccountMode.LoggedOut);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const logIn = async (emailOrUsername: string, password: string): Promise<LogInResult> => {
     try {
       setLoading(true);
       const result = await account.signIn(emailOrUsername, password);
-      if (result == 'changepassword') {
+      if (result == 'changepassword')
         return LogInResult.ChangePassword;
-      } else {
-        return LogInResult.Success;
-      }
+      setMode(AccountMode.LoggedIn);
+      return LogInResult.Success;
     } catch (err) {
       if (err.code == 'UserNotFoundException') {
         return LogInResult.UserNotFound;
@@ -91,7 +156,7 @@ export const useAccount = () => {
     }
   }
 
-  const confirm = async (code: string) => {
+  const confirmCode = async (code: string) => {
     try {
       setLoading(true);
       if (!await account.confirmSignUp(code)) {
@@ -122,23 +187,69 @@ export const useAccount = () => {
     }
   }
 
-  return { loading, resendConfirmationCode, logIn, signUp, sendRecoveryEmail, resetPassword, confirm, changePassword };
+  return {
+    loading, resendConfirmationCode, logIn, logOut, signUp, loggedIn,
+    sendRecoveryEmail, resetPassword, confirmCode, changePassword, user
+  };
 }
-
-const _account = new Account(UserPoolMode.Web, AsyncStorage);
-
-const AccountContext = React.createContext<Account>(_account);
 
 export const AccountProvider = (props: { region: string, children?: React.ReactNode }) => {
   const [ready, setReady] = React.useState(false);
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState(AccountMode.LoggedOut);
+  const [user, setUser] = React.useState<User>();
 
   React.useEffect(() => {
+    setLoading(true);
     _account.init(props.region)
-      .then(() => setReady(true))
-      .catch(console.error);
+      .then(async () => {
+        const user = await _account.currentUser();
+        setMode(user ? AccountMode.LoggedIn : AccountMode.LoggedOut);
+        setReady(true);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, []);
+
+  React.useEffect(() => {
+    if (ready) {
+      setLoading(true);
+      _account.currentUser()
+        .then(async user => {
+          if (!user) setUser(undefined);
+          else {
+            const attrs = await _account.userAttributes();
+            if (!UserAttributesRecord.guard(attrs)) {
+              console.error('invalid user attributes');
+              await _account.signOut();
+            } else {
+              const tokens = await _account.tokens();
+              if (!tokens) {
+                console.error('invalid account tokens');
+                await _account.signOut();
+              } else {
+                setUser({
+                  username: user.getUsername(),
+                  sub: attrs.sub,
+                  locale: attrs.locale,
+                  email: attrs.email,
+                  role: attrs["custom:role"],
+                  tokens
+                });
+              }
+            }
+          }
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
+  }, [ready, mode]);
 
   if (!ready) return <UI.Loading />;
 
-  return <AccountContext.Provider value={_account}>{props.children}</AccountContext.Provider>;
+  return <AccountContext.Provider value={{
+    account: _account,
+    loading, setLoading,
+    setMode, user,
+  }}>{props.children}</AccountContext.Provider>;
 }

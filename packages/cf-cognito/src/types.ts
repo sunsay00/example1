@@ -111,7 +111,7 @@ export type CognitoClient = {
   createCognitoUserPool(): UserPool;
   createCognitoUser(Username: string): CognitoUser;
   cognitoIdentityId(): string;
-  currentUser(): CognitoUser;
+  currentUser(): CognitoUser | undefined;
   accessKeyId(): string | undefined;
   secretAccessKey(): string | undefined;
   sessionToken(): string | undefined;
