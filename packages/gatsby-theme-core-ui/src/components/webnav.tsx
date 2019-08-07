@@ -21,20 +21,24 @@ const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
   );
 }
 
-const NavLayoutContext = React.createContext({ height: 0 });
-
-const NavContext = React.createContext((_opened: boolean) => { });
+const NavLayoutContext = React.createContext({
+  animHeight: new Animated.Value(0),
+  height: 0,
+  setOpened: (opened: boolean) => console.error('invalid navlayout context'),
+  opened: false,
+  setNumChildren: (num: number) => console.error('invalid navlayout context'),
+  navHeight: (opened: boolean) => 0 as number,
+});
 
 export const WebNavBar = (props: {
   renderLogo?: () => React.ReactNode,
   children?: React.ReactNode
 }) => {
   const numChildren = React.Children.count(props.children);
-  const [opened, setOpened] = React.useState(false);
-  const animHeight = React.useRef(new Animated.Value(0)).current;
-  const toggleHeight = React.useCallback((opened: boolean) => {
-    const height = numChildren == 0 ? 0 : numChildren * 52 + (numChildren - 1);
-    Animated.timing(animHeight, { toValue: opened ? height : 0, duration: 200, easing: Easing.quad }).start(() => setOpened(v => !v));
+  const { setNumChildren, opened, setOpened, height, animHeight } = React.useContext(NavLayoutContext);
+
+  React.useEffect(() => {
+    setNumChildren(numChildren);
   }, [numChildren]);
 
   const goHome = () => {
@@ -43,58 +47,53 @@ export const WebNavBar = (props: {
     if (splits.length > 1) {
       navigateTo('/');
     } else {
-      console.log(rel);
       const body = document.querySelector('body');
       body && body.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
   return (
-    <NavLayoutContext.Consumer>{({ height }) =>
-      <NavContext.Provider value={toggleHeight}>
-        <Breakable renderSmall={() =>
-          <>
-            <Animated.View style={{ height: animHeight }}>
-              {React.Children.map(props.children, child =>
-                <View style={{
-                  alignItems: 'center',
-                  borderBottomColor: rgba(Colors.white, .2),
-                  borderBottomWidth: 1,
-                  marginHorizontal: -32
-                }}>
-                  {React.isValidElement(child) ? React.cloneElement(child, {
-                    ...child.props,
-                    secondary: true
-                  }) : child}
-                </View>
-              )}
-            </Animated.View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, backgroundColor: Colors.white, marginHorizontal: -32, paddingHorizontal: 16 }}>
-              <TouchableOpacity onPress={() => {
-                goHome();
-                toggleHeight(false);
-              }}>
+    <Breakable renderSmall={() =>
+      <>
+        <Animated.View style={{ height: animHeight }}>
+          {React.Children.map(props.children, child =>
+            <View style={{
+              alignItems: 'center',
+              borderBottomColor: rgba(Colors.white, .2),
+              borderBottomWidth: 1,
+              marginHorizontal: -32
+            }}>
+              {React.isValidElement(child) ? React.cloneElement(child, {
+                ...child.props,
+                secondary: true
+              }) : child}
+            </View>
+          )}
+        </Animated.View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, backgroundColor: Colors.white, marginHorizontal: -32, paddingHorizontal: 16 }}>
+          <TouchableOpacity onPress={() => {
+            goHome();
+            setOpened(false);
+          }}>
+            {props.renderLogo && props.renderLogo()}
+          </TouchableOpacity>
+          {numChildren > 0 && <Icon size="sm" name="bars" onPress={() => setOpened(!opened)} />}
+        </View>
+      </>}
+      renderMedium={() =>
+        <WebSticky offsetY={0}>
+          <Section>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, marginHorizontal: 16 }}>
+              <TouchableOpacity onPress={goHome}>
                 {props.renderLogo && props.renderLogo()}
               </TouchableOpacity>
-              {numChildren > 0 && <Icon size="sm" name="bars" onPress={() => toggleHeight(!opened)} />}
+              <View style={{ flexDirection: 'row' }}>
+                {props.children}
+              </View>
             </View>
-          </>}
-          renderMedium={() =>
-            <WebSticky offsetY={height}>
-              <Section>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, marginHorizontal: 16 }}>
-                  <TouchableOpacity onPress={goHome}>
-                    {props.renderLogo && props.renderLogo()}
-                  </TouchableOpacity>
-                  <View style={{ flexDirection: 'row' }}>
-                    {props.children}
-                  </View>
-                </View>
-              </Section>
-            </WebSticky>
-          } />
-      </NavContext.Provider>}
-    </NavLayoutContext.Consumer>
+          </Section>
+        </WebSticky>
+      } />
   );
 }
 
@@ -104,12 +103,35 @@ export const WebNavLink = (props: {
   onPress?: () => void,
   children?: React.ReactNode,
 }) => {
+  const { setOpened } = React.useContext(NavLayoutContext);
   if (props.onPress) {
     return (
-      <NavContext.Consumer>{setOpened =>
+      <TouchableOpacity onPress={() => {
+        setOpened(false);
+        props.onPress && props.onPress();
+      }}>
+        <Text style={{
+          padding: { xs: 4, sm: 8, md: 16 }.md,
+          fontFamily: Fonts.sansSerif.weightProps.bold.name,
+          fontWeight: Fonts.sansSerif.weightProps.bold.value,
+          fontSize: Fonts.sansSerif.size.heading4,
+          color: props.secondary ? Colors.white : Colors.black,
+        }}>{props.children}</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  if (props.to) {
+    const to = props.to;
+    const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*/, '');
+    if (props.to.startsWith('#') && rel.startsWith('/#')) {
+      return (
         <TouchableOpacity onPress={() => {
-          setOpened(false);
-          props.onPress && props.onPress();
+          const anchor = document.querySelector(to);
+          if (anchor) {
+            setOpened(false);
+            anchor.scrollIntoView({ behavior: 'smooth' });
+          }
         }}>
           <Text style={{
             padding: { xs: 4, sm: 8, md: 16 }.md,
@@ -119,32 +141,6 @@ export const WebNavLink = (props: {
             color: props.secondary ? Colors.white : Colors.black,
           }}>{props.children}</Text>
         </TouchableOpacity>
-      }</NavContext.Consumer >
-    );
-  }
-
-  if (props.to) {
-    const to = props.to;
-    const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*/, '');
-    if (props.to.startsWith('#') && rel.startsWith('/#')) {
-      return (
-        <NavContext.Consumer>{setOpened =>
-          <TouchableOpacity onPress={() => {
-            const anchor = document.querySelector(to);
-            if (anchor) {
-              setOpened(false);
-              anchor.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}>
-            <Text style={{
-              padding: { xs: 4, sm: 8, md: 16 }.md,
-              fontFamily: Fonts.sansSerif.weightProps.bold.name,
-              fontWeight: Fonts.sansSerif.weightProps.bold.value,
-              fontSize: Fonts.sansSerif.size.heading4,
-              color: props.secondary ? Colors.white : Colors.black,
-            }}>{props.children}</Text>
-          </TouchableOpacity>
-        }</NavContext.Consumer>
       );
     } else {
       return (
@@ -172,15 +168,24 @@ export const WebNavLink = (props: {
   );
 }
 
-export const WebNavAnchor = (props: { id: string }) =>
-  <NavLayoutContext.Consumer>{({ height }) =>
-    <div id={`${props.id}`} style={{ top: -height, position: 'relative' }} />}
-  </NavLayoutContext.Consumer>
+export const WebNavAnchor = (props: { id: string }) => {
+  const { opened, height, navHeight } = React.useContext(NavLayoutContext);
+  return (
+    <div id={`${props.id}`} style={{ top: opened ? -navHeight(opened) : -height, position: 'relative' }} />
+  );
+}
 
 export const WebNavLayout = (props: { navHeight?: number, children?: React.ReactNode, renderNavBar?: () => React.ReactNode }) => {
-  const navHeight = props.navHeight || 80;
+  const height = props.navHeight || 80;
+  const [opened, _setOpened] = React.useState(false);
+  const [numChildren, setNumChildren] = React.useState(0);
+  const animHeight = React.useRef(new Animated.Value(0)).current;
+  const navHeight = (opened: boolean) => opened ? numChildren == 0 ? 0 : numChildren * 52 + (numChildren - 1) : 0;
+  const setOpened = React.useCallback((opened: boolean) => {
+    Animated.timing(animHeight, { toValue: navHeight(opened), duration: 200, easing: Easing.quad }).start(() => _setOpened(v => !v));
+  }, [numChildren]);
   return (
-    <NavLayoutContext.Provider value={{ height: navHeight }}>
+    <NavLayoutContext.Provider value={{ height, opened, setOpened, setNumChildren, animHeight, navHeight }}>
       <View style={{ minWidth: 300, marginHorizontal: 32, flex: 1, minHeight: '100vh' }}>
         <Breakable
           renderSmall={children => <>
@@ -188,7 +193,7 @@ export const WebNavLayout = (props: { navHeight?: number, children?: React.React
             <View key={1} style={{ flex: 1 }}>{children}</View>
           </>}
           renderMedium={children => <>
-            <View key={1} style={{ marginTop: navHeight, marginBottom: -navHeight }}>{children}</View>
+            <View key={1} style={{ marginTop: height, marginBottom: -height }}>{children}</View>
             {props.renderNavBar && props.renderNavBar()}
           </>}
         >
