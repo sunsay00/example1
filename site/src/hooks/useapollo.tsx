@@ -22,16 +22,6 @@ const createCache = async () => {
 
 const httpLink = new HttpLink({ uri: process.env.GRAPHQL_ENDPOINT });
 
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.token;
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : ''
-    }
-  }
-});
-
 const concatWebSocket = (link: ApolloLink) => {
   if (!process.env.WEBSOCKET_ENDPOINT) return link;
 
@@ -50,12 +40,39 @@ const concatWebSocket = (link: ApolloLink) => {
   }, wsLink, link);
 }
 
-export const useApollo = () => {
+const useAuthorizationHeader = () => {
+  const { user } = UI.useAccount();
+  const [authorization, setAuthorization] = React.useState('Guest');
+  React.useEffect(() => {
+    if (user) setAuthorization(`Bearer ${user.tokens.idToken}`);
+    else setAuthorization('Guest');
+  }, [user]);
+  return authorization;
+}
+
+const useAuthLink = () => {
+  const authorization = useAuthorizationHeader();
+
+  const [authLink, setAuthLink] = React.useState(setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization } })));
+
+  React.useEffect(() => {
+    setAuthLink(setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization } })));
+  }, [authorization]);
+
+  return authLink;
+}
+
+const ApolloContext = React.createContext<ApolloClient<unknown> | undefined>(undefined);
+
+export const useApollo = () => React.useContext(ApolloContext);
+
+export const ApolloProvider = (props: { children?: React.ReactNode }) => {
   const [client, setClient] = React.useState<ApolloClient<unknown> | undefined>(undefined);
+
+  const authLink = useAuthLink();
 
   React.useEffect(() => {
     createCache().then(cache => {
-
       setClient(new ApolloClient({
         link: ApolloLink.from([
           onError(({ graphQLErrors, networkError }) => {
@@ -82,17 +99,13 @@ export const useApollo = () => {
         }
       }));
     }).catch(console.error);
-  }, []);
-
-  return client;
-}
-
-export const ApolloProvider = (props: { children?: React.ReactNode }) => {
-  const client = useApollo();
+  }, [authLink]);
 
   if (!client) return <UI.Loading />;
 
   return (
-    <Apollo client={client}>{props.children}</Apollo>
+    <ApolloContext.Provider value={client}>
+      <Apollo client={client}>{props.children}</Apollo>
+    </ApolloContext.Provider>
   );
 }

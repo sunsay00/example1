@@ -25,10 +25,6 @@ const Application = (props: { children?: React.ReactNode }) => {
   const { setCurrent } = UI.useModal();
   const { loading, user, logOut } = useAccount();
 
-  //const [authToken/*, refresh*/] = useAuthToken({ region: process.env.AWS_REGION, email: 'guest@guest.com', username: 'guest', password: 'guestguest' });
-  //if (!authToken) return null;
-  //localStorage.setItem('token', authToken);
-
   return (
     <UI.WebNavLayout renderNavBar={() =>
       <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32, paddingHorizontal: 32 }}>
@@ -48,10 +44,10 @@ const Application = (props: { children?: React.ReactNode }) => {
 }
 
 export const Root = (props: { children?: React.ReactNode }) =>
-  <ApolloProvider>
-    <AccountProvider region="us-east-1">
+  <AccountProvider region="us-east-1">
+    <ApolloProvider>
       <UI.WebRoot>
         <Application>{props.children}</Application>
       </UI.WebRoot>
-    </AccountProvider>
-  </ApolloProvider>
+    </ApolloProvider>
+  </AccountProvider>
