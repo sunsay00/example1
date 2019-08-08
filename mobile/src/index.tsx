@@ -3,9 +3,16 @@ import { SafeAreaView, StatusBar, } from 'react-native';
 import * as UI from 'core-ui';
 import {
   NavigationTransitionProps, createSwitchNavigator, createDrawerNavigator,
-  createBottomTabNavigator, createAppContainer, createStackNavigator
+  createBottomTabNavigator, createAppContainer, createStackNavigator,
 } from "react-navigation";
 import { useNavigation } from './hooks/usenavigation';
+
+const Drawer = () =>
+  <UI.SafeAreaView>
+    <UI.ScrollView>
+      <UI.Text>Hello World</UI.Text>
+    </UI.ScrollView>
+  </UI.SafeAreaView>
 
 const Tab1 = (props: {}) => {
   const nav = useNavigation();
@@ -25,10 +32,7 @@ const Tab1 = (props: {}) => {
         <UI.Text weight="light" numberOfLines={1}>123456789</UI.Text>
         <UI.Text weight="thin" numberOfLines={1}>123456789</UI.Text>
         <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <UI.Button onPress={nav.openDrawer}>
-            Open Drawer
-        </UI.Button>
-          <UI.Text>Home</UI.Text>
+          <UI.Button onPress={nav.openDrawer}>Open Drawer</UI.Button>
         </UI.View>
       </SafeAreaView>
     </UI.View>
@@ -67,15 +71,17 @@ const transitionConfig = () => ({
 });
 
 export const App = createAppContainer(createSwitchNavigator({
-  Main: createDrawerNavigator(
-    {
-      Home: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab1' }),
-      Settings: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab2' }),
-    }, {
+  Main: createDrawerNavigator({
+    Home: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab1' }),
+    Settings: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab2' }),
+  }, {
+      drawerType: 'slide',
       //hideStatusBar: true,
       //drawerBackgroundColor: 'rgba(255,255,255,.9)',
       //overlayColor: '#6b52ae',
-      //contentOptions: { activeTintColor: '#fff', activeBackgroundColor: '#6b52ae' },
+      //contentOptions: {activeTintColor: '#fff', activeBackgroundColor: '#6b52ae' },
+      //contentOptions: {inactiveBackgroundColor: '#ffffff', activeBackgroundColor: '#ffffff' },
+      contentComponent: Drawer
     }
   ),
   Landing: () => {
