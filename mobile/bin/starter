@@ -1,0 +1,117 @@
+#!/usr/bin/env node
+
+const { spawn } = require('child_process');
+
+//console.log(`cwd: ${__dirname}`);
+
+if (!process.env.ANDROID_HOME) {
+  console.error('ANDROID_HOME envvar not defined');
+  process.exit(1);
+}
+
+const shell = (command, args = [], { cwd = undefined, env = envs, onStdOut = undefined, onStdErr = undefined }) => new Promise((resolve, reject) => {
+  //console.error(`[EXECUTE] ${cwd || ''}/${command} ${args.join(' ')}`);
+  const proc = spawn(command, args, { env, cwd });
+  proc.stdout.on('data', data => onStdOut ? onStdOut(data.toString()) : process.stdout.write(data.toString()));
+  proc.stderr.on('data', data => onStdErr ? onStdErr(data.toString()) : process.stderr.write(data.toString()));
+  proc.on('close', code => code == 0 ? resolve() : reject(new Error(`${command} existed with ${code}`)));
+})
+
+const done = (cmd = '', subcmd = '') => {
+  if (!cmd || !commands()[cmd]) {
+    console.error('usage: starter <command> ...');
+    console.error('  commands:');
+    Object.entries(commands())
+      .sort(([ka, va], [kb, vb]) => va.index - vb.index)
+      .forEach(([k, v]) => console.error(`    ${k}`));
+  } else {
+    const command = commands()[cmd];
+    if (!subcmd || !command.subcmds.find(s => s.name == subcmd)) {
+      console.error(`usage: starter ${cmd} <subcommand> ...`);
+      console.error('  subcommands:');
+      command.subcmds.forEach(subcmd => console.error(`    ${subcmd.name} ${subcmd.args.map(a => `<${a}>`).join(' ')}`));
+    } else {
+      const scmd = command.subcmds.find(s => s.name == subcmd);
+      console.error(`usage: starter ${cmd} ${subcmd} ${scmd.args.map(a => `<${a}>`).join(' ')}`);
+    }
+  }
+  process.exit(1);
+}
+
+const main = async () => {
+  if (process.argv.length <= 2) done();
+  const [_1, _2, cmd, ...args]  = process.argv;
+  const command = commands()[cmd];
+  if (!command) done();
+  if (args.length == 0) done(cmd);
+  const [subcmd, ...subargs] = args;
+  const scmd = command.subcmds.find(s => s.name == subcmd);
+  if (!scmd) done(cmd, subcmd);
+  if (scmd.args.length != subargs.length) done(cmd, subcmd);
+  scmd.fn.apply(this, subargs);
+}
+
+const envs = {
+  ...process.env,
+  PATH: `${process.env.ANDROID_HOME}/emulator/:${process.env.PATH}`
+}
+
+const commands = () => ({
+  android: {
+    index: 0,
+    subcmds: [{
+      name: 'list',
+      args: [],
+      fn: runAndroidList,
+    }, {
+      name: 'start',
+      args: ['avd-name'],
+      fn: runAndroidStart,
+    }]
+  },
+  ios: {
+    index: 1,
+    subcmds: [{
+      name: 'start',
+      args: [],
+      fn: runIOSStart,
+    }]
+  }
+});
+
+const runAndroidList = async () => {
+  await shell('emulator', ['-list-avds'], { cwd: `${process.env.ANDROID_HOME}/emulator` });
+}
+
+const runAndroidStart = async (avdName) => {
+  await shell('emulator', ['-avd', avdName, '-dns-server', '8.8.8.8', '-verbose'], {
+    cwd: `${process.env.ANDROID_HOME}/emulator`,
+    onStdOut: s => {
+      if (/Adb connected, start proxing data/.exec(s)) {
+        shell('yarn', ['react-native', 'start'], {
+          cwd: `${__dirname}/../`,
+          onStdOut: s => {
+            if (/Loading dependency graph, done./.exec(s))
+              shell('yarn', ['react-native', 'run-android'], {});
+            process.stdout.write(s);
+          }
+        });
+      } else {
+        process.stdout.write('.');
+      }
+    },
+  });
+}
+
+const runIOSStart = async () => {
+  await shell('yarn', ['react-native', 'start'], {
+    cwd: `${__dirname}/../`,
+    onStdOut: s => {
+      if (/Loading dependency graph, done./.exec(s))
+        shell('yarn', ['react-native', 'run-ios'], {});
+      process.stdout.write(s);
+    }
+  });
+}
+
+main().then(() => {}).catch(console.error);

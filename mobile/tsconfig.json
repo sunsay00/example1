@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig-base",
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react",
+    "lib": [
+      "es6"
+    ],
+    "moduleResolution": "node",
+    "noEmit": true,
+    "target": "esnext",
+    "types": [
+      "jest"
+    ],
+    "rootDirs": [
+      "./src",
+      "./__tests__"
+    ]
+  }
+}
