@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import { SafeAreaView, StyleSheet, Text, StatusBar, } from 'react-native';
+import { SafeAreaView, StatusBar, } from 'react-native';
 import * as UI from 'core-ui';
 
 export const App = () => {
@@ -9,7 +9,16 @@ export const App = () => {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <UI.Accent>123456789</UI.Accent>
-        <UI.Header1>Infinage Labs</UI.Header1>
+        <UI.Header1>Infinage Styleguide</UI.Header1>
+        <UI.Header2>Table of Contents</UI.Header2>
+        <UI.Header2>Components</UI.Header2>
+        <UI.Header4>Accent</UI.Header4>
+        <UI.Header2>123456789</UI.Header2>
+        <UI.Text weight="black" numberOfLines={1}>123456789</UI.Text>
+        <UI.Text weight="bold" numberOfLines={1}>123456789</UI.Text>
+        <UI.Text weight="medium" numberOfLines={1}>123456789</UI.Text>
+        <UI.Text weight="light" numberOfLines={1}>123456789</UI.Text>
+        <UI.Text weight="thin" numberOfLines={1}>123456789</UI.Text>
       </SafeAreaView>
     </Fragment>
   );

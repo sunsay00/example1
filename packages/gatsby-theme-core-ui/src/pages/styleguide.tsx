@@ -38,9 +38,10 @@ export default (props: {}) =>
         {/*
       - [Components](#components)
       - [Base Tags](#basetags)
-
-## Components <a name="components" />
       */}
+
+        <Header2>Components</Header2>
+
         <Header4>Accent</Header4>
 
         <Code live>{
