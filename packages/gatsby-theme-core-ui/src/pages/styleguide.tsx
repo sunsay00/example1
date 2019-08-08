@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Section, View, Header1, Header2, Header3, Header4, Header5, Header6, Code } from 'core-ui';
+import { Section, View, Header1, Header2, Header3, Header4, Header5, Header6 } from 'core-ui';
+import { WebCode as Code } from '../components/webcode';
 
 /*
   p: Paragraph,

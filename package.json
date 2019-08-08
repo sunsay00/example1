@@ -5,7 +5,8 @@
   "workspaces": [
     "packages/*",
     "api",
-    "site"
+    "site",
+    "mobile"
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",

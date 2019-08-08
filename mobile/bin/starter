@@ -84,10 +84,13 @@ const runAndroidList = async () => {
 }
 
 const runAndroidStart = async (avdName) => {
+  let stop = false;
   await shell('emulator', ['-avd', avdName, '-dns-server', '8.8.8.8', '-verbose'], {
     cwd: `${process.env.ANDROID_HOME}/emulator`,
     onStdOut: s => {
       if (/Adb connected, start proxing data/.exec(s)) {
+        stop = true;
+        process.stdout.write('.');
         shell('yarn', ['react-native', 'start'], {
           cwd: `${__dirname}/../`,
           onStdOut: s => {
@@ -97,7 +100,7 @@ const runAndroidStart = async (avdName) => {
           }
         });
       } else {
-        process.stdout.write('.');
+        !stop && process.stdout.write('.');
       }
     },
   });

@@ -38,9 +38,43 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>anticon.ttf</string>
+		<string>fontawesome-webfont.ttf</string>
+		<string>ZillaSlab-Bold.ttf</string>
+		<string>ZillaSlab-BoldItalic.ttf</string>
+		<string>ZillaSlab-Italic.ttf</string>
+		<string>ZillaSlab-Light.ttf</string>
+		<string>ZillaSlab-LightItalic.ttf</string>
+		<string>ZillaSlab-Medium.ttf</string>
+		<string>ZillaSlab-MediumItalic.ttf</string>
+		<string>ZillaSlab-Regular.ttf</string>
+		<string>ZillaSlab-SemiBoldItalic.ttf</string>
+		<string>ZillaSlab-SemiBold.ttf</string>
+		<string>Raleway-ExtracBold.ttf</string>
+		<string>Raleway-ExtraLight.ttf</string>
+		<string>Raleway-Light.ttf</string>
+		<string>Raleway-Medium.ttf</string>
+		<string>Raleway-Regular.ttf</string>
+		<string>Raleway-SemiBold.ttf</string>
+		<string>Raleway-Thin.ttf</string>
+		<string>Raleway-Bold.ttf</string>
+		<string>Raleway-Black.ttf</string>
+		<string>Raleway-BlackItalic.ttf</string>
+		<string>Raleway-BoldItalic.ttf</string>
+		<string>Raleway-ExtraBoldItalic.ttf</string>
+		<string>Raleway-ExtraLightItalic.ttf</string>
+		<string>Raleway-Italic.ttf</string>
+		<string>Raleway-LightItalic.ttf</string>
+		<string>Raleway-MediumItalic.ttf</string>
+		<string>Raleway-SemiBoldItalic.ttf</string>
+		<string>Raleway-ThinItalic.ttf</string>
+		<string>Raleway-ExtraBold.ttf</string>
+	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

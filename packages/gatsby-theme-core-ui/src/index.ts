@@ -11,6 +11,7 @@ export { ImageBackground } from './components/imagebackground';
 export { Modal } from './components/modal';
 export { Icon } from './components/icon';
 export { AlertProvider, Alert } from './components/alert';
+export { Slider } from './components/slider';
 
 // web components
 export { WebNavBar, WebNavAnchor, WebNavLayout, WebNavLink } from './components/webnav';
@@ -18,6 +19,7 @@ export { WebAnchor } from './components/webanchor';
 export { WebEndReachedDetector } from './components/webendreacheddetector';
 export { WebTable, WebTableBody, WebTableRow, WebTableData, WebTableHeader } from './components/webtable';
 export { WebRoot } from './components/webroot';
+export { WebCode, WebInlineCode } from './components/webcode';
 
 // hooks
 export * from './hooks/usetopviewstack';

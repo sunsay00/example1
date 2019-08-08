@@ -4,3 +4,8 @@ declare module '@fortawesome/react-fontawesome' {
     style?: any,
   }) => JSX.Element;
 }
+
+declare module 'react-native-web/dist/modules/applyNativeMethods' {
+  const applyNativeMethods: <P, S>(componentClass: React.ComponentClass<P, S>) => React.ComponentClass<P, S>;
+  export default applyNativeMethods;
+}
