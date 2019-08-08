@@ -83,22 +83,36 @@ const runAndroidList = async () => {
   await shell('emulator', ['-list-avds'], { cwd: `${process.env.ANDROID_HOME}/emulator` });
 }
 
+const runPackager = async () => new Promise(async (resolve, reject) => {
+  try {
+    let done = false;
+    const ret = await shell('yarn', ['react-native', 'start'], {
+      cwd: `${__dirname}/../`,
+      onStdOut: s => {
+        if (done) return;
+        if (/Loading dependency graph, done./.exec(s)) {
+          done = true;
+          resolve();
+        }
+        process.stdout.write(s);
+      }
+    });
+  } catch (err) {
+    reject(err);
+  }
+});
+
 const runAndroidStart = async (avdName) => {
-  let stop = false;
+  await runPackager();
+  let done = false;
   await shell('emulator', ['-avd', avdName, '-dns-server', '8.8.8.8', '-verbose'], {
     cwd: `${process.env.ANDROID_HOME}/emulator`,
     onStdOut: s => {
+      if (done) return;
       if (/Adb connected, start proxing data/.exec(s)) {
-        stop = true;
+        done = true;
         process.stdout.write('.');
-        shell('yarn', ['react-native', 'start'], {
-          cwd: `${__dirname}/../`,
-          onStdOut: s => {
-            if (/Loading dependency graph, done./.exec(s))
-              shell('yarn', ['react-native', 'run-android'], {});
-            process.stdout.write(s);
-          }
-        });
+        shell('yarn', ['react-native', 'run-android'], {});
       } else {
         !stop && process.stdout.write('.');
       }
@@ -107,14 +121,8 @@ const runAndroidStart = async (avdName) => {
 }
 
 const runIOSStart = async () => {
-  await shell('yarn', ['react-native', 'start'], {
-    cwd: `${__dirname}/../`,
-    onStdOut: s => {
-      if (/Loading dependency graph, done./.exec(s))
-        shell('yarn', ['react-native', 'run-ios'], {});
-      process.stdout.write(s);
-    }
-  });
+  await runPackager();
+  shell('yarn', ['react-native', 'run-ios'], {});
 }
 
 main().then(() => {}).catch(console.error);
