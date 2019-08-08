@@ -21,8 +21,9 @@
     "core-ui": "./packages/core-ui",
     "react": "16.8.6",
     "react-native": "0.60.4",
-    "react-navigation": "^3.11.1",
-    "react-native-gesture-handler": "^1.1.0"
+    "react-native-gesture-handler": "^1.1.0",
+    "react-native-screens": "^1.0.0-alpha.23",
+    "react-navigation": "^3.11.1"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
