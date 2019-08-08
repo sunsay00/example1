@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { SafeAreaView, StatusBar, } from 'react-native';
+import { StatusBar, } from 'react-native';
 import * as UI from 'core-ui';
 import {
-  NavigationTransitionProps, createSwitchNavigator, createDrawerNavigator,
+  createSwitchNavigator, createDrawerNavigator,
   createBottomTabNavigator, createAppContainer, createStackNavigator,
-} from "react-navigation";
-import { useNavigation } from './hooks/usenavigation';
+  useNavigation, useNavigationOptions
+} from './hooks/usenavigation';
 
 const Drawer = () =>
   <UI.SafeAreaView>
@@ -14,12 +14,16 @@ const Drawer = () =>
     </UI.ScrollView>
   </UI.SafeAreaView>
 
-const Tab1 = (props: {}) => {
+const Tab1 = () => {
   const nav = useNavigation();
+  useNavigationOptions({
+    title: 'wakka',
+    headerRight: <UI.View style={{ paddingHorizontal: 16 }}><UI.Text weight="bold">Right</UI.Text></UI.View>,
+  });
   return (
     <UI.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <StatusBar barStyle='dark-content' />
-      <SafeAreaView>
+      <UI.SafeAreaView>
         <UI.Accent>123456789</UI.Accent>
         <UI.Header1>Infinage Styleguide</UI.Header1>
         <UI.Header2>Table of Contents</UI.Header2>
@@ -34,56 +38,36 @@ const Tab1 = (props: {}) => {
         <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <UI.Button onPress={nav.openDrawer}>Open Drawer</UI.Button>
         </UI.View>
-      </SafeAreaView>
+      </UI.SafeAreaView>
     </UI.View>
   );
 }
 
-const Tab2 = (props: {}) => {
+const Tab2 = () => {
   const nav = useNavigation();
+  useNavigationOptions({
+    title: 'wakka2',
+    headerLeft: <UI.View style={{ paddingHorizontal: 16 }}><UI.Text weight="bold">Left</UI.Text></UI.View>,
+  });
   return (
     <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <UI.Header1>Tab2</UI.Header1>
       <UI.Button onPress={nav.openDrawer}>
         Open Drawer
     </UI.Button>
-      <UI.Text style={{ fontWeight: 'bold', marginTop: 20 }}>Settings</UI.Text>
     </UI.View>
   );
 }
 
-const transitionConfig = () => ({
-  transitionSpec: {
-    duration: 400,
-    easing: UI.Easing.out(UI.Easing.poly(4)),
-    timing: UI.Animated.timing,
-    useNativeDriver: true,
-  },
-  screenInterpolator: (sceneProps: NavigationTransitionProps) => {
-    const { layout, position, scene } = sceneProps
-    const thisSceneIndex = scene.index
-    const width = layout.initWidth
-    const translateX = position.interpolate({
-      inputRange: [thisSceneIndex - 1, thisSceneIndex],
-      outputRange: [width, 0],
-    });
-    return { transform: [{ translateX }] }
-  },
-});
+const Tabs = (initialRouteName: string) => createBottomTabNavigator({
+  Tab1: createStackNavigator({ Tab1 }),
+  Tab2: createStackNavigator({ Tab2 }),
+}, { initialRouteName });
 
 export const App = createAppContainer(createSwitchNavigator({
-  Main: createDrawerNavigator({
-    Home: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab1' }),
-    Settings: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab2' }),
-  }, {
-      drawerType: 'slide',
-      //hideStatusBar: true,
-      //drawerBackgroundColor: 'rgba(255,255,255,.9)',
-      //overlayColor: '#6b52ae',
-      //contentOptions: {activeTintColor: '#fff', activeBackgroundColor: '#6b52ae' },
-      //contentOptions: {inactiveBackgroundColor: '#ffffff', activeBackgroundColor: '#ffffff' },
-      contentComponent: Drawer
-    }
-  ),
+  Main: createDrawerNavigator(
+    { Home: Tabs('Tab1'), Settings: Tabs('Tab2') },
+    { drawerType: 'slide', contentComponent: Drawer }),
   Landing: () => {
     const nav = useNavigation();
     return (
@@ -116,5 +100,5 @@ export const App = createAppContainer(createSwitchNavigator({
         </UI.View>
       );
     }
-  }, { transitionConfig }),
+  }, { headerMode: 'none' }),
 }, { initialRouteName: 'Landing' }));

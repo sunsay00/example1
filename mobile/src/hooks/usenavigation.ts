@@ -1,4 +1,12 @@
 import { useState, useContext, useEffect } from 'react';
+import { Easing, Animated } from 'react-native';
+import {
+  NavigationTransitionProps, createStackNavigator as createStackNavigatorRN,
+  NavigationScreenConfigProps, NavigationStackScreenOptions, NavigationRouteConfigMap,
+  StackNavigatorConfig, NavigationContainer
+} from "react-navigation";
+
+export * from 'react-navigation';
 
 import {
   NavigationContext,
@@ -93,4 +101,50 @@ export function useFocusState() {
   }
   useNavigationEvents(handleEvt);
   return focusState;
+}
+
+export const createStackNavigator = (
+  routeConfigMap: NavigationRouteConfigMap,
+  stackConfig?: StackNavigatorConfig
+): NavigationContainer => {
+  return createStackNavigatorRN(routeConfigMap, {
+    transitionConfig: () => ({
+      transitionSpec: {
+        duration: 400,
+        easing: Easing.out(Easing.poly(4)),
+        timing: Animated.timing,
+        useNativeDriver: true,
+      },
+      screenInterpolator: (sceneProps: NavigationTransitionProps) => {
+        const { layout, position, scene } = sceneProps
+        const thisSceneIndex = scene.index
+        const width = layout.initWidth
+        const translateX = position.interpolate({
+          inputRange: [thisSceneIndex - 1, thisSceneIndex],
+          outputRange: [width, 0],
+        });
+        return { transform: [{ translateX }] }
+      }
+    }),
+    defaultNavigationOptions: (props: NavigationScreenConfigProps): NavigationStackScreenOptions => ({
+      title: props.navigation.getParam('title'),
+      headerLeft: props.navigation.getParam('headerLeft'),
+      headerRight: props.navigation.getParam('headerRight'),
+    }),
+    ...stackConfig
+  });
+}
+
+export const useNavigationOptions = (opts: {
+  title?: string,
+  headerLeft?: React.ReactNode,
+  headerRight?: React.ReactNode,
+}) => {
+  const nav = useNavigation();
+  useEffect(() => {
+    nav.setParams(opts);
+    return () => {
+      nav.setParams({});
+    };
+  }, []);
 }
