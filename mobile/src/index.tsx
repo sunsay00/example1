@@ -73,12 +73,12 @@ export const App = createAppContainer(createSwitchNavigator({
       Settings: createBottomTabNavigator({ Tab1, Tab2 }, { initialRouteName: 'Tab2' }),
     }, {
       //hideStatusBar: true,
-      drawerBackgroundColor: 'rgba(255,255,255,.9)',
+      //drawerBackgroundColor: 'rgba(255,255,255,.9)',
       //overlayColor: '#6b52ae',
       //contentOptions: { activeTintColor: '#fff', activeBackgroundColor: '#6b52ae' },
     }
   ),
-  Landing: (props: {}) => {
+  Landing: () => {
     const nav = useNavigation();
     return (
       <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -88,7 +88,7 @@ export const App = createAppContainer(createSwitchNavigator({
     );
   },
   Auth: createStackNavigator({
-    LogIn: (props: {}) => {
+    LogIn: () => {
       const nav = useNavigation();
       return (
         <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -101,7 +101,7 @@ export const App = createAppContainer(createSwitchNavigator({
         </UI.View>
       );
     },
-    SignUp: (props: {}) => {
+    SignUp: () => {
       const nav = useNavigation();
       return (
         <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
