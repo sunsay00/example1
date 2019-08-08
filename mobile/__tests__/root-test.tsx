@@ -1,10 +1,15 @@
 import * as React from 'react';
-import 'react-native';
+import { View as mockView } from 'react-native';
 import { App } from '../src';
 
 // Note: test renderer must be required after react-native.
 import * as renderer from 'react-test-renderer';
 
-it('renders correctly', () => {
+jest.mock('react-navigation', () => ({
+  createAppContainer: () => mockView,
+  createStackNavigator: () => undefined,
+}));
+
+it('renders screen', () => {
   renderer.create(<App />);
 });

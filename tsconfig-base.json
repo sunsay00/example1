@@ -24,7 +24,7 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "strictFunctionTypes": true,
-    "jsx": "react-native",
+    "jsx": "react",
     "noImplicitUseStrict": true,
     "types": []
   }
