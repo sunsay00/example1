@@ -10,13 +10,19 @@
   "workspaces": {
     "nohoist": [
       "react-native",
-      "react-native/**"
+      "react-native/**",
+      "react-navigation",
+      "react-navigation/**",
+      "react-native-gesture-handler",
+      "react-native-gesture-handler/**"
     ]
   },
   "dependencies": {
+    "core-ui": "./packages/core-ui",
     "react": "16.8.6",
     "react-native": "0.60.4",
-    "core-ui": "./packages/core-ui"
+    "react-navigation": "^3.11.1",
+    "react-native-gesture-handler": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
@@ -35,10 +41,5 @@
   },
   "jest": {
     "preset": "react-native"
-  },
-  "rnpm": {
-    "assets": [
-      "./assets/fonts/"
-    ]
   }
 }

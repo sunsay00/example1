@@ -114,7 +114,7 @@ const runAndroidStart = async (avdName) => {
         process.stdout.write('.');
         shell('yarn', ['react-native', 'run-android'], {});
       } else {
-        !stop && process.stdout.write('.');
+        process.stdout.write('.');
       }
     },
   });

@@ -2,10 +2,11 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { SafeAreaView, StatusBar, } from 'react-native';
 import * as UI from 'core-ui';
+import { createAppContainer, createStackNavigator } from "react-navigation";
 
-export const App = () => {
-  return (
-    <Fragment>
+const HomeScreen = (props: {}) =>
+  <Fragment>
+    <UI.View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <UI.Accent>123456789</UI.Accent>
@@ -20,6 +21,13 @@ export const App = () => {
         <UI.Text weight="light" numberOfLines={1}>123456789</UI.Text>
         <UI.Text weight="thin" numberOfLines={1}>123456789</UI.Text>
       </SafeAreaView>
-    </Fragment>
-  );
-};
+    </UI.View>
+  </Fragment>
+
+export const Navigator = createStackNavigator({
+  Home: {
+    screen: HomeScreen
+  }
+});
+
+export const App = createAppContainer(Navigator);
