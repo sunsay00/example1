@@ -1,6 +1,6 @@
 import { useToast } from './usetoast';
 import { useAccount, SignUpResult, LogInResult, ConfirmResult } from './useaccount';
-import { useForm } from 'core-hooks';
+import * as UI from 'core-ui';
 import { Alert } from '../components/alert';
 
 export const useLogInForm = (props: {
@@ -10,7 +10,7 @@ export const useLogInForm = (props: {
 }) => {
   const { loading, logIn, resendConfirmationCode } = useAccount();
   const toast = useToast();
-  const form = useForm({
+  const form = UI.useForm({
     emailOrUsername: {
       type: 'text',
       placeholder: 'Email or Username',
@@ -57,7 +57,7 @@ export const useLogInForm = (props: {
 
 export const useChangePasswordForm = (props: { locale: string }) => {
   const { loading, changePassword } = useAccount();
-  const form = useForm({
+  const form = UI.useForm({
     newPassword: {
       type: 'password',
       placeholder: 'New Password',
@@ -76,7 +76,7 @@ export const useConfirmationForm = (props: { onGoToLogIn: () => void }) => {
   const { loading, resendConfirmationCode, confirmCode } = useAccount();
   const toast = useToast();
 
-  const form = useForm({
+  const form = UI.useForm({
     code: {
       type: 'text',
       placeholder: 'Confirmation Code',
@@ -104,7 +104,7 @@ export const useConfirmationForm = (props: { onGoToLogIn: () => void }) => {
 export const useResetPasswordForm = (props: { emailOrUsername: string, onGoToLogIn: () => void }) => {
   const { loading, resetPassword } = useAccount();
 
-  const form = useForm({
+  const form = UI.useForm({
     code: {
       type: 'text',
       placeholder: 'Code',
@@ -135,7 +135,7 @@ export const useSignUpForm = (props: {
   const { loading, signUp } = useAccount();
   const toast = useToast();
 
-  const form = useForm({
+  const form = UI.useForm({
     username: {
       type: 'username',
       placeholder: 'Username',
@@ -173,7 +173,7 @@ export const useForgotPasswordForm = (props: {
   onGoToResetPassword: (emailOrUsername: string) => void,
 }) => {
   const { loading, sendRecoveryEmail } = useAccount();
-  const form = useForm({
+  const form = UI.useForm({
     emailOrUsername: {
       type: 'text',
       pattern: /^.{2,}$/,

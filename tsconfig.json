@@ -9,10 +9,10 @@
       "path": "./packages/core"
     },
     {
-      "path": "./packages/core-hooks"
+      "path": "./packages/core-ui"
     },
     {
-      "path": "./packages/core-ui"
+      "path": "./packages/mobile-ui"
     },
     {
       "path": "./packages/cf-cognito"

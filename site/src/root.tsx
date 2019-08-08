@@ -44,10 +44,12 @@ const Application = (props: { children?: React.ReactNode }) => {
 }
 
 export const Root = (props: { children?: React.ReactNode }) =>
-  <AccountProvider region="us-east-1">
-    <ApolloProvider>
-      <UI.WebRoot>
-        <Application>{props.children}</Application>
-      </UI.WebRoot>
-    </ApolloProvider>
-  </AccountProvider>
+  <UI.Injector>
+    <AccountProvider region="us-east-1">
+      <ApolloProvider>
+        <UI.WebRoot>
+          <Application>{props.children}</Application>
+        </UI.WebRoot>
+      </ApolloProvider>
+    </AccountProvider>
+  </UI.Injector>
