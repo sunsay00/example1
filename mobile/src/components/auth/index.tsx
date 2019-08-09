@@ -89,3 +89,28 @@ export const Auth = (props: {
     return null;
   }
 }
+/*
+  Auth: createStackNavigator({
+    LogIn: () => {
+      const nav = useNavigation();
+      return (
+        <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <UI.Header1>Log in</UI.Header1>
+          <UI.Button onPress={() => nav.navigate('Main')}>Sign in</UI.Button>
+          <UI.Spacer />
+          <UI.Button onPress={() => nav.push('SignUp')}>Sign up</UI.Button>
+          <UI.Spacer />
+          <UI.Button size="xs" secondary onPress={() => nav.navigate('Landing')}>Landing</UI.Button>
+        </UI.View>
+      );
+    },
+    SignUp: () => {
+      const nav = useNavigation();
+      return (
+        <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <UI.Header1>Sign up</UI.Header1>
+          <UI.Button onPress={() => nav.navigate('LogIn')}>Go To Log in</UI.Button>
+        </UI.View>
+      );
+    }
+*/

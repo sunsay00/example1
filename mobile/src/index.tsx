@@ -7,6 +7,9 @@ import {
   createBottomTabNavigator, createAppContainer, createStackNavigator,
   useNavigation, useNavigationOptions
 } from './hooks/usenavigation';
+import { Auth } from './components/auth';
+import { AccountProvider } from 'cf-cognito';
+//import { ApolloProvider } from './hooks/useapollo';
 
 const Drawer = () =>
   <UI.SafeAreaView>
@@ -62,6 +65,16 @@ const Tab2 = () => {
   );
 }
 
+const Landing = (props: {}) => {
+  const nav = useNavigation();
+  return (
+    <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <UI.Header1>Infinage Labs</UI.Header1>
+      <UI.Link size="md" onPress={() => nav.navigate('Auth')}>Proceed</UI.Link>
+    </UI.View>
+  )
+}
+
 const Tabs = (initialRouteName: string) => createBottomTabNavigator({
   Tab1: createStackNavigator({ Tab1 }),
   Tab2: createStackNavigator({ Tab2 }),
@@ -71,44 +84,27 @@ export const Layout = createAppContainer(createSwitchNavigator({
   Main: createDrawerNavigator(
     { Home: Tabs('Tab1'), Settings: Tabs('Tab2') },
     { drawerType: 'slide', contentComponent: Drawer }),
-  Landing: () => {
-    const nav = useNavigation();
-    return (
-      <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <UI.Header1>Landing</UI.Header1>
-        <UI.Button onPress={() => nav.navigate('Auth')}>Log in</UI.Button>
-      </UI.View>
-    );
-  },
-  Auth: createStackNavigator({
-    LogIn: () => {
-      const nav = useNavigation();
-      return (
-        <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <UI.Header1>Log in</UI.Header1>
-          <UI.Button onPress={() => nav.navigate('Main')}>Sign in</UI.Button>
-          <UI.Spacer />
-          <UI.Button onPress={() => nav.push('SignUp')}>Sign up</UI.Button>
-          <UI.Spacer />
-          <UI.Button size="xs" secondary onPress={() => nav.navigate('Landing')}>Landing</UI.Button>
-        </UI.View>
-      );
-    },
-    SignUp: () => {
-      const nav = useNavigation();
-      return (
-        <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <UI.Header1>Sign up</UI.Header1>
-          <UI.Button onPress={() => nav.navigate('LogIn')}>Go To Log in</UI.Button>
-        </UI.View>
-      );
-    }
-  }, { headerMode: 'none' }),
+  Landing,
+  Auth,
 }, { initialRouteName: 'Landing' }));
 
-export const App = (props: {}) =>
+const MobileRoot = (props: { children?: (overlays: React.ReactNode) => React.ReactNode }) =>
   <Mobile.Injector>
     <UI.LoadingProvider>
-      <Layout />
+      <UI.BreakableProvider>
+        <UI.TopViewStackProvider>{overlays =>
+          <UI.ToastProvider>
+            {props.children && props.children(overlays) || null}
+          </UI.ToastProvider>}
+        </UI.TopViewStackProvider>
+      </UI.BreakableProvider>
     </UI.LoadingProvider>
   </Mobile.Injector>
+
+export const App = (props: {}) =>
+  <MobileRoot>{overlays =>
+    <AccountProvider region="us-east-1">
+      <Layout />
+      {overlays}
+    </AccountProvider>}
+  </MobileRoot>

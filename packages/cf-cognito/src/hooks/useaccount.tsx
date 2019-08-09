@@ -11,7 +11,7 @@ export enum ConfirmResult { Success, CodeMismatch, Unknown };
 
 enum AccountMode { LoggedIn, LoggedOut };
 
-type User = {
+export type AccountUser = {
   username: string,
   sub: string,
   locale: string,
@@ -30,7 +30,7 @@ type User = {
 type ContextValue = {
   account: Account
   setMode: (mode: AccountMode) => void,
-  user?: User,
+  user?: AccountUser,
 };
 
 const _account = new Account(UserPoolMode.Web, AsyncStorage);
@@ -197,7 +197,7 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
   const [ready, setReady] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState(AccountMode.LoggedOut);
-  const [user, setUser] = React.useState<User>();
+  const [user, setUser] = React.useState<AccountUser>();
 
   React.useEffect(() => {
     setLoading(true);
