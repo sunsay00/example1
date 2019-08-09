@@ -3,11 +3,11 @@ import { useState } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signup';
-import { ResetPassword } from '../components/resetpassword';
+import { ResetPassword } from './resetpassword';
 import { Forgot } from '../components/forgot';
-import { Confirmation } from '../components/confirmation';
+import { Confirmation } from './confirmation';
 import { useLocale } from '../hooks/uselocale';
-import { ChangePassword } from '../components/changepassword';
+import { ChangePassword } from './changepassword';
 
 // [ STATE FLOWS ]
 // signUp -> confirmation -> logIn
