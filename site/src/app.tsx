@@ -22,7 +22,7 @@ library.add(faVideo);
 library.add(faSync);
 
 const Layout = (props: { children?: React.ReactNode }) => {
-  const { setCurrent } = UI.useModal();
+  const { setCurrent } = UI.usePopUp();
   const { loading, user, logOut } = useAccount();
 
   return (
@@ -36,7 +36,9 @@ const Layout = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink disabled={loading} onPress={() => {
             if (user) logOut();
             else setCurrent(<Authentication onLogInComplete={() => setCurrent(null)} />);
-          }}>{user ? 'Log out' : 'Log in'}</UI.WebNavLink>
+          }}>
+            {user ? 'Log out' : 'Log in'}
+          </UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
     }>
@@ -47,13 +49,15 @@ const Layout = (props: { children?: React.ReactNode }) => {
 
 export const App = (props: { children?: React.ReactNode }) =>
   <UI.Injector>
-    <AccountProvider region="us-east-1">
-      <ApolloProvider>
-        <UI.Root>
-          <Layout>
-            {props.children}
-          </Layout>
-        </UI.Root>
-      </ApolloProvider>
-    </AccountProvider>
+    <UI.LoadingProvider>
+      <AccountProvider region="us-east-1">
+        <ApolloProvider>
+          <UI.Root>
+            <Layout>
+              {props.children}
+            </Layout>
+          </UI.Root>
+        </ApolloProvider>
+      </AccountProvider>
+    </UI.LoadingProvider>
   </UI.Injector>

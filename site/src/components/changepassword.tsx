@@ -5,7 +5,8 @@ export const ChangePassword = (props: {
   locale: string,
   onToGoLogIn: () => void,
 }) => {
-  const { loading, form } = UI.useChangePasswordForm({ locale: props.locale });
+  const { loading } = UI.useLoading(ChangePassword);
+  const { form } = UI.useChangePasswordForm({ locale: props.locale });
 
   return (
     <UI.View style={{

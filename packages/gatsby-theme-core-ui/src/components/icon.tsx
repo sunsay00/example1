@@ -31,7 +31,7 @@ export const Icon = (props: {
   const size = _styles.fontSize[props.size || 'lg'];
   const icon = Icons[props.name];
   return (
-    <UI.TouchableWithoutFeedback disabled={!props.onPress} style={props.style} onPress={props.onPress} hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
+    <UI.TouchableWithoutFeedback disabled={props.disabled || !props.onPress} style={props.style} onPress={props.onPress} hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
       <UI.View style={{ width: size, height: size }}>
         <FontAwesomeIcon
           style={{

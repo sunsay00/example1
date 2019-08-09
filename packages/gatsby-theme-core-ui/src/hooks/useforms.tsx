@@ -8,7 +8,7 @@ export const useLogInForm = (props: {
   onGoToChangePassword: () => void,
   onGoToConfirmation: (verifiedUsername: string) => void,
 }) => {
-  const { loading, logIn, resendConfirmationCode } = useAccount();
+  const { logIn, resendConfirmationCode } = useAccount();
 
   const toast = useToast();
   const form = UI.useForm({
@@ -53,11 +53,12 @@ export const useLogInForm = (props: {
     }
   });
 
-  return { loading, form };
+  return { form };
 }
 
 export const useChangePasswordForm = (props: { locale: string }) => {
-  const { loading, changePassword } = useAccount();
+  const { loading } = UI.useLoading(useChangePasswordForm);
+  const { changePassword } = useAccount();
   const form = UI.useForm({
     newPassword: {
       type: 'password',
@@ -74,7 +75,8 @@ export const useChangePasswordForm = (props: { locale: string }) => {
 }
 
 export const useConfirmationForm = (props: { onGoToLogIn: () => void }) => {
-  const { loading, resendConfirmationCode, confirmCode } = useAccount();
+  const { loading } = UI.useLoading(useConfirmationForm);
+  const { resendConfirmationCode, confirmCode } = useAccount();
   const toast = useToast();
 
   const form = UI.useForm({
@@ -103,7 +105,8 @@ export const useConfirmationForm = (props: { onGoToLogIn: () => void }) => {
 }
 
 export const useResetPasswordForm = (props: { emailOrUsername: string, onGoToLogIn: () => void }) => {
-  const { loading, resetPassword } = useAccount();
+  const { loading } = UI.useLoading(useResetPasswordForm);
+  const { resetPassword } = useAccount();
 
   const form = UI.useForm({
     code: {
@@ -133,7 +136,8 @@ export const useSignUpForm = (props: {
   role: string,
   locale: string,
 }) => {
-  const { loading, signUp } = useAccount();
+  const { loading } = UI.useLoading(useSignUpForm);
+  const { signUp } = useAccount();
   const toast = useToast();
 
   const form = UI.useForm({
@@ -173,7 +177,8 @@ export const useSignUpForm = (props: {
 export const useForgotPasswordForm = (props: {
   onGoToResetPassword: (emailOrUsername: string) => void,
 }) => {
-  const { loading, sendRecoveryEmail } = useAccount();
+  const { loading } = UI.useLoading(useForgotPasswordForm);
+  const { sendRecoveryEmail } = useAccount();
   const form = UI.useForm({
     emailOrUsername: {
       type: 'text',

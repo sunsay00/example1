@@ -5,7 +5,8 @@ export const ResetPassword = (props: {
   emailOrUsername: string,
   onGoToLogIn: () => void,
 }) => {
-  const { loading, form } = UI.useResetPasswordForm({
+  const { loading } = UI.useLoading(ResetPassword);
+  const { form } = UI.useResetPasswordForm({
     emailOrUsername: props.emailOrUsername,
     onGoToLogIn: props.onGoToLogIn
   });

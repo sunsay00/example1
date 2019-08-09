@@ -10,7 +10,8 @@ export const SignUp = (props: {
   version: string;
   renderLogo?: () => JSX.Element,
 }) => {
-  const { loading, form } = UI.useSignUpForm({
+  const { loading } = UI.useLoading(SignUp);
+  const { form } = UI.useSignUpForm({
     onGoToConfirmation: props.onGoToConfirmation,
     role: props.role,
     locale: props.locale,

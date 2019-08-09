@@ -4,7 +4,8 @@ import * as UI from 'gatsby-theme-core-ui';
 export const Confirmation = (props: {
   onGoToLogIn: () => void
 }) => {
-  const { loading, form, resendConfirmationCode } = UI.useConfirmationForm({ onGoToLogIn: props.onGoToLogIn });
+  const { loading } = UI.useLoading(Confirmation);
+  const { form, resendConfirmationCode } = UI.useConfirmationForm({ onGoToLogIn: props.onGoToLogIn });
 
   return (
     <>

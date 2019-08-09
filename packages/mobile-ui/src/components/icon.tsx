@@ -29,7 +29,7 @@ export const Icon = (props: {
 }) => {
   const slop = 16;
   return (
-    <TouchableWithoutFeedback disabled={!props.onPress} style={props.style} onPress={props.onPress} hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
+    <TouchableWithoutFeedback disabled={props.disabled || !props.onPress} style={props.style} onPress={props.onPress} hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
       <UI.Text
         style={{
           ..._styles.common,

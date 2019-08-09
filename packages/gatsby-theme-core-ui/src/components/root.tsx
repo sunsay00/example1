@@ -4,7 +4,7 @@ import * as UI from 'core-ui';
 import { TopViewStackProvider } from '../hooks/usetopviewstack';
 import { ToastProvider } from '../hooks/usetoast';
 import { AlertProvider } from './alert';
-import { ModalProvider } from '../hooks/usemodal';
+import { PopUpProvider } from '../hooks/usepopup';
 
 export const Root = (props: { children?: React.ReactNode }) => {
   return (
@@ -12,9 +12,9 @@ export const Root = (props: { children?: React.ReactNode }) => {
       <TopViewStackProvider renderWrapper={children =>
         <ToastProvider>
           <AlertProvider>
-            <ModalProvider style={{ maxWidth: 500 }}>
+            <PopUpProvider style={{ maxWidth: 500 }}>
               {children}
-            </ModalProvider>
+            </PopUpProvider>
           </AlertProvider>
         </ToastProvider>
       }>

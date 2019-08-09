@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useContext } from 'react';
 import { AsyncStorage } from 'react-native';
 import { Account, UserPoolMode } from 'cf-cognito';
+import * as UI from 'core-ui';
 import { useToast } from './usetoast';
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
@@ -28,8 +29,6 @@ type User = {
 
 type ContextValue = {
   account: Account
-  setLoading: (loading: boolean) => void,
-  loading: boolean
   setMode: (mode: AccountMode) => void,
   user?: User,
 };
@@ -42,7 +41,10 @@ export const useAccount = () => {
   const toast = useToast();
   const ctx = useContext(AccountContext);
   if (!ctx) throw new Error('invalid account context');
-  const { account, setLoading, loading, setMode, user } = ctx;
+
+  const { account, setMode, user } = ctx;
+
+  const { setLoading } = UI.useLoading(useAccount);
 
   const resendConfirmationCode = async () => {
     try {
@@ -185,7 +187,7 @@ export const useAccount = () => {
   }
 
   return {
-    loading, resendConfirmationCode, logIn, logOut, signUp,
+    resendConfirmationCode, logIn, logOut, signUp,
     changePassword, sendRecoveryEmail, resetPassword, confirmCode,
     completeNewPasswordChallenge, user, refreshCredentials
   };
@@ -227,7 +229,6 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
   return (
     <AccountContext.Provider value={{
       account: _account,
-      loading, setLoading,
       setMode, user,
     }}>
       {props.children}

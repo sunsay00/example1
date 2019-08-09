@@ -9,7 +9,8 @@ export const LogIn = (props: {
   onGoToConfirmation: (verifiedUsername: string) => void,
   renderLogo?: () => JSX.Element,
 }) => {
-  const { loading, form } = UI.useLogInForm({
+  const { loading } = UI.useLoading(LogIn);
+  const { form } = UI.useLogInForm({
     onLogInComplete: props.onLogInComplete,
     onGoToChangePassword: props.onGoToChangePassword,
     onGoToConfirmation: props.onGoToConfirmation,
