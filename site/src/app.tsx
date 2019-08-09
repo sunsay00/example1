@@ -55,8 +55,8 @@ export const App = (props: { children?: React.ReactNode }) =>
       <ApolloProvider>
         <Layout>
           {props.children}
-          {overlays}
         </Layout>
+        {overlays}
       </ApolloProvider>
     </AccountProvider>}
   </Web.Root>
