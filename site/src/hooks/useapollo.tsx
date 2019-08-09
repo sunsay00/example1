@@ -13,6 +13,7 @@ import { onError } from 'apollo-link-error';
 import { getMainDefinition } from 'apollo-utilities';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { setContext } from 'apollo-link-context';
+import { useAccount } from 'cf-cognito';
 
 const createCache = async () => {
   const cache = new InMemoryCache();
@@ -41,7 +42,7 @@ const concatWebSocket = (link: ApolloLink) => {
 }
 
 const useAuthorizationHeader = () => {
-  const { user } = UI.useAccount();
+  const { user } = useAccount();
   const [authorization, setAuthorization] = React.useState('Guest');
   React.useEffect(() => {
     if (user) setAuthorization(`Bearer ${user.tokens.idToken}`);

@@ -7,8 +7,10 @@ import { Alert } from './alert';
 import { Image } from './image';
 import { ImageBackground } from './imagebackground';
 import { Modal } from './modal';
+import { useToast } from '../hooks/usetoast';
 
 export const Injector = (props: { children?: React.ReactNode }) => {
+  const toast = useToast();
   return (
     <UI.InjectorProvider client={{
       Slider: props => <Slider {...props} />,
@@ -16,6 +18,7 @@ export const Injector = (props: { children?: React.ReactNode }) => {
       Icon,
       Image,
       ImageBackground,
+      toast,
       Modal: props => <Modal {...props} />,
     }}>
       {props.children}

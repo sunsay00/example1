@@ -1,11 +1,12 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
+import { useConfirmationForm } from 'cf-cognito';
 
 export const Confirmation = (props: {
   onGoToLogIn: () => void
 }) => {
   const { loading } = UI.useLoading(Confirmation);
-  const { form, resendConfirmationCode } = UI.useConfirmationForm({ onGoToLogIn: props.onGoToLogIn });
+  const { form, resendConfirmationCode } = useConfirmationForm({ onGoToLogIn: props.onGoToLogIn });
 
   return (
     <>

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
+import { useLogInForm } from 'cf-cognito';
 
 export const LogIn = (props: {
   onLogInComplete: () => void,
@@ -10,7 +11,7 @@ export const LogIn = (props: {
   renderLogo?: () => JSX.Element,
 }) => {
   const { loading } = UI.useLoading(LogIn);
-  const { form } = UI.useLogInForm({
+  const { form } = useLogInForm({
     onLogInComplete: props.onLogInComplete,
     onGoToChangePassword: props.onGoToChangePassword,
     onGoToConfirmation: props.onGoToConfirmation,

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
+import { useChangePasswordForm } from 'cf-cognito';
 
 export const ChangePassword = (props: {
   locale: string,
   onToGoLogIn: () => void,
 }) => {
   const { loading } = UI.useLoading(ChangePassword);
-  const { form } = UI.useChangePasswordForm({ locale: props.locale });
+  const { form } = useChangePasswordForm({ locale: props.locale });
 
   return (
     <UI.View style={{

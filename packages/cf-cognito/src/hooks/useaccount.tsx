@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useState, useContext } from 'react';
 import { AsyncStorage } from 'react-native';
-import { Account, UserPoolMode } from 'cf-cognito';
+import { Account } from '../account';
+import { UserPoolMode } from '../types';
 import * as UI from 'core-ui';
-import { useToast } from './usetoast';
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
 export enum SignUpResult { Success, UsernameExists, Unknown };
@@ -38,7 +38,7 @@ const _account = new Account(UserPoolMode.Web, AsyncStorage);
 const AccountContext = React.createContext<ContextValue | undefined>(undefined);
 
 export const useAccount = () => {
-  const toast = useToast();
+  const toast = UI.useToast();
   const ctx = useContext(AccountContext);
   if (!ctx) throw new Error('invalid account context');
 

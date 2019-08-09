@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
-import { AccountProvider, useAccount } from 'gatsby-theme-core-ui';
+import { AccountProvider, useAccount } from 'cf-cognito';
 import { ApolloProvider } from './hooks/useapollo';
 import { Authentication } from './components/authentication';
 import { library } from '@fortawesome/fontawesome-svg-core';
