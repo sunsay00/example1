@@ -7,18 +7,10 @@
     "test": "jest",
     "lint": "eslint ."
   },
-  "workspaces": {
-    "nohoist": [
-      "react-native",
-      "react-native/**",
-      "react-navigation",
-      "react-navigation/**",
-      "react-native-gesture-handler",
-      "react-native-gesture-handler/**"
-    ]
-  },
   "dependencies": {
-    "mobile-ui": "./packages/mobile-ui",
+    "common": "../packages/common",
+    "core-ui": "../packages/core-ui",
+    "mobile-ui": "../packages/mobile-ui",
     "react": "16.8.6",
     "react-native": "0.60.4",
     "react-native-gesture-handler": "^1.1.0",
@@ -38,7 +30,8 @@
     "jest": "^24.8.0",
     "metro-react-native-babel-preset": "^0.55.0",
     "react-test-renderer": "16.8.6",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "react-native-cli": "^2.0.1"
   },
   "jest": {
     "preset": "react-native"

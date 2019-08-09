@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { useState } from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
 import { LogIn } from './login';
 import { SignUp } from './signup';
 import { ResetPassword } from './resetpassword';
 import { ForgotPassword } from './forgotpassword';
 import { Confirmation } from './confirmation';
-import { useLocale } from '../../hooks/uselocale';
 import { ChangePassword } from './changepassword';
+
+const useLocale = () => 'EN';
 
 // [ STATE FLOWS ]
 // signUp -> confirmation -> logIn

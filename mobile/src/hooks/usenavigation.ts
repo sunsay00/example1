@@ -3,20 +3,12 @@ import { Easing, Animated } from 'react-native';
 import {
   NavigationTransitionProps, createStackNavigator as createStackNavigatorRN,
   NavigationScreenConfigProps, NavigationStackScreenOptions, NavigationRouteConfigMap,
-  StackNavigatorConfig, NavigationContainer
-} from "react-navigation";
-
-export * from 'react-navigation';
-
-import {
-  NavigationContext,
-  NavigationScreenProp,
-  NavigationRoute,
-  NavigationParams,
-  NavigationEventCallback,
-  NavigationEventPayload,
+  StackNavigatorConfig, NavigationContainer, NavigationContext, NavigationScreenProp,
+  NavigationRoute, NavigationParams, NavigationEventCallback, NavigationEventPayload,
   EventType,
 } from 'react-navigation';
+
+export * from 'react-navigation';
 
 export function useNavigation<S>(): NavigationScreenProp<S & NavigationRoute> {
   return useContext(NavigationContext as any);

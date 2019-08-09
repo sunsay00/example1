@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { StatusBar, } from 'react-native';
 import * as UI from 'core-ui';
+import * as Mobile from 'mobile-ui';
 import {
   createSwitchNavigator, createDrawerNavigator,
   createBottomTabNavigator, createAppContainer, createStackNavigator,
@@ -66,7 +67,7 @@ const Tabs = (initialRouteName: string) => createBottomTabNavigator({
   Tab2: createStackNavigator({ Tab2 }),
 }, { initialRouteName });
 
-export const App = createAppContainer(createSwitchNavigator({
+export const Layout = createAppContainer(createSwitchNavigator({
   Main: createDrawerNavigator(
     { Home: Tabs('Tab1'), Settings: Tabs('Tab2') },
     { drawerType: 'slide', contentComponent: Drawer }),
@@ -104,3 +105,10 @@ export const App = createAppContainer(createSwitchNavigator({
     }
   }, { headerMode: 'none' }),
 }, { initialRouteName: 'Landing' }));
+
+export const App = (props: {}) =>
+  <Mobile.Injector>
+    <UI.LoadingProvider>
+      <Layout />
+    </UI.LoadingProvider>
+  </Mobile.Injector>
