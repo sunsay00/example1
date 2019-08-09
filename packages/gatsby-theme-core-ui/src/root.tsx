@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
 import { PopUpProvider } from './hooks/usepopup';
+import { useBodyScrollLocker } from './hooks/usebodyscrolllocker';
 
 import { Alert, AlertProvider } from './components/inject/alert';
 import { Slider } from './components/inject/slider';
@@ -23,6 +24,14 @@ const Injector = (props: { children?: React.ReactNode }) =>
     {props.children}
   </UI.InjectorProvider>
 
+const ScrollLocker = (props: {
+  locked: boolean
+  children?: React.ReactNode
+}) => {
+  useBodyScrollLocker(props.locked);
+  return <>{props.children}</>
+}
+
 export const Root = (props: {
   children?: (overlays: React.ReactNode) => React.ReactNode
 }) =>
@@ -30,13 +39,15 @@ export const Root = (props: {
     <UI.LoadingProvider>
       <UI.BreakableProvider>
         <UI.TopViewStackProvider>{overlays =>
-          <UI.ToastProvider>
-            <AlertProvider>
-              <PopUpProvider style={{ maxWidth: 500 }}>
-                {props.children && props.children(overlays)}
-              </PopUpProvider>
-            </AlertProvider>
-          </UI.ToastProvider>}
+          <ScrollLocker locked={!!overlays}>
+            <UI.ToastProvider>
+              <AlertProvider>
+                <PopUpProvider style={{ maxWidth: 500 }}>
+                  {props.children && props.children(overlays)}
+                </PopUpProvider>
+              </AlertProvider>
+            </UI.ToastProvider>
+          </ScrollLocker>}
         </UI.TopViewStackProvider>
       </UI.BreakableProvider>
     </UI.LoadingProvider>
