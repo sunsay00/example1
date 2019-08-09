@@ -50,16 +50,13 @@ const Layout = (props: { children?: React.ReactNode }) => {
 }
 
 export const App = (props: { children?: React.ReactNode }) =>
-  <Web.Injector>
-    <UI.LoadingProvider>
-      <AccountProvider region="us-east-1">
-        <ApolloProvider>
-          <Web.Providers>
-            <Layout>
-              {props.children}
-            </Layout>
-          </Web.Providers>
-        </ApolloProvider>
-      </AccountProvider>
-    </UI.LoadingProvider>
-  </Web.Injector>
+  <Web.Root>{overlays =>
+    <AccountProvider region="us-east-1">
+      <ApolloProvider>
+        <Layout>
+          {props.children}
+          {overlays}
+        </Layout>
+      </ApolloProvider>
+    </AccountProvider>}
+  </Web.Root>

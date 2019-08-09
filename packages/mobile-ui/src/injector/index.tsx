@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as UI from 'core-ui';
 import { Slider, Alert, Image, ImageBackground, Modal } from 'react-native';
 import { Icon } from './components/icon';
+import { FixedView } from './components/fixedview';
 
 export const Injector = (props: { children?: React.ReactNode }) => {
   return (
@@ -12,6 +13,7 @@ export const Injector = (props: { children?: React.ReactNode }) => {
       ImageBackground: props => <ImageBackground {...props} />,
       Modal: props => <Modal {...props} />,
       Slider: props => <Slider {...props} />,
+      FixedView,
       toast: {
         info: (msg: string, onEnd?: () => void) => console.info(msg),
         warn: (msg: string, onEnd?: () => void) => console.warn(msg),

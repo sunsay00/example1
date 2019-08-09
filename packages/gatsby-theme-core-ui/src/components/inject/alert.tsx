@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useTopViewStack } from '../../hooks/usetopviewstack';
-import { useSlideUpAnimation } from '../../hooks/useslideupanimation';
 
 type Opts = {
   title: string,
@@ -15,8 +13,8 @@ let _alert: ((opts: Opts) => void) | undefined;
 export const AlertProvider = (props: {
   children?: React.ReactNode,
 }) => {
-  const [translateY, setVisible] = useSlideUpAnimation(false);
-  const { display, dismiss, requestDismissal } = useTopViewStack(AlertProvider, {
+  const [translateY, setVisible] = UI.useSlideUpAnimation(false);
+  const { display, dismiss, requestDismissal } = UI.useTopViewStack(AlertProvider, {
     onDismissRequest: () => {
       requestDismissal();
       setVisible(false, () =>

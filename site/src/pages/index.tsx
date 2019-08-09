@@ -86,7 +86,7 @@ export default () => {
         </UI.Grid>
       </UI.Section>
 
-      <Web.Anchor id="services" />
+      <Web.NavAnchor id="services" />
 
       <UI.View style={{ backgroundColor: UI.rgba(UI.Colors.black, .05), marginHorizontal: -32, paddingHorizontal: 32 }}>
         <UI.Section>

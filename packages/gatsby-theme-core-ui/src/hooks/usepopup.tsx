@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useTopViewStack } from '../hooks/usetopviewstack';
-import { useScalarAnimation } from '../hooks/usescalaranimation';
 
 type ContextValue = {
   current: React.ReactNode,
@@ -56,7 +54,8 @@ const PopUp = (props: {
           <UI.View style={{ alignSelf: 'flex-start' }}>
             <UI.Icon disabled={props.loading} size="xs" name="times" onPress={() => props.onDimiss && props.onDimiss()} />
             <UI.Spacer />
-          </UI.View>} />
+          </UI.View>}
+      />
       <UI.Spacer />
       {props.children}
     </UI.Breakable>
@@ -70,7 +69,7 @@ export const PopUpProvider = (props: {
   const { loading } = UI.useLoading(PopUpProvider);
 
   const [current, setCurrent] = React.useState<React.ReactNode>(null);
-  const { display, dismiss, requestDismissal } = useTopViewStack(PopUpProvider, {
+  const { display, dismiss, requestDismissal } = UI.useTopViewStack(PopUpProvider, {
     onDismissRequest: () => {
       if (!loading) {
         requestDismissal();
@@ -79,7 +78,7 @@ export const PopUpProvider = (props: {
       }
     }
   });
-  const [opacity, setOpacity] = useScalarAnimation(0);
+  const [opacity, setOpacity] = UI.useScalarAnimation(0);
 
   React.useEffect(() => {
     if (!current) {

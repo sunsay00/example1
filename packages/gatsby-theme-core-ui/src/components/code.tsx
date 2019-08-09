@@ -1,5 +1,4 @@
 import * as React from 'react';
-//import { TextStyle } from 'react-native';
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 import Highlight, { Language, PrismTheme, defaultProps } from 'prism-react-renderer';
 import * as UI from 'core-ui';

@@ -1,11 +1,7 @@
 import '../index.css';
 
-// injector
-
-export * from './injector';
-
 // root
-export * from './components/providers';
+export * from './root';
 
 // web components
 export * from './components/nav';
@@ -15,11 +11,7 @@ export * from './components/table';
 export * from './components/code';
 
 // hooks
-export * from './hooks/usetopviewstack';
 export * from './hooks/usebodyscrolllocker';
-export * from './hooks/useanimation';
-export * from './hooks/useslideupanimation';
-export * from './hooks/usescalaranimation';
 export * from './hooks/usepopup';
 
 // icons
