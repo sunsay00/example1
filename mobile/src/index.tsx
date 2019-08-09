@@ -9,7 +9,7 @@ import {
 } from './hooks/usenavigation';
 import { Auth } from './components/auth';
 import { AccountProvider } from 'cf-cognito';
-//import { ApolloProvider } from './hooks/useapollo';
+import { ApolloProvider } from '@inf/apollo';
 
 const Drawer = () =>
   <UI.SafeAreaView>
@@ -101,10 +101,21 @@ const MobileRoot = (props: { children?: (overlays: React.ReactNode) => React.Rea
     </UI.LoadingProvider>
   </Mobile.Injector>
 
+const config = {
+  WEBSOCKET_ENDPOINT: undefined,
+  GRAPHQL_ENDPOINT: '',
+};
+
 export const App = (props: {}) =>
   <MobileRoot>{overlays =>
     <AccountProvider region="us-east-1">
-      <Layout />
-      {overlays}
+      <ApolloProvider
+        authorization="Guest"
+        websocketEndpoint={config.WEBSOCKET_ENDPOINT}
+        graphqlEndpoint={config.GRAPHQL_ENDPOINT}
+      >
+        <Layout />
+        {overlays}
+      </ApolloProvider>
     </AccountProvider>}
   </MobileRoot>

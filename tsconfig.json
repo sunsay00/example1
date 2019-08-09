@@ -19,6 +19,9 @@
     },
     {
       "path": "./packages/gatsby-theme-core-ui"
+    },
+    {
+      "path": "./packages/@inf/apollo"
     }
   ]
 }

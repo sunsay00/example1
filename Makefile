@@ -16,6 +16,7 @@ sync:
 	tsc -b && cd ./mobile && \
 		cp -r ../packages/common/lib/ node_modules/common/lib/ && \
 		cp -r ../packages/core-ui/lib/ node_modules/core-ui/lib/ && \
+		cp -r ../packages/@inf/apollo/lib/ node_modules/@inf/apollo/lib/ && \
 		cp -r ../packages/cf-cognito/lib/ node_modules/cf-cognito/lib/ && \
 		cp -r ../packages/mobile-ui/lib/ node_modules/mobile-ui/lib/
 
