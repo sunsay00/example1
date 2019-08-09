@@ -1,4 +1,4 @@
 // @ts-check
 import * as React from 'react';
-import { Root } from './src/root';
-export const wrapPageElement = ({ element }) => <Root>{element}</Root>
+import { App } from './src/app';
+export const wrapPageElement = ({ element }) => <App>{element}</App>

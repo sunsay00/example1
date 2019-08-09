@@ -64,7 +64,11 @@ const useAuthLink = () => {
 
 const ApolloContext = React.createContext<ApolloClient<unknown> | undefined>(undefined);
 
-export const useApollo = () => React.useContext(ApolloContext);
+export const useApollo = () => {
+  const ctx = React.useContext(ApolloContext);
+  if (!ctx) throw new Error('invalid apollo context');
+  return ctx;
+}
 
 export const ApolloProvider = (props: { children?: React.ReactNode }) => {
   const [client, setClient] = React.useState<ApolloClient<unknown> | undefined>(undefined);

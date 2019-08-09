@@ -21,7 +21,7 @@ library.add(faRedo);
 library.add(faVideo);
 library.add(faSync);
 
-const Application = (props: { children?: React.ReactNode }) => {
+const Layout = (props: { children?: React.ReactNode }) => {
   const { setCurrent } = UI.useModal();
   const { loading, user, logOut } = useAccount();
 
@@ -39,15 +39,21 @@ const Application = (props: { children?: React.ReactNode }) => {
           }}>{user ? 'Log out' : 'Log in'}</UI.WebNavLink>
         </UI.WebNavBar>
       </UI.ImageBackground>
-    }>{props.children}</UI.WebNavLayout>
+    }>
+      {props.children}
+    </UI.WebNavLayout>
   );
 }
 
-export const Root = (props: { children?: React.ReactNode }) =>
+export const App = (props: { children?: React.ReactNode }) =>
   <UI.Injector>
     <AccountProvider region="us-east-1">
       <ApolloProvider>
-        <Application>{props.children}</Application>
+        <UI.Root>
+          <Layout>
+            {props.children}
+          </Layout>
+        </UI.Root>
       </ApolloProvider>
     </AccountProvider>
   </UI.Injector>

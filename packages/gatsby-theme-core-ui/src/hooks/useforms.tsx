@@ -9,6 +9,7 @@ export const useLogInForm = (props: {
   onGoToConfirmation: (verifiedUsername: string) => void,
 }) => {
   const { loading, logIn, resendConfirmationCode } = useAccount();
+
   const toast = useToast();
   const form = UI.useForm({
     emailOrUsername: {

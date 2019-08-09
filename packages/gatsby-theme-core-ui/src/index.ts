@@ -2,16 +2,19 @@ import '../index.css';
 
 export * from 'core-ui';
 
-// web components
-export { WebNavBar, WebNavAnchor, WebNavLayout, WebNavLink } from './components/webnav';
-export { WebAnchor } from './components/webanchor';
-export { WebEndReachedDetector } from './components/webendreacheddetector';
-export { WebTable, WebTableBody, WebTableRow, WebTableData, WebTableHeader } from './components/webtable';
-export { WebRoot } from './components/webroot';
-export { WebCode, WebInlineCode } from './components/webcode';
-
 // injector
+
 export * from './components/injector';
+
+// root
+export * from './components/root';
+
+// web components
+export * from './components/webnav';
+export * from './components/webanchor';
+export * from './components/webendreacheddetector';
+export * from './components/webtable';
+export * from './components/webcode';
 
 // hooks
 export * from './hooks/usetopviewstack';

@@ -8,9 +8,13 @@ type ContextValue = {
   setCurrent: (c: React.ReactNode) => void,
 };
 
-const ModalContext = React.createContext<ContextValue>({ current: null, setCurrent: _ => console.warn('invalid modal context') });
+const ModalContext = React.createContext<ContextValue | undefined>(undefined);
 
-export const useModal = () => React.useContext(ModalContext);
+export const useModal = () => {
+  const ctx = React.useContext(ModalContext);
+  if (!ctx) throw new Error('invalid modal context');
+  return ctx;
+}
 
 export const ModalProvider = (props: {
   style?: UI.ViewStyle,

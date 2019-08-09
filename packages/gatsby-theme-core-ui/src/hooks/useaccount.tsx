@@ -36,17 +36,13 @@ type ContextValue = {
 
 const _account = new Account(UserPoolMode.Web, AsyncStorage);
 
-const AccountContext = React.createContext<ContextValue>({
-  account: _account,
-  setLoading: () => console.error('invalid account context'),
-  loading: true,
-  setMode: () => console.error('invalid account context'),
-  user: undefined
-});
+const AccountContext = React.createContext<ContextValue | undefined>(undefined);
 
 export const useAccount = () => {
   const toast = useToast();
-  const { account, setLoading, loading, setMode, user } = useContext(AccountContext);
+  const ctx = useContext(AccountContext);
+  if (!ctx) throw new Error('invalid account context');
+  const { account, setLoading, loading, setMode, user } = ctx;
 
   const resendConfirmationCode = async () => {
     try {
@@ -228,9 +224,13 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
 
   if (!ready) return null;
 
-  return <AccountContext.Provider value={{
-    account: _account,
-    loading, setLoading,
-    setMode, user,
-  }}>{props.children}</AccountContext.Provider>;
+  return (
+    <AccountContext.Provider value={{
+      account: _account,
+      loading, setLoading,
+      setMode, user,
+    }}>
+      {props.children}
+    </AccountContext.Provider>
+  );
 }
