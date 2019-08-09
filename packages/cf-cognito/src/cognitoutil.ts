@@ -2,14 +2,10 @@ import { CognitoClient, LocalStorage, UserState, UserPoolMode, UserPool, Cognito
 
 export default class CognitoUtil {
   private _client: CognitoClient;
-  private _region: string;
-  private _mode: UserPoolMode;
   private _localStorageService: LocalStorage;
 
-  constructor(client: CognitoClient, region: string, mode: UserPoolMode, localStorageService: LocalStorage) {
+  constructor(client: CognitoClient, localStorageService: LocalStorage) {
     this._client = client;
-    this._region = region;
-    this._mode = mode;
     this._localStorageService = localStorageService;
   }
 

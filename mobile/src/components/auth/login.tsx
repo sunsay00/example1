@@ -8,7 +8,6 @@ export const LogIn = (props: {
   onGoToChangePassword: () => void,
   onGoToSignUp?: () => void,
   onGoToConfirmation: (verifiedUsername: string) => void,
-  renderLogo?: () => JSX.Element,
 }) => {
   const { loading } = UI.useLoading(LogIn);
   const { form } = useLogInForm({
@@ -19,16 +18,10 @@ export const LogIn = (props: {
 
   return (
     <UI.View style={{
-      width: '100%',
-      height: '100%',
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      justifyContent: 'center',
       flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 40,
     }}>
-      <UI.View style={{ justifyContent: 'center', width: '100%', alignItems: 'center' }}>
-        {props.renderLogo && props.renderLogo()}
-      </UI.View>
       <UI.UserNameInput {...form.fields.emailOrUsername} />
       <UI.Spacer size="sm" />
       <UI.PasswordInput {...form.fields.password} />

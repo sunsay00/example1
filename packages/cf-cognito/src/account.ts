@@ -2,9 +2,10 @@ import CognitoUtil from './cognitoutil';
 import UserLogin from './userlogin';
 import UserProfile from './userprofile';
 import UserRegistration from './userregistration';
-import { CognitoUserSession, CognitoClient, CognitoUser, UserPoolMode, AccountCredentials, UserState, Obj, LocalStorage, Storage } from './types';
+import { CognitoUserSession, CognitoClient, UserPoolMode, LocalStorage, Storage } from './types';
 import { vars } from './vars';
 import * as RT from 'runtypes';
+import { Client } from './client';
 
 const UserAttributesRecord = RT.Record({
   'custom:role': RT.String,
@@ -14,8 +15,6 @@ const UserAttributesRecord = RT.Record({
   preferred_username: RT.String,
   sub: RT.String
 });
-
-type UserAttributes = RT.Static<typeof UserAttributesRecord>;
 
 export type Tokens = {
   idToken: string, accessToken: string, refreshToken: string,
@@ -32,6 +31,37 @@ export type User = {
   tokens: Tokens
 }
 
+class StorageAdaptor {
+  private _storage: Storage;
+  private _prefix: string;
+  constructor(storage: Storage, prefix: string) {
+    this._storage = storage;
+    this._prefix = prefix;
+  }
+  getAllKeys = async () => {
+    const keys = await new Promise<string[]>((resolve, reject) =>
+      this._storage.getAllKeys((err, keys) => err ? reject(err) : resolve(keys || [])));
+    return keys.filter(k => k.startsWith(this._prefix)).map(k => k.substr(this._prefix.length));
+  }
+  remove = (key: string) => new Promise<void>((resolve, reject) =>
+    this._storage.removeItem(`${this._prefix}${key}`, err => err ? reject(err) : resolve()));
+  clear = async () => {
+    const keys = await this.getAllKeys();
+    for (let key of keys)
+      await this.remove(key);
+  }
+  set = (key: string, value?: string) => new Promise<void>((resolve, reject) => {
+    if (value) this._storage.setItem(`${this._prefix}${key}`, value || '', err => err ? reject(err) : resolve());
+    else this._storage.removeItem(`${this._prefix}${key}`, err => err ? reject(err) : resolve());
+  });
+  get = (key: string) => new Promise<string | undefined>((resolve, reject) =>
+    this._storage.getItem(`${this._prefix}${key}`, (err, val) => err ? reject(err) : resolve(val === null ? undefined : val)));
+  setObject = (key: string, value: object) => new Promise<void>((resolve, reject) =>
+    this._storage.setItem(`${this._prefix}${key}`, JSON.stringify(value), err => err ? reject(err) : resolve()));
+  getObject = (key: string) => new Promise<object | undefined>((resolve, reject) =>
+    this._storage.getItem(`${this._prefix}${key}`, (err, data) => err ? reject(err) : resolve(data && JSON.parse(data))));
+}
+
 export class Account {
   private _mode: UserPoolMode;
   private _client: CognitoClient | undefined;
@@ -40,44 +70,29 @@ export class Account {
   private _login: UserLogin | undefined;
   private _profile: UserProfile | undefined;
   private _storage: LocalStorage;
+  private _clientStorage: LocalStorage;
   private _initialized: boolean = false;
 
   constructor(mode: UserPoolMode, storage: Storage) {
     this._mode = mode;
-    const prefix = '@account:';
-    const getAllKeys = () => new Promise<string[]>((resolve, reject) =>
-      storage.getAllKeys((err, keys) => err ? reject(err) : resolve((keys || []).filter(k => k.startsWith(prefix)).map(k => k.substr(prefix.length)))));
-    const remove = (key: string) => new Promise<void>((resolve, reject) =>
-      storage.removeItem(`${prefix}${key}`, err => err ? reject(err) : resolve()));
-    const clear = async () => {
-      const keys = await getAllKeys();
-      for (let key of keys)
-        await remove(key);
-    }
-    this._storage = {
-      getAllKeys, remove, clear,
-      set: (key: string, value?: string) => new Promise<void>((resolve, reject) =>
-        storage.setItem(`${prefix}${key}`, value || '', err => err ? reject(err) : resolve())),
-      get: (key: string) => new Promise<string | undefined>((resolve, reject) =>
-        storage.getItem(`${prefix}${key}`, (err, val) => err ? reject(err) : resolve(val === null ? undefined : val))),
-      setObject: (key: string, value: object) => new Promise<void>((resolve, reject) =>
-        storage.setItem(`${prefix}${key}`, JSON.stringify(value), err => err ? reject(err) : resolve())),
-      getObject: (key: string) => new Promise<object | undefined>((resolve, reject) =>
-        storage.getItem(`${prefix}${key}`, (err, data) => err ? reject(err) : resolve(data && JSON.parse(data)))),
-    };
+    this._storage = new StorageAdaptor(storage, '@account:');
+    this._clientStorage = new StorageAdaptor(storage, '');
   }
+
   init = async (region: string): Promise<boolean> => {
     if (this._initialized) return true;
-    const { Client } = this._mode == UserPoolMode.Web ? await import('./web-client') : await import('./rn-client');
-    this._client = new Client(region, this._mode);
-    this._util = new CognitoUtil(this._client, region, this._mode, this._storage);
-    this._reg = new UserRegistration(this._client, this._mode, this._util);
-    this._profile = new UserProfile(this._client, this._util, this._storage);
-    this._login = new UserLogin(this._client, region, this._profile, this._util, this._storage);
+    const client = new Client(region, this._mode, this._clientStorage) as CognitoClient;
+    this._util = new CognitoUtil(client, this._storage);
+    this._reg = new UserRegistration(client, this._mode, this._util);
+    this._profile = new UserProfile(client, this._util, this._storage);
+    this._login = new UserLogin(client, region, this._profile, this._util, this._storage);
+    await client.init();
     await this._util.sync();
+    this._client = client;
     this._initialized = true;
     return this._initialized;
   }
+
   signUp = async (username: string, email: string, password: string, locale: string, role: string): Promise<string> => {
     if (!this._reg) throw new Error('not initialized');
     const ret = await this._reg.signUp(username, email, password, locale, role);
@@ -97,6 +112,7 @@ export class Account {
     if (!this._login) throw new Error('not initialized');
     await this._login.signOut();
     await this._storage.clear();
+
     //Sentry.setUserContext({ id: sub.ok });
   }
   confirmSignUp = async (confirmationCode: string): Promise<boolean> => {
@@ -115,7 +131,7 @@ export class Account {
     if (!this._login) throw new Error('not initialized');
     return await this._login.confirmForgotPassword(username, verificationCode, password);
   }
-  changePassword = async (prevPassword: string, newPassword: string): Promise<void> => {
+  changePassword = async (prevPassword: string, newPassword: string): Promise<string | undefined> => {
     if (!this._login) throw new Error('not initialized');
     return await this._login.changePassword(prevPassword, newPassword);
   }

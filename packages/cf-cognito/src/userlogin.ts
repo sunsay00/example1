@@ -230,21 +230,19 @@ export default class UserLogin {
     this._client.clearCachedId();
   }
 
-  changePassword = async (previousPassword: string, proposedPassword: string): Promise<void> => {
-    return new Promise<void>(async (resolve, reject) => {
-      // first, load the valid tokens cached in the local store, if they are available
-      // see: https://github.com/aws/amazon-cognito-identity-js/issues/71
-      const cognitoUser = await this._util.getCognitoUser();
-      if (cognitoUser === undefined) return reject('not currently logged in');
-      cognitoUser.getSession((err: Error, session: any) => {
+  changePassword = async (previousPassword: string, proposedPassword: string) => new Promise<string | undefined>(async (resolve, reject) => {
+    // first, load the valid tokens cached in the local store, if they are available
+    // see: https://github.com/aws/amazon-cognito-identity-js/issues/71
+    const cognitoUser = await this._util.getCognitoUser();
+    if (cognitoUser === undefined) return reject('not currently logged in');
+    cognitoUser.getSession((err: Error, session: any) => {
+      if (err) return reject(err);
+      cognitoUser.changePassword(previousPassword, proposedPassword, (err?: Error, result?: string) => {
         if (err) return reject(err);
-        cognitoUser.changePassword(previousPassword, proposedPassword, (err: Error, result: any) => {
-          if (err) return reject(err);
-          resolve(result);
-        });
+        resolve(result);
       });
     });
-  }
+  });
 
   completeNewPasswordChallenge = async (newPassword: string, locale: string) => {
     const cognitoUser = this._currentSignInUser || this._util.getCurrentUser();

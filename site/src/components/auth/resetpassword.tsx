@@ -14,12 +14,8 @@ export const ResetPassword = (props: {
 
   return (
     <UI.View style={{
-      width: '100%',
-      height: '100%',
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      justifyContent: 'center',
       flex: 1,
+      justifyContent: 'center',
     }} >
       <UI.Text size="sm">Please enter the code you received in your email below.</UI.Text>
       <UI.Spacer size="xl" />

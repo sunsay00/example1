@@ -11,13 +11,9 @@ export const ChangePassword = (props: {
 
   return (
     <UI.View style={{
-      width: '100%',
-      height: '100%',
-      flexDirection: 'column',
-      alignItems: 'center',
+      flex: 1,
       justifyContent: 'center',
       paddingHorizontal: 40,
-      backgroundColor: UI.Colors.splash,
     }}>
       <UI.PasswordInput {...form.fields.newPassword} />
       <UI.Spacer size="md" />

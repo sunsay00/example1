@@ -1,1 +1,2 @@
-export * from './injector';
+// root
+export * from './root';

@@ -1,6 +1,8 @@
+start:
+	yarn react-native start
 link:
 	yarn react-native link && \
-		cd ./ios && pod install || cd-
+		cd ./ios && pod install || cd -
 
 sim.ios: 
 	@./bin/starter ios start

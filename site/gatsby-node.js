@@ -16,10 +16,13 @@ exports.onCreateWebpackConfig = ({
     devServer: {
       hot: false
     },
+    //devtool: 'cheap-module-eval-source-map', // fast inpercise debugging
+    devtool: 'source-map', // slow percise debugging
     module: {
       rules: [
-        { test: /\.flow$/, use: 'ignore-loader' }
-      ],
-    }
+        { test: /\.flow$/, use: 'ignore-loader' },
+        { test: /\.js$/, enforce: 'pre', loader: "source-map-loader" }
+      ]
+    },
   })
 }

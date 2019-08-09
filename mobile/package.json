@@ -8,15 +8,16 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@inf/apollo": "../packages/@inf/apollo",
+    "amazon-cognito-identity-js": "^3.0.15",
+    "cf-cognito": "../packages/cf-cognito",
     "common": "../packages/common",
     "core-ui": "../packages/core-ui",
+    "graphql-tag": "^2.10.1",
     "mobile-ui": "../packages/mobile-ui",
-    "cf-cognito": "../packages/cf-cognito",
-    "@inf/apollo": "../packages/@inf/apollo",
-    "react": "16.8.6",
+    "react": "^16.9.0",
     "react-native": "0.60.4",
     "react-native-gesture-handler": "^1.1.0",
-    "graphql-tag": "^2.10.1",
     "react-native-screens": "^1.0.0-alpha.23",
     "react-navigation": "^3.11.1"
   },
@@ -32,9 +33,9 @@
     "eslint": "^6.1.0",
     "jest": "^24.8.0",
     "metro-react-native-babel-preset": "^0.55.0",
+    "react-native-cli": "^2.0.1",
     "react-test-renderer": "16.8.6",
-    "typescript": "^3.5.3",
-    "react-native-cli": "^2.0.1"
+    "typescript": "^3.5.3"
   },
   "jest": {
     "preset": "react-native"

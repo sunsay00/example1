@@ -44,9 +44,24 @@ export type CompleteNewPasswordChallengeHandler = {
   customChallenge: (challengeParameters: any) => void
 };
 
+export type CodeDeliveryDetails = {
+  AttributeName: string,
+  DeliveryMedium: string,
+  Destination: string
+}
+
+export type ISignUpResult = {
+  user: CognitoUser;
+  userConfirmed: boolean;
+  userSub: string;
+  codeDeliveryDetails: CodeDeliveryDetails
+}
+
 export type UserPool = {
-  signUp: (username: string, password: string, attributeList: any[], validationData: any[], fn: (err: any, result: any) => void) => void,
-  getCurrentUser: () => CognitoUser,
+  getUserPoolId(): string;
+  getClientId(): string;
+  signUp: (username: string, password: string, userAttributes: CognitoUserAttribute[], validationData: CognitoUserAttribute[], callback: (error?: Error, result?: ISignUpResult) => void) => void;
+  getCurrentUser(): CognitoUser | null;
 }
 
 export type Storage = {
@@ -61,16 +76,17 @@ export type CognitoUser = {
   getUsername: () => string,
   confirmRegistration(confirmationCode: string, b: boolean, next: (err: Error, data: any) => void): void,
   getSession(next: (err: Error, session: any) => void): void,
-  updateAttributes: (attributeList: any[], next: (err: Error, result: string) => void) => void,
-  getAttributeVerificationCode: (username: string, params: {
-    onFailure: (err: any) => void,
-    inputVerificationCode: (data: object) => void
+  updateAttributes: (attributeList: any[], next: (err?: Error, result?: string) => void) => void,
+  getAttributeVerificationCode: (name: string, params: {
+    onSuccess: () => void,
+    onFailure: (err: Error) => void,
+    inputVerificationCode?: (data: string) => void | null,
   }) => void,
   verifyAttribute: (attribute: any, verificationCode: string, params: {
     onFailure: (err: any) => void,
     onSuccess: (data: string) => void
   }) => void,
-  getUserAttributes: (next: (err: Error, result: CognitoUserAttribute[]) => void) => void,
+  getUserAttributes: (next: (err?: Error, result?: CognitoUserAttribute[]) => void) => void,
   authenticateUser: (details: AuthenticationDetails, callbacks: {
     newPasswordRequired: (userAttributes: any, requiredAttributes: any) => void,
     customChallenge: (challengeParameters: any) => void,
@@ -79,7 +95,7 @@ export type CognitoUser = {
     onFailure: (err: any) => void
   }) => void,
   signOut: () => void,
-  changePassword: (previousPassword: string, proposedPassword: string, next: (err: Error, result: any) => void) => void,
+  changePassword: (previousPassword: string, proposedPassword: string, next: (err?: Error, result?: 'SUCCESS') => void) => void,
   completeNewPasswordChallenge: (newPassword: string, requiredAttributeData: Obj<string>, handler: CompleteNewPasswordChallengeHandler) => void,
   globalSignOut: (next: {
     onSuccess: (msg: string) => void,
@@ -103,15 +119,20 @@ export type ResendConfirmationCodeResponse = {
 export type CognitoIdentityServiceProvider = {
   resendConfirmationCode(params: { ClientId: string, Username: string }): { promise: () => Promise<ResendConfirmationCodeResponse> }
 };
-export type AuthenticationDetails = {};
+export type AuthenticationDetails = {
+  getUsername(): string;
+  getPassword(): string;
+  getValidationData(): any[];
+};
 
 export type CognitoClient = {
+  init(): Promise<void>,
   //refreshCredentials(accessKeyId: string, secretAccessKey: string, sessionToken: string): void;
   setCognitoIdentityPoolDetails(logins?: { [_: string]: string }): CognitoIdentityCredentials;
   createCognitoUserPool(): UserPool;
   createCognitoUser(Username: string): CognitoUser;
   cognitoIdentityId(): string;
-  currentUser(): CognitoUser | undefined;
+  currentUser(): CognitoUser | null;
   accessKeyId(): string | undefined;
   secretAccessKey(): string | undefined;
   sessionToken(): string | undefined;

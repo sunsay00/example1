@@ -11,12 +11,9 @@ export const ForgotPassword = (props: {
 
   return (
     <UI.View style={{
-      width: '100%',
-      height: '100%',
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      justifyContent: 'center',
       flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 40,
     }}>
       <UI.View>
         <UI.Text size="lg">Forgot your password?</UI.Text>

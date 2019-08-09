@@ -9,7 +9,11 @@ export const Confirmation = (props: {
   const { form, resendConfirmationCode } = useConfirmationForm({ onGoToLogIn: props.onGoToLogIn });
 
   return (
-    <>
+    <UI.View style={{
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 40,
+    }}>
       <UI.NumericInput {...form.fields.code} />
       <UI.Spacer size='md' />
       <UI.View style={{ width: '100%' }}>
@@ -25,6 +29,6 @@ export const Confirmation = (props: {
           onPress={() => resendConfirmationCode()}
         >Resend Confirmation Code</UI.Link>
       </UI.View>
-    </>
+    </UI.View>
   );
 }

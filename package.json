@@ -10,7 +10,7 @@
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",
-    "typescript": "3.5.3",
-    "react-native-cli": "^2.0.1"
+    "react-native-cli": "^2.0.1",
+    "typescript": "3.5.3"
   }
 }

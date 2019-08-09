@@ -5,5 +5,12 @@ module.exports = {
     assets: [
       './assets/fonts/'
     ]
+  },
+  dependencies: {
+    'react-native-aws-cognito-js': {
+      platforms: {
+        ios: null
+      },
+    },
   }
 };

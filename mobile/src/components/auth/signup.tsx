@@ -9,7 +9,6 @@ export const SignUp = (props: {
   role: string,
   locale: string,
   version: string;
-  renderLogo?: () => JSX.Element,
 }) => {
   const { loading } = UI.useLoading(SignUp);
   const { form } = useSignUpForm({
@@ -19,10 +18,11 @@ export const SignUp = (props: {
   });
 
   return (
-    <UI.View style={{ width: '100%', height: '100%', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center', flex: 1 }} >
-      <UI.View style={{ justifyContent: 'center', width: '100%', alignItems: 'center' }}>
-        {props.renderLogo && props.renderLogo()}
-      </UI.View>
+    <UI.View style={{
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 40,
+    }} >
       <UI.UserNameInput {...form.fields.username} />
       <UI.Spacer size="md" />
       <UI.EmailInput {...form.fields.email} />

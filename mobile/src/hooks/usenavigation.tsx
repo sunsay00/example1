@@ -1,11 +1,12 @@
-import { useState, useContext, useEffect } from 'react';
+import * as React from 'react';
+import { Component, useState, useContext, useEffect } from 'react';
 import { Easing, Animated } from 'react-native';
 import {
   NavigationTransitionProps, createStackNavigator as createStackNavigatorRN,
   NavigationScreenConfigProps, NavigationStackScreenOptions, NavigationRouteConfigMap,
-  StackNavigatorConfig, NavigationContainer, NavigationContext, NavigationScreenProp,
+  StackNavigatorConfig, NavigationContext, NavigationScreenProp, EventType,
   NavigationRoute, NavigationParams, NavigationEventCallback, NavigationEventPayload,
-  EventType,
+  NavigationContainer, NavigationContainerProps, NavigationNavigatorProps, NavigationRouter, NavigationScreenConfig, NavigationState
 } from 'react-navigation';
 
 export * from 'react-navigation';
@@ -139,4 +140,16 @@ export const useNavigationOptions = (opts: {
       nav.setParams({});
     };
   }, []);
+}
+
+export const createNavWrapper = <State extends NavigationState, Options extends {}, Props extends {}>(
+  renderWrapper: (children?: React.ReactNode) => React.ReactNode,
+  Wrapped: NavigationContainer) => {
+  return class extends Component<NavigationContainerProps & NavigationNavigatorProps<Options, State>, Props> {
+    static router: NavigationRouter<State, Options> = Wrapped.router;
+    static navigationOptions?: NavigationScreenConfig<Options> = Wrapped.navigationOptions;
+    render() {
+      return <>{renderWrapper(<Wrapped {...this.props} />)}</>;
+    }
+  }
 }

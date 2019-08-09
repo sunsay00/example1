@@ -89,8 +89,7 @@ const runPackager = async () => new Promise(async (resolve, reject) => {
     const ret = await shell('yarn', ['react-native', 'start'], {
       cwd: `${__dirname}/../`,
       onStdOut: s => {
-        if (done) return;
-        if (/Loading dependency graph, done./.exec(s)) {
+        if (!done && /Loading dependency graph, done./.exec(s)) {
           done = true;
           resolve();
         }
@@ -108,8 +107,7 @@ const runAndroidStart = async (avdName) => {
   await shell('emulator', ['-avd', avdName, '-dns-server', '8.8.8.8', '-verbose'], {
     cwd: `${process.env.ANDROID_HOME}/emulator`,
     onStdOut: s => {
-      if (done) return;
-      if (/Adb connected, start proxing data/.exec(s)) {
+      if (!done && /Adb connected, start proxing data/.exec(s)) {
         done = true;
         process.stdout.write('.');
         shell('yarn', ['react-native', 'run-android'], {});

@@ -31,9 +31,13 @@ type ContextValue = {
   account: Account
   setMode: (mode: AccountMode) => void,
   user?: AccountUser,
+  ready: boolean,
 };
 
-const _account = new Account(UserPoolMode.Web, AsyncStorage);
+const _account: Account | undefined = new Account(
+  UI.Platform.OS == 'web' ? UserPoolMode.Web : UserPoolMode.Mobile,
+  AsyncStorage
+);
 
 const AccountContext = React.createContext<ContextValue | undefined>(undefined);
 
@@ -42,7 +46,7 @@ export const useAccount = () => {
   const ctx = useContext(AccountContext);
   if (!ctx) throw new Error('invalid account context');
 
-  const { account, setMode, user } = ctx;
+  const { account, setMode, user, ready } = ctx;
 
   const { setLoading } = UI.useLoading(useAccount);
 
@@ -63,6 +67,7 @@ export const useAccount = () => {
       setLoading(true);
       await account.signOut();
       setMode(AccountMode.LoggedOut);
+      console.log('logged out');
     } finally {
       setLoading(false);
     }
@@ -75,6 +80,7 @@ export const useAccount = () => {
       if (result == 'changepassword')
         return LogInResult.ChangePassword;
       setMode(AccountMode.LoggedIn);
+      console.log(`logged in as ${emailOrUsername}`);
       return LogInResult.Success;
     } catch (err) {
       if (err.code == 'UserNotFoundException') {
@@ -187,15 +193,16 @@ export const useAccount = () => {
   }
 
   return {
-    resendConfirmationCode, logIn, logOut, signUp,
+    ready, user, resendConfirmationCode, logIn, logOut, signUp,
     changePassword, sendRecoveryEmail, resetPassword, confirmCode,
-    completeNewPasswordChallenge, user, refreshCredentials
+    completeNewPasswordChallenge, refreshCredentials
   };
 }
 
 export const AccountProvider = (props: { region: string, children?: React.ReactNode }) => {
+  const [initialized, setInitialized] = React.useState(false);
   const [ready, setReady] = React.useState(false);
-  const [loading, setLoading] = useState(false);
+  const { setLoading } = UI.useLoading(AccountProvider);
   const [mode, setMode] = useState(AccountMode.LoggedOut);
   const [user, setUser] = React.useState<AccountUser>();
 
@@ -205,32 +212,30 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
       .then(async () => {
         const user = await _account.getCurrentUser();
         setMode(user ? AccountMode.LoggedIn : AccountMode.LoggedOut);
-        setReady(true);
+        setInitialized(true);
       })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, []);
 
   React.useEffect(() => {
-    if (ready) {
+    if (initialized) {
       setLoading(true);
       _account.getCurrentUser()
         .then(async user => {
           if (!user) setUser(undefined);
           else setUser(user);
+          setReady(true);
         })
         .catch(console.error)
         .finally(() => setLoading(false));
     }
-  }, [ready, mode]);
+  }, [initialized, mode]);
 
-  if (!ready) return null;
+  if (!initialized) return null;
 
   return (
-    <AccountContext.Provider value={{
-      account: _account,
-      setMode, user,
-    }}>
+    <AccountContext.Provider value={{ account: _account, setMode, user, ready }}>
       {props.children}
     </AccountContext.Provider>
   );

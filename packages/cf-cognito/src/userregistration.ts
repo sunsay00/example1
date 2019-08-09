@@ -32,7 +32,7 @@ export default class UserRegistration {
       }
 
       this._util.getUserPool().signUp(username, password, attributeList, [], async (err, result) => {
-        if (err) { return reject(err); }
+        if (err || !result) { return reject(err); }
 
         console.log(`Username is ${result.user.getUsername()}`);
         console.log('Sign-up successful!');
@@ -42,7 +42,7 @@ export default class UserRegistration {
         await this._util.setUserState('PendingConfirmation');
 
         // Sign-up successful. Callback without error.
-        resolve(result.user.username);
+        resolve(result.user.getUsername());
       });
     });
   }

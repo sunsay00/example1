@@ -26,6 +26,8 @@
     "strictFunctionTypes": true,
     "jsx": "react",
     "noImplicitUseStrict": true,
-    "types": []
+    "types": [],
+    "inlineSourceMap": true,
+    "inlineSources": true
   }
 }
