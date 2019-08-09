@@ -1,12 +1,6 @@
 import '../index.css';
 
-import { Image, ImageBackground, Modal } from 'core-ui';
-export const Actual = { Image, ImageBackground, Modal };
-
 export * from 'core-ui';
-
-// core-ui overrides
-export { Modal } from './components/modal';
 
 // web components
 export { WebNavBar, WebNavAnchor, WebNavLayout, WebNavLink } from './components/webnav';

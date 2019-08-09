@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Animated, Dimensions, Easing, TouchableWithoutFeedback } from '..';
-import { useBodyScrollLocker } from '../hooks/usebodyscrolllocker';
+import { Animated, Dimensions, Easing, TouchableWithoutFeedback } from 'react-native';
+import * as UI from 'core-ui';
 
 const ModalPortal = (props: {
   children?: React.ReactNode
@@ -21,16 +21,6 @@ const ModalPortal = (props: {
   return ReactDOM.createPortal(props.children, elem);
 }
 
-export type ModalProps = {
-  animationType?: 'none' | 'slide' | 'fade',
-  transparent?: boolean,
-  visible?: boolean,
-  onRequestClose?: () => void,
-  renderOverlayWrapper?: () => void,
-  onDismiss?: () => void,
-  children?: React.ReactNode,
-}
-
 type ModalState = {
   animationSlide: Animated.CompositeAnimation | null,
   animationFade: Animated.CompositeAnimation | null,
@@ -39,7 +29,7 @@ type ModalState = {
   slideTranslation: Animated.Value,
 };
 
-export class Modal extends React.Component<ModalProps, ModalState> {
+export class Modal extends React.Component<UI.ModalProps, ModalState> {
 
   static defaultProps = {
     animationType: 'none',
@@ -50,9 +40,9 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     onDismiss: () => { },
     ariaHideApp: true,
     appElement: null,
-  };
+  } as const;
 
-  constructor(props: Readonly<ModalProps>) {
+  constructor(props: Readonly<UI.ModalProps>) {
     super(props);
 
     this.state = {
@@ -68,24 +58,22 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     if (this.props.visible) this.handleShow(this.props);
   }
 
-  componentWillReceiveProps(props: ModalProps) {
+  componentWillReceiveProps(props: UI.ModalProps) {
     if (props.visible && !this.props.visible) this.handleShow(props);
     if (!props.visible && this.props.visible) this.handleClose(props);
   }
 
-  private handleShow = (props: ModalProps) => {
+  private handleShow = (props: UI.ModalProps) => {
     if (props.animationType === 'slide') {
-      this.animateSlideIn(() => props.renderOverlayWrapper && props.renderOverlayWrapper());
+      this.animateSlideIn(() => { });
     } else if (props.animationType === 'fade') {
-      this.animateFadeIn(() => props.renderOverlayWrapper && props.renderOverlayWrapper());
-    } else {
-      props.renderOverlayWrapper && props.renderOverlayWrapper();
+      this.animateFadeIn(() => { });
     }
   }
 
   dismiss = () => this.handleClose(this.props);
 
-  private handleClose = (props: ModalProps) => {
+  private handleClose = (props: UI.ModalProps) => {
     if (props.animationType === 'slide') {
       this.animateSlideOut(() => props.onDismiss && props.onDismiss());
     } else if (props.animationType === 'fade') {
