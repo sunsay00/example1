@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { AsyncStorage } from 'react-native';
 import gql from 'graphql-tag';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
 import { ApolloProvider as Apollo } from 'react-apollo-hooks';
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';

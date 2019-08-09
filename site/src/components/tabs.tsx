@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
 import { has } from 'common';
 
 export const Tabs = (props: {

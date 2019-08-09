@@ -2,9 +2,7 @@ import * as React from 'react';
 //import { TextStyle } from 'react-native';
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 import Highlight, { Language, PrismTheme, defaultProps } from 'prism-react-renderer';
-import { TextStyle, Breakable } from '..';
-import { View } from '..';
-import * as UI from '..';
+import * as UI from 'core-ui';
 
 const lightTheme: PrismTheme = {
   plain: { backgroundColor: undefined/*"#faf8f5"*/, color: "#728fcb" },
@@ -36,7 +34,7 @@ const darkTheme: PrismTheme = {
   { types: ["attr-name"], style: { color: "rgb(241, 250, 140)" } }]
 };
 
-export const WebCode = (props: { className?: string, style?: TextStyle, children: string, live?: boolean, secondary?: boolean }) => {
+export const Code = (props: { className?: string, style?: UI.TextStyle, children: string, live?: boolean, secondary?: boolean }) => {
   const language = (props.className && props.className.replace(/language-/, '') || 'jsx') as Language;
   const theme = props.secondary ? lightTheme : darkTheme;
   if (props.live) {
@@ -63,19 +61,19 @@ export const WebCode = (props: { className?: string, style?: TextStyle, children
         ScrollView: UI.ScrollView,
         View: UI.View,
       }}>
-        <Breakable style={{ marginBottom: 16 }}
+        <UI.Breakable style={{ marginBottom: 16 }}
           renderSmall={children =>
-            <View style={{ flex: 1, alignItems: 'stretch', justifyContent: 'flex-start' }}>{children}</View>}
+            <UI.View style={{ flex: 1, alignItems: 'stretch', justifyContent: 'flex-start' }}>{children}</UI.View>}
           renderMedium={children =>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-evenly' }}>{children}</View>}>
-          <View style={{ flex: 1, marginBottom: 16 }}>
+            <UI.View style={{ flex: 1, flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-evenly' }}>{children}</UI.View>}>
+          <UI.View style={{ flex: 1, marginBottom: 16 }}>
             <LiveEditor style={{ minHeight: 100, height: '100%' }} />
             <LiveError />
-          </View>
-          <View style={{ flex: 1, justifyContent: 'center', paddingLeft: 16 }}>
+          </UI.View>
+          <UI.View style={{ flex: 1, justifyContent: 'center', paddingLeft: 16 }}>
             <LivePreview style={{ minHeight: 100, height: '100%' }} />
-          </View>
-        </Breakable>
+          </UI.View>
+        </UI.Breakable>
       </LiveProvider>
     );
   } else {
@@ -95,7 +93,7 @@ export const WebCode = (props: { className?: string, style?: TextStyle, children
   }
 }
 
-export const WebInlineCode = (props: { style?: TextStyle, children: string, secondary?: boolean }) =>
+export const InlineCode = (props: { style?: UI.TextStyle, children: string, secondary?: boolean }) =>
   <Highlight {...defaultProps} theme={props.secondary ? lightTheme : darkTheme} code={props.children} language={'jsx'}>
     {({ style, tokens, getLineProps, getTokenProps }) => (
       <pre style={{ ...style, borderRadius: 4, paddingLeft: 4, paddingRight: 4, margin: 0, fontSize: 13 }}>

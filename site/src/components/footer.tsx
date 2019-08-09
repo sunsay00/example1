@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
 
 export const Footer = () =>
   <UI.View style={{ alignItems: 'center', marginVertical: 48 }}>

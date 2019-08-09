@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TextInput, EmailInput, Spacer, Button, View, Breakable } from 'gatsby-theme-core-ui';
+import { TextInput, EmailInput, Spacer, Button, View, Breakable } from 'core-ui';
 import { Headline2 } from './headline';
 import { FinePrint } from './fineprint';
 

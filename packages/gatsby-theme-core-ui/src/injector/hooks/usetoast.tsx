@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useTopViewStack } from '../hooks/usetopviewstack';
+import { useTopViewStack } from '../../hooks/usetopviewstack';
 
 type ContextValue = {
   setCurrent: (c: React.ReactNode) => void,

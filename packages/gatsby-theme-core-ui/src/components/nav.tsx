@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text, ImageBackground } from 'core-ui';
+import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text } from 'core-ui';
 import { Link, navigate } from 'gatsby';
 
-const WebSticky = (props: { offsetY: number, children?: React.ReactNode }) => {
+const Sticky = (props: { offsetY: number, children?: React.ReactNode }) => {
   const navRef = React.useRef<HTMLElement | null>(null);
   React.useEffect(() => {
     navRef.current = document.querySelector('nav');
@@ -30,7 +30,7 @@ const NavLayoutContext = React.createContext({
   navHeight: (opened: boolean) => 0 as number,
 });
 
-export const WebNavBar = (props: {
+export const NavBar = (props: {
   renderLogo?: () => React.ReactNode,
   children?: React.ReactNode
 }) => {
@@ -81,7 +81,7 @@ export const WebNavBar = (props: {
         </View>
       </>}
       renderMedium={() =>
-        <WebSticky offsetY={0}>
+        <Sticky offsetY={0}>
           <Section>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height, marginHorizontal: 16 }}>
               <TouchableOpacity onPress={goHome}>
@@ -92,12 +92,12 @@ export const WebNavBar = (props: {
               </View>
             </View>
           </Section>
-        </WebSticky>
+        </Sticky>
       } />
   );
 }
 
-export const WebNavLink = (props: {
+export const NavLink = (props: {
   secondary?: boolean,
   to?: string,
   onPress?: () => void,
@@ -169,14 +169,14 @@ export const WebNavLink = (props: {
   );
 }
 
-export const WebNavAnchor = (props: { id: string }) => {
+export const NavAnchor = (props: { id: string }) => {
   const { opened, height, navHeight } = React.useContext(NavLayoutContext);
   return (
     <div id={`${props.id}`} style={{ top: opened ? -navHeight(opened) : -height, position: 'relative' }} />
   );
 }
 
-export const WebNavLayout = (props: { navHeight?: number, children?: React.ReactNode, renderNavBar?: () => React.ReactNode }) => {
+export const NavLayout = (props: { navHeight?: number, children?: React.ReactNode, renderNavBar?: () => React.ReactNode }) => {
   const height = props.navHeight || 80;
   const [opened, _setOpened] = React.useState(false);
   const [numChildren, setNumChildren] = React.useState(0);

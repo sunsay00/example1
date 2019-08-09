@@ -18,7 +18,7 @@
     ]
   },
   "dependencies": {
-    "core-ui": "./packages/core-ui",
+    "mobile-ui": "./packages/mobile-ui",
     "react": "16.8.6",
     "react-native": "0.60.4",
     "react-native-gesture-handler": "^1.1.0",

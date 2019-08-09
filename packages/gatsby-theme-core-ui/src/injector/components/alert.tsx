@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useTopViewStack } from '../hooks/usetopviewstack';
-import { useSlideUpAnimation } from '../hooks/useslideupanimation';
+import { useTopViewStack } from '../../hooks/usetopviewstack';
+import { useSlideUpAnimation } from '../../hooks/useslideupanimation';
 
 type Opts = {
   title: string,

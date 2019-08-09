@@ -1,5 +1,6 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
+import * as Web from 'gatsby-theme-core-ui';
 import { Cover } from '../components/cover';
 import { Headline2 } from '../components/headline';
 import { ContactUs } from '../components/contactus';
@@ -85,7 +86,7 @@ export default () => {
         </UI.Grid>
       </UI.Section>
 
-      <UI.WebNavAnchor id="services" />
+      <Web.Anchor id="services" />
 
       <UI.View style={{ backgroundColor: UI.rgba(UI.Colors.black, .05), marginHorizontal: -32, paddingHorizontal: 32 }}>
         <UI.Section>
@@ -93,7 +94,7 @@ export default () => {
         </UI.Section>
       </UI.View>
 
-      <UI.WebNavAnchor id="contact" />
+      <Web.NavAnchor id="contact" />
 
       <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32 }}>
         <UI.Section><ContactUs /></UI.Section>

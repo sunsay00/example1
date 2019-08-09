@@ -2,8 +2,8 @@ import * as React from 'react';
 import * as UI from 'core-ui';
 
 import { TopViewStackProvider } from '../hooks/usetopviewstack';
-import { ToastProvider } from '../hooks/usetoast';
-import { AlertProvider } from './alert';
+import { ToastProvider } from '../injector/hooks/usetoast';
+import { AlertProvider } from '../injector/components/alert';
 import { PopUpProvider } from '../hooks/usepopup';
 
 export const Providers = (props: { children?: React.ReactNode }) => {

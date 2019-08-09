@@ -1,6 +1,3 @@
-sync:
-	cd .. && tsc -b && cd - && cp -r ../packages/core-ui/lib/ node_modules/core-ui/lib/
-
 link:
 	yarn react-native link && \
 		cd ./ios && pod install || cd-

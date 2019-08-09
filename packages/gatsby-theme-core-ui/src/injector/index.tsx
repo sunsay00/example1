@@ -1,13 +1,13 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
 
-import { Slider } from './slider';
-import { Icon } from './icon';
-import { Alert } from './alert';
-import { Image } from './image';
-import { ImageBackground } from './imagebackground';
-import { Modal } from './modal';
-import { useToast } from '../hooks/usetoast';
+import { Slider } from './components/slider';
+import { Icon } from './components/icon';
+import { Alert } from './components/alert';
+import { Image } from './components/image';
+import { ImageBackground } from './components/imagebackground';
+import { Modal } from './components/modal';
+import { useToast } from './hooks/usetoast';
 
 export const Injector = (props: { children?: React.ReactNode }) => {
   const toast = useToast();

@@ -1,20 +1,18 @@
 import '../index.css';
 
-export * from 'core-ui';
-
 // injector
 
-export * from './components/injector';
+export * from './injector';
 
 // root
 export * from './components/providers';
 
 // web components
-export * from './components/webnav';
-export * from './components/webanchor';
-export * from './components/webendreacheddetector';
-export * from './components/webtable';
-export * from './components/webcode';
+export * from './components/nav';
+export * from './components/anchor';
+export * from './components/endreacheddetector';
+export * from './components/table';
+export * from './components/code';
 
 // hooks
 export * from './hooks/usetopviewstack';

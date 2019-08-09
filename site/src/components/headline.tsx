@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
 
 const Headline = (sz: 1 | 2) => (props: { children?: React.ReactNode, serifed?: boolean, secondary?: boolean }) => {
   const fontSize = UI.Fonts[props.serifed ? 'serif' : 'sansSerif'].size[sz == 1 ? 'super1' : 'super2'];

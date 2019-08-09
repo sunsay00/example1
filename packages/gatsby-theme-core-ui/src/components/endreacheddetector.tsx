@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { debounce } from 'debounce';
 
-export const WebEndReachedDetector = (props: {
+export const EndReachedDetector = (props: {
   onEndReached?: () => void,
   onEndReachedThreshold?: number,
   children?: React.ReactNode

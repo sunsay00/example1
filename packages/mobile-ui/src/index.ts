@@ -1,3 +1,1 @@
-export * from 'core-ui';
-
-export * from './components/injector';
+export * from './injector';

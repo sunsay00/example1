@@ -11,3 +11,7 @@ vars:
 
 configure: .envs.$(STAGE)/aws
 	yarn vars yarn configure up
+
+sync:
+	tsc -b && cd ./mobile && cp -r ../packages/mobile-ui/lib/ node_modules/mobile-ui/lib/
+

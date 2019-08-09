@@ -1,5 +1,6 @@
 import * as React from 'react';
-import * as UI from 'gatsby-theme-core-ui';
+import * as UI from 'core-ui';
+import * as Web from 'gatsby-theme-core-ui';
 import { AccountProvider, useAccount } from 'cf-cognito';
 import { ApolloProvider } from './hooks/useapollo';
 import { Auth } from './components/auth';
@@ -23,42 +24,42 @@ library.add(faSync);
 
 const Layout = (props: { children?: React.ReactNode }) => {
   const { loading } = UI.useLoading(Layout);
-  const { setCurrent } = UI.usePopUp();
+  const { setCurrent } = Web.usePopUp();
   const { user, logOut } = useAccount();
 
   return (
-    <UI.WebNavLayout renderNavBar={() =>
+    <Web.NavLayout renderNavBar={() =>
       <UI.ImageBackground source={{ uri: 'pattern1.png' }} resizeMode="repeat" style={{ marginHorizontal: -32, paddingHorizontal: 32 }}>
-        <UI.WebNavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
-          <UI.WebNavLink to="/styleguide/">Styleguide</UI.WebNavLink>
-          <UI.WebNavLink to="#services">Services</UI.WebNavLink>
-          <UI.WebNavLink to="#contact">Contact</UI.WebNavLink>
-          <UI.WebNavLink >Disabled</UI.WebNavLink>
-          <UI.WebNavLink disabled={loading} onPress={() => {
+        <Web.NavBar renderLogo={() => <UI.Image style={{ width: 150 }} resizeMode="contain" source={{ uri: 'logo.png' }} />}>
+          <Web.NavLink to="/styleguide/">Styleguide</Web.NavLink>
+          <Web.NavLink to="#services">Services</Web.NavLink>
+          <Web.NavLink to="#contact">Contact</Web.NavLink>
+          <Web.NavLink >Disabled</Web.NavLink>
+          <Web.NavLink disabled={loading} onPress={() => {
             if (user) logOut();
             else setCurrent(<Auth onLogInComplete={() => setCurrent(null)} />);
           }}>
             {user ? 'Log out' : 'Log in'}
-          </UI.WebNavLink>
-        </UI.WebNavBar>
+          </Web.NavLink>
+        </Web.NavBar>
       </UI.ImageBackground>
     }>
       {props.children}
-    </UI.WebNavLayout>
+    </Web.NavLayout>
   );
 }
 
 export const App = (props: { children?: React.ReactNode }) =>
-  <UI.Injector>
+  <Web.Injector>
     <UI.LoadingProvider>
       <AccountProvider region="us-east-1">
         <ApolloProvider>
-          <UI.Providers>
+          <Web.Providers>
             <Layout>
               {props.children}
             </Layout>
-          </UI.Providers>
+          </Web.Providers>
         </ApolloProvider>
       </AccountProvider>
     </UI.LoadingProvider>
-  </UI.Injector>
+  </Web.Injector>

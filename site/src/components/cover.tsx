@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { rgba, Colors, Carousel, View, Header3, ImageBackground } from 'gatsby-theme-core-ui';
+import { rgba, Colors, Carousel, View, Header3, ImageBackground } from 'core-ui';
 import { Headline1 } from './headline';
 
 export const Cover = () =>

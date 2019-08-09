@@ -4048,12 +4048,6 @@ core-js@^3.0.0:
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.1.4.tgz#3a2837fc48e582e1ae25907afcd6cf03b0cc7a07"
 
-core-ui@./packages/core-ui:
-  version "1.0.0"
-  dependencies:
-    react "^16.8.6"
-    react-dom "^16.8.6"
-
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
@@ -9524,6 +9518,11 @@ mkdirp@0.5.1, mkdirp@0.5.x, mkdirp@0.x.x, mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
   dependencies:
     minimist "0.0.8"
+
+mobile-ui@./packages/mobile-ui:
+  version "0.0.1"
+  dependencies:
+    react "^16.8.6"
 
 moment@^2.21.0, moment@^2.24.0:
   version "2.24.0"
