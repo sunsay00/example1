@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { AccountProvider, useAccount } from 'cf-cognito';
 import { ApolloProvider } from './hooks/useapollo';
-import { Authentication } from './components/authentication';
+import { Auth } from './components/auth';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faChevronLeft, faTimes, faGlobe, faServer, faBolt, faQuestion, faBars, faPlay, faPause, faTimesCircle, faUpload, faRedo, faVideo, faSync } from '@fortawesome/free-solid-svg-icons';
 
@@ -36,7 +36,7 @@ const Layout = (props: { children?: React.ReactNode }) => {
           <UI.WebNavLink >Disabled</UI.WebNavLink>
           <UI.WebNavLink disabled={loading} onPress={() => {
             if (user) logOut();
-            else setCurrent(<Authentication onLogInComplete={() => setCurrent(null)} />);
+            else setCurrent(<Auth onLogInComplete={() => setCurrent(null)} />);
           }}>
             {user ? 'Log out' : 'Log in'}
           </UI.WebNavLink>

@@ -2,11 +2,11 @@ import * as React from 'react';
 import * as UI from 'gatsby-theme-core-ui';
 import { useForgotPasswordForm } from 'cf-cognito';
 
-export const Forgot = (props: {
+export const ForgotPassword = (props: {
   onGoToResetPassword: (emailOrUsername: string) => void,
   onGoToLogIn?: () => void,
 }) => {
-  const { loading } = UI.useLoading(Forgot);
+  const { loading } = UI.useLoading(ForgotPassword);
   const { form } = useForgotPasswordForm({ onGoToResetPassword: props.onGoToResetPassword });
 
   return (

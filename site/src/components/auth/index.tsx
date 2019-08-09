@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useState } from 'react';
 import * as UI from 'gatsby-theme-core-ui';
-import { LogIn } from '../components/login';
-import { SignUp } from '../components/signup';
+import { LogIn } from './login';
+import { SignUp } from './signup';
 import { ResetPassword } from './resetpassword';
-import { Forgot } from '../components/forgot';
+import { ForgotPassword } from './forgotpassword';
 import { Confirmation } from './confirmation';
-import { useLocale } from '../hooks/uselocale';
+import { useLocale } from '../../hooks/uselocale';
 import { ChangePassword } from './changepassword';
 
 // [ STATE FLOWS ]
@@ -15,38 +15,38 @@ import { ChangePassword } from './changepassword';
 // logIn -> changePassword -> logIn
 // logIn -> [DONE]
 
-enum AuthenticationMode { LogIn, SignUp, Confirmation, Forgot, ResetPassword, ChangePassword };
+enum AuthMode { LogIn, SignUp, Confirmation, Forgot, ResetPassword, ChangePassword };
 
-export const Authentication = (props: {
+export const Auth = (props: {
   onLogInComplete: () => void
 }) => {
   const locale = useLocale();
-  const [mode, setMode] = useState<AuthenticationMode>(AuthenticationMode.LogIn);
+  const [mode, setMode] = useState<AuthMode>(AuthMode.LogIn);
   const [name, setName] = useState<string>();
 
   if (!locale) return <UI.Loading />;
 
-  if (mode == AuthenticationMode.LogIn) {
+  if (mode == AuthMode.LogIn) {
     return (
       <LogIn
         onLogInComplete={() => props.onLogInComplete()}
-        onGoToForgot={() => setMode(AuthenticationMode.Forgot)}
-        onGoToSignUp={() => setMode(AuthenticationMode.SignUp)}
-        onGoToChangePassword={() => setMode(AuthenticationMode.ChangePassword)}
+        onGoToForgot={() => setMode(AuthMode.Forgot)}
+        onGoToSignUp={() => setMode(AuthMode.SignUp)}
+        onGoToChangePassword={() => setMode(AuthMode.ChangePassword)}
         onGoToConfirmation={verifiedUsername => {
           setName(verifiedUsername);
-          setMode(AuthenticationMode.Confirmation);
+          setMode(AuthMode.Confirmation);
         }}
         renderLogo={() => <UI.View />/*<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />*/}
       />
     );
-  } else if (mode == AuthenticationMode.SignUp) {
+  } else if (mode == AuthMode.SignUp) {
     return (
       <SignUp
-        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+        onGoToLogIn={() => setMode(AuthMode.LogIn)}
         onGoToConfirmation={verifiedUsername => {
           setName(verifiedUsername);
-          setMode(AuthenticationMode.Confirmation);
+          setMode(AuthMode.Confirmation);
         }}
         onVersion={() => { }}
         role="default"
@@ -54,34 +54,34 @@ export const Authentication = (props: {
         version={'0.0.1'}
       />
     );
-  } else if (mode == AuthenticationMode.Confirmation && name) {
+  } else if (mode == AuthMode.Confirmation && name) {
     return (
       <Confirmation
-        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+        onGoToLogIn={() => setMode(AuthMode.LogIn)}
       />
     );
-  } else if (mode == AuthenticationMode.Forgot) {
+  } else if (mode == AuthMode.Forgot) {
     return (
-      <Forgot
+      <ForgotPassword
         onGoToResetPassword={emailOrUsername => {
           setName(emailOrUsername);
-          setMode(AuthenticationMode.ResetPassword);
+          setMode(AuthMode.ResetPassword);
         }}
-        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+        onGoToLogIn={() => setMode(AuthMode.LogIn)}
       />
     );
-  } else if (mode == AuthenticationMode.ResetPassword && name) {
+  } else if (mode == AuthMode.ResetPassword && name) {
     return (
       <ResetPassword
         emailOrUsername={name}
-        onGoToLogIn={() => setMode(AuthenticationMode.LogIn)}
+        onGoToLogIn={() => setMode(AuthMode.LogIn)}
       />
     );
-  } else if (mode == AuthenticationMode.ChangePassword) {
+  } else if (mode == AuthMode.ChangePassword) {
     return (
       <ChangePassword
         locale={locale}
-        onToGoLogIn={() => setMode(AuthenticationMode.LogIn)}
+        onToGoLogIn={() => setMode(AuthMode.LogIn)}
       />
     )
   } else {
