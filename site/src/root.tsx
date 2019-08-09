@@ -47,9 +47,7 @@ export const Root = (props: { children?: React.ReactNode }) =>
   <UI.Injector>
     <AccountProvider region="us-east-1">
       <ApolloProvider>
-        <UI.WebRoot>
-          <Application>{props.children}</Application>
-        </UI.WebRoot>
+        <Application>{props.children}</Application>
       </ApolloProvider>
     </AccountProvider>
   </UI.Injector>

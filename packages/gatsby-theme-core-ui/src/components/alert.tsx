@@ -3,15 +3,11 @@ import * as UI from 'core-ui';
 import { useTopViewStack } from '../hooks/usetopviewstack';
 import { useSlideUpAnimation } from '../hooks/useslideupanimation';
 
-type Options = { cancelable: boolean };
-
-type ButtonOption = { text: string, onPress?: () => void };
-
 type Opts = {
   title: string,
   message?: string,
-  options?: Options,
-  buttons: ButtonOption[]
+  buttons: UI.AlertButton[]
+  options?: UI.AlertOptions,
 }
 
 let _alert: ((opts: Opts) => void) | undefined;
@@ -71,7 +67,7 @@ export const AlertProvider = (props: {
 }
 
 export const Alert = {
-  alert: (title: string, message?: string, buttons: ButtonOption[] = [{ text: 'OK' }], options?: Options) => {
+  alert: (title: string, message?: string, buttons: UI.AlertButton[] = [{ text: 'OK' }], options?: UI.AlertOptions) => {
     if (!_alert) {
       console.warn('alert provider not initialized');
     } else {
