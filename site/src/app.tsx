@@ -22,8 +22,9 @@ library.add(faVideo);
 library.add(faSync);
 
 const Layout = (props: { children?: React.ReactNode }) => {
+  const { loading } = UI.useLoading(Layout);
   const { setCurrent } = UI.usePopUp();
-  const { loading, user, logOut } = useAccount();
+  const { user, logOut } = useAccount();
 
   return (
     <UI.WebNavLayout renderNavBar={() =>
@@ -52,11 +53,11 @@ export const App = (props: { children?: React.ReactNode }) =>
     <UI.LoadingProvider>
       <AccountProvider region="us-east-1">
         <ApolloProvider>
-          <UI.Root>
+          <UI.Providers>
             <Layout>
               {props.children}
             </Layout>
-          </UI.Root>
+          </UI.Providers>
         </ApolloProvider>
       </AccountProvider>
     </UI.LoadingProvider>

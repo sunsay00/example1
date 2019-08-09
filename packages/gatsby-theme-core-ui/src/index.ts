@@ -7,7 +7,7 @@ export * from 'core-ui';
 export * from './components/injector';
 
 // root
-export * from './components/root';
+export * from './components/providers';
 
 // web components
 export * from './components/webnav';

@@ -6,7 +6,7 @@ import { ToastProvider } from '../hooks/usetoast';
 import { AlertProvider } from './alert';
 import { PopUpProvider } from '../hooks/usepopup';
 
-export const Root = (props: { children?: React.ReactNode }) => {
+export const Providers = (props: { children?: React.ReactNode }) => {
   return (
     <UI.BreakableProvider>
       <TopViewStackProvider renderWrapper={children =>
