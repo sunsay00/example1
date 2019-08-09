@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { StyleSheet } from 'react-native';
 import * as UI from 'core-ui';
 
 export const FixedView = (props: { style?: UI.ViewStyle, children?: React.ReactNode }) => {
@@ -15,7 +16,7 @@ export const FixedView = (props: { style?: UI.ViewStyle, children?: React.ReactN
       justifyContent: 'center',
       alignItems: 'center',
     }}>
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', ...StyleSheet.absoluteFillObject }}>
         {props.children}
       </div>
     </div>

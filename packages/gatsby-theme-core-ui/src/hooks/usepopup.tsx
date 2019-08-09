@@ -21,7 +21,7 @@ const PopUp = (props: {
   children?: React.ReactNode,
   onDimiss?: () => void,
 }) =>
-  <UI.Animated.View style={{ opacity: props.opacity }}>
+  <UI.Animated.View style={{ opacity: props.opacity, flex: 1 }}>
     <UI.Breakable
       renderSmall={children =>
         <UI.View>
