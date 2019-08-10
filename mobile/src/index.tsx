@@ -33,15 +33,17 @@ const AuthChecker = (props: { children?: React.ReactNode }) => {
   );
 }
 
+const Main = createDrawerNavigator(
+  { Home: Tabs('Home'), Profile: Tabs('Profile') },
+  { drawerType: 'slide', contentComponent: Drawer });
+
 export const Layout = createAppContainer(createNavWrapper(
   children => <AuthChecker>{children}</AuthChecker>,
   createSwitchNavigator({
     Loading: UI.Loading,
     Landing,
     Auth,
-    Main: createDrawerNavigator(
-      { Home: Tabs('Home'), Profile: Tabs('Profile') },
-      { drawerType: 'slide', contentComponent: Drawer }),
+    Main,
   }, { initialRouteName: 'Loading' })
 ));
 
