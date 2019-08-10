@@ -28,7 +28,7 @@ const PopUp = (props: {
           <UI.TouchableWithoutFeedback disabled={props.loading}>
             <UI.View style={{ height: '100vh', padding: 40, backgroundColor: UI.Colors.white, alignItems: 'stretch', flex: 1, }}>
               <UI.View style={{ alignSelf: 'flex-start' }}>
-                <UI.Icon disabled={props.loading} size="xs" name="times" onPress={() => props.onDimiss && props.onDimiss()} />
+                <UI.Icon disabled={props.loading} size="xs" name="close" onPress={() => props.onDimiss && props.onDimiss()} />
               </UI.View>
               <UI.View key={1} style={{ flex: 1 }}>
                 {children}
@@ -52,7 +52,7 @@ const PopUp = (props: {
       <UI.Breakable
         renderMedium={() =>
           <UI.View style={{ alignSelf: 'flex-start' }}>
-            <UI.Icon disabled={props.loading} size="xs" name="times" onPress={() => props.onDimiss && props.onDimiss()} />
+            <UI.Icon disabled={props.loading} size="xs" name="close" onPress={() => props.onDimiss && props.onDimiss()} />
             <UI.Spacer />
           </UI.View>}
       />

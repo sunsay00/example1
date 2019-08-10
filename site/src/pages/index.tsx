@@ -53,7 +53,6 @@ const Services = () =>
 export default () => {
   return (
     <>
-      <UI.Icon2 color="tomato" name="add" />
       <UI.Section>
         <Cover />
       </UI.Section>
@@ -62,7 +61,7 @@ export default () => {
         <UI.Grid stride={3}>
           <UI.View>
             <UI.View style={{ alignItems: 'center' }}>
-              <UI.Icon name="server" color={UI.Colors.accentBlue} />
+              <UI.Icon name="desktop" color={UI.Colors.accentBlue} />
               <UI.Spacer />
               <UI.Header3 serifed>Experienced IT</UI.Header3>
             </UI.View>
@@ -70,7 +69,7 @@ export default () => {
           </UI.View>
           <UI.View>
             <UI.View style={{ alignItems: 'center' }} >
-              <UI.Icon name="bolt" color={UI.Colors.accentGreen} />
+              <UI.Icon name="flash" color={UI.Colors.accentGreen} />
               <UI.Spacer />
               <UI.Header3 serifed>Efficiency driven</UI.Header3>
             </UI.View>

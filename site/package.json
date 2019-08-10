@@ -11,9 +11,6 @@
     "serve": "gatsby serve"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.19",
-    "@fortawesome/free-solid-svg-icons": "^5.9.0",
-    "@fortawesome/react-fontawesome": "^0.1.4",
     "@types/node": "^12.6.8",
     "babel-plugin-react-native-web": "^0.11.5",
     "gatsby": "^2.13.39",

@@ -97,7 +97,7 @@ export default (props: {}) =>
         <Header4>Icon</Header4>
 
         <Code live>{
-          `<Icon name="stroopwafel" color="tomato" />`
+          `<Icon name="planet" color="tomato" />`
         }</Code>
 
         <Header4>UserNameInput</Header4>

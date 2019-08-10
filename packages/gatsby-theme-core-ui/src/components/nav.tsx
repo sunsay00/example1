@@ -77,7 +77,7 @@ export const NavBar = (props: {
           }}>
             {props.renderLogo && props.renderLogo()}
           </TouchableOpacity>
-          {numChildren > 0 && <Icon size="sm" name="bars" onPress={() => setOpened(!opened)} />}
+          {numChildren > 0 && <Icon size="sm" name="menu" onPress={() => setOpened(!opened)} />}
         </View>
       </>}
       renderMedium={() =>
