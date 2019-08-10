@@ -19,7 +19,8 @@
     "react-native": "0.60.4",
     "react-native-gesture-handler": "^1.1.0",
     "react-native-screens": "^1.0.0-alpha.23",
-    "react-navigation": "^3.11.1"
+    "react-navigation": "^3.11.1",
+    "react-native-ionicons": "https://github.com/kyunghoon/react-native-ionicons.git"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",

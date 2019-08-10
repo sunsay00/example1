@@ -57,10 +57,7 @@ export const Icon2 = (props: UI.Icon2Props) => {
       <UI.View style={{ width: fontSize, height: fontSize }}>
         {
           // @ts-ignore
-          <ion-icon style={{
-            color: props.color,
-            fontSize
-          }} name={props.name} />
+          <ion-icon style={{ color: props.color, fontSize }} name={props.name} />
         }
       </UI.View>
     </UI.TouchableWithoutFeedback>

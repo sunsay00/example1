@@ -74,6 +74,7 @@
 		<string>Raleway-SemiBoldItalic.ttf</string>
 		<string>Raleway-ThinItalic.ttf</string>
 		<string>Raleway-ExtraBold.ttf</string>
+		<string>Ionicons.ttf</string>
 	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
