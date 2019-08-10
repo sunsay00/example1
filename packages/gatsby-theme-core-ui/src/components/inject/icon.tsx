@@ -45,3 +45,24 @@ export const Icon = (props: {
     </UI.TouchableWithoutFeedback>
   );
 }
+
+export const Icon2 = (props: UI.Icon2Props) => {
+  const slop = 16;
+  const fontSize = _styles.fontSize[props.size || 'lg'];
+  return (
+    <UI.TouchableWithoutFeedback
+      disabled={props.disabled || !props.onPress}
+      style={props.style} onPress={props.onPress}
+      hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
+      <UI.View style={{ width: fontSize, height: fontSize }}>
+        {
+          // @ts-ignore
+          <ion-icon style={{
+            color: props.color,
+            fontSize
+          }} name={props.name} />
+        }
+      </UI.View>
+    </UI.TouchableWithoutFeedback>
+  );
+}

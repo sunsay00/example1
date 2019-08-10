@@ -53,6 +53,7 @@ const Services = () =>
 export default () => {
   return (
     <>
+      <UI.Icon2 color="tomato" name="heart" />
       <UI.Section>
         <Cover />
       </UI.Section>

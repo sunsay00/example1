@@ -5,7 +5,7 @@ import { useBodyScrollLocker } from './hooks/usebodyscrolllocker';
 
 import { Alert, AlertProvider } from './components/inject/alert';
 import { Slider } from './components/inject/slider';
-import { Icon } from './components/inject/icon';
+import { Icon, Icon2 } from './components/inject/icon';
 import { Image } from './components/inject/image';
 import { ImageBackground } from './components/inject/imagebackground';
 import { Modal } from './components/inject/modal';
@@ -16,6 +16,7 @@ const Injector = (props: { children?: React.ReactNode }) =>
     Alert,
     FixedView,
     Icon,
+    Icon2,
     Image,
     ImageBackground,
     Modal: props => <Modal {...props} />,

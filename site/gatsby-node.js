@@ -16,8 +16,7 @@ exports.onCreateWebpackConfig = ({
     devServer: {
       hot: false
     },
-    //devtool: 'cheap-module-eval-source-map', // fast inpercise debugging
-    devtool: 'source-map', // slow percise debugging
+    //devtool: 'source-map', // uncomment this line if slow percise debugging is required
     module: {
       rules: [
         { test: /\.flow$/, use: 'ignore-loader' },

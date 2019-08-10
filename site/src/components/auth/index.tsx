@@ -37,7 +37,6 @@ export const Auth = (props: {
           setName(verifiedUsername);
           setMode(AuthMode.Confirmation);
         }}
-        renderLogo={() => <UI.View />/*<UI.Image source={require('../../img/logo_sm.png')} style={{ width: 80, height: 80 }} />*/}
       />
     );
   } else if (mode == AuthMode.SignUp) {
