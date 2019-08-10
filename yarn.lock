@@ -9618,6 +9618,10 @@ react-native-cli@^2.0.1:
     prompt "^0.2.14"
     semver "^5.0.3"
 
+"react-native-ionicons@https://github.com/kyunghoon/react-native-ionicons.git":
+  version "4.6.1"
+  resolved "https://github.com/kyunghoon/react-native-ionicons.git#0838b29470cceaa6b210f735d5746eac66d07d42"
+
 react-native-web@^0.11.4, react-native-web@^0.11.5:
   version "0.11.6"
   resolved "https://registry.yarnpkg.com/react-native-web/-/react-native-web-0.11.6.tgz#7766c1550331c8724b2d5fe5d1b9ad83efe32c91"
