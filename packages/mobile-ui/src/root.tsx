@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { Slider, Alert, Image, ImageBackground, Modal } from 'react-native';
+import { Keyboard, Slider, Alert, Image, ImageBackground, Modal } from 'react-native';
 import { Icon } from './components/inject/icon';
 import { FixedView } from './components/inject/fixedview';
 
@@ -23,7 +23,9 @@ export const Root = (props: { children?: (overlays: React.ReactNode) => React.Re
       <UI.BreakableProvider>
         <UI.TopViewStackProvider>{overlays =>
           <UI.ToastProvider>
-            {props.children && props.children(overlays) || null}
+            <UI.View style={{ flex: 1 }} onStartShouldSetResponder={() => { Keyboard.dismiss(); return false; }}>
+              {props.children && props.children(overlays) || null}
+            </UI.View>
           </UI.ToastProvider>}
         </UI.TopViewStackProvider>
       </UI.BreakableProvider>
