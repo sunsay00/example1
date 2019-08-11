@@ -62,7 +62,6 @@ export const Auth = createStackNavigator(
           onGoToResetPassword={emailOrUsername => {
             nav.push('ResetPassword', { name: emailOrUsername });
           }}
-          onGoToLogIn={() => nav.popToTop()}
         />
       );
     },

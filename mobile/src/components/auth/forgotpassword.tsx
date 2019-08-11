@@ -4,7 +4,6 @@ import { useForgotPasswordForm } from 'cf-cognito';
 
 export const ForgotPassword = (props: {
   onGoToResetPassword: (emailOrUsername: string) => void,
-  onGoToLogIn?: () => void,
 }) => {
   const { loading } = UI.useLoading(ForgotPassword);
   const { form } = useForgotPasswordForm({ onGoToResetPassword: props.onGoToResetPassword });
@@ -23,13 +22,7 @@ export const ForgotPassword = (props: {
       <UI.Spacer size="xl" />
       <UI.UserNameInput {...form.fields.emailOrUsername} />
       <UI.Spacer size="md" />
-      <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        {props.onGoToLogIn && <>
-          <UI.Link testID="LOGIN" size="md" disabled={loading} onPress={props.onGoToLogIn}>
-            <UI.Icon size="sm" name="chevronLeft" color={UI.Colors.green} />Back to Login</UI.Link>
-        </>}
-        <UI.Button disabled={loading} loading={loading} onPress={form.submit}>Send Recovery Email</UI.Button>
-      </UI.View>
+      <UI.Button disabled={loading} loading={loading} onPress={form.submit}>Send Recovery Email</UI.Button>
     </UI.View>
   );
 }

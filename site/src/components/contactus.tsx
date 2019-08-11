@@ -23,17 +23,17 @@ export const ContactUs = () =>
       <Breakable
         renderSmall={() =>
           <View style={{ justifyContent: 'space-evenly' }}>
-            <TextInput secondary style={{ flex: 1 }} iconType="user" placeholder="First Name *" />
+            <TextInput secondary style={{ flex: 1 }} iconName="person" placeholder="First Name *" />
             <TextInput secondary style={{ flex: 1, marginLeft: 22 }} placeholder="Last Name *" />
           </View>}
         renderMedium={() =>
           <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
-            <TextInput secondary style={{ flex: 1 }} iconType="user" placeholder="First Name *" />
+            <TextInput secondary style={{ flex: 1 }} iconName="person" placeholder="First Name *" />
             <Spacer />
             <TextInput secondary style={{ flex: 1 }} placeholder="Last Name *" />
           </View>} />
       <EmailInput secondary placeholder="Email Address *" />
-      <TextInput secondary iconType="question" multiline placeholder="How can we help?" numberOfLines={5} />
+      <TextInput secondary iconName="happy" multiline placeholder="How can we help?" numberOfLines={5} />
       <FinePrint secondary>Please do not include confidential or sensitive information in your message. In the event that we are representing a party with opposing interests to your own, we may have a duty to disclose any information you provide to our client.</FinePrint>
       <Breakable
         renderSmall={children =>
