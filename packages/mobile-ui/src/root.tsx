@@ -24,7 +24,9 @@ export const Root = (props: { children?: (overlays: React.ReactNode) => React.Re
         <UI.TopViewStackProvider>{overlays =>
           <UI.ToastProvider>
             <UI.View style={{ flex: 1 }} onStartShouldSetResponder={() => { Keyboard.dismiss(); return false; }}>
-              {props.children && props.children(overlays) || null}
+              <UI.SingletonAsserter fn={Root}>
+                {props.children && props.children(overlays) || null}
+              </UI.SingletonAsserter>
             </UI.View>
           </UI.ToastProvider>}
         </UI.TopViewStackProvider>

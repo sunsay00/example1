@@ -43,7 +43,9 @@ export const Root = (props: {
             <UI.ToastProvider>
               <AlertProvider>
                 <PopUpProvider style={{ maxWidth: 500 }}>
-                  {props.children && props.children(overlays)}
+                  <UI.SingletonAsserter fn={Root}>
+                    {props.children && props.children(overlays)}
+                  </UI.SingletonAsserter>
                 </PopUpProvider>
               </AlertProvider>
             </UI.ToastProvider>
