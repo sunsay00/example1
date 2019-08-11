@@ -57,7 +57,9 @@ const PopUp = (props: {
           </UI.View>}
       />
       <UI.Spacer />
-      {props.children}
+      <UI.SingletonAsserter fn={PopUp}>
+        {props.children}
+      </UI.SingletonAsserter>
     </UI.Breakable>
   </UI.Animated.View>
 
