@@ -1,13 +1,16 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useNavigation } from '../hooks/usenavigation';
+import { useNavigation, useNavigationOptions } from '../hooks/usenavigation';
+import { Home } from './home';
+import { NavHeaderButton } from '../components/navheaderbutton';
 
 export const Landing = (props: {}) => {
   const nav = useNavigation();
+  useNavigationOptions({
+    title: 'Home',
+    headerRight: <NavHeaderButton onPress={() => nav.navigate('LogIn')}>Log in</NavHeaderButton>,
+  });
   return (
-    <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <UI.Header1>Infinage Labs</UI.Header1>
-      <UI.Link size="md" onPress={() => nav.navigate('Auth')}>Proceed</UI.Link>
-    </UI.View>
-  )
+    <Home />
+  );
 }

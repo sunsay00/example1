@@ -1,18 +1,11 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
+import { useAccount } from 'cf-cognito';
 import { useNavigation, useNavigationOptions } from '../hooks/usenavigation';
 import { NavHeaderButton } from '../components/navheaderbutton';
 
-const Specimen = (props: { title: string, children?: React.ReactNode }) =>
-  <>
-    <UI.Header4>{props.title}</UI.Header4>
-    <UI.View style={{ padding: 16, marginBottom: 8 }}>
-      {props.children}
-    </UI.View>
-  </>
-
 export const Home = () => {
-  const toast = UI.useToast();
+  const { user } = useAccount();
   const nav = useNavigation();
   useNavigationOptions({
     title: 'Home',
@@ -20,12 +13,19 @@ export const Home = () => {
   });
   return (
     <UI.ScrollView style={{ flex: 1 }}>
-      <UI.ImageBackground source={require('../../assets/images/image1.jpg')} style={{ width: '100%' }}>
-        <UI.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16, paddingVertical: 56, backgroundColor: UI.rgba(UI.Colors.blue, .3) }}>
-          <UI.StatusBar barStyle='dark-content' />
-          <UI.Headline secondary>Business + Technology = Success</UI.Headline>
-          <UI.Header4 secondary serifed>Advocating for businesses since 2000</UI.Header4>
-        </UI.View>
+      <UI.ImageBackground source={require('../../assets/images/image1.jpg')} style={{ width: '100%' }} resizeMode="cover">
+        <UI.SafeAreaView style={{ backgroundColor: UI.rgba(UI.Colors.blue, .2) }}>
+          <UI.View style={{
+            flex: 1, alignItems: 'center', justifyContent: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 56,
+          }}>
+            <UI.StatusBar barStyle='dark-content' />
+            <UI.Headline secondary>Business + Technology = Success</UI.Headline>
+            <UI.Header4 secondary serifed>Advocating for businesses since 2000</UI.Header4>
+            {!user && <UI.Button onPress={() => nav.navigate('LogIn')}>Log in</UI.Button>}
+          </UI.View>
+        </UI.SafeAreaView>
       </UI.ImageBackground>
 
       <UI.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: UI.rgba(UI.Colors.black, .02), padding: 16 }}>

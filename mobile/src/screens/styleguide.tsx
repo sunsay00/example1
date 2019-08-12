@@ -15,11 +15,11 @@ export const StyleGuide = () => {
   const toast = UI.useToast();
   const nav = useNavigation();
   useNavigationOptions({
-    title: 'Home',
+    title: 'StyleGuide',
     headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />
   });
   return (
-    <UI.ScrollView style={{ flex: 1, padding: 16 }}>
+    <UI.ScrollView style={{ flex: 1, padding: 16, backgroundColor: UI.rgba(UI.Colors.black, 0.05) }}>
       <UI.View style={{ flex: 1, alignItems: 'stretch', justifyContent: 'center' }}>
         <UI.StatusBar barStyle='dark-content' />
         <UI.Header1>Infinage Styleguide</UI.Header1>

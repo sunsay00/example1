@@ -9,10 +9,19 @@ export const NavHeaderButton = (props: {
 }) => {
   const { loading } = UI.useLoading(NavHeaderButton);
   return (
-    <UI.TouchableOpacity onPress={props.onPress}>
+    <UI.TouchableOpacity onPress={() => {
+      console.log('BBB');
+      props.onPress && props.onPress();
+    }}>
       <UI.View style={{ paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' }}>
         {props.prefixIconName && <UI.Icon size="md" disabled={loading} name={props.prefixIconName} style={{ marginRight: 8 }} />}
-        {props.children && <UI.Text style={{ color: loading ? UI.rgba(UI.Colors.black, .5) : UI.Colors.green }}>{props.children}</UI.Text>}
+        {props.children &&
+          <UI.TouchableOpacity onPress={() => {
+            console.log('XXX');
+            props.onPress && props.onPress();
+          }}>
+            <UI.Text style={{ color: loading ? UI.rgba(UI.Colors.black, .5) : UI.Colors.green }}>{props.children}</UI.Text>
+          </UI.TouchableOpacity>}
         {props.suffixIconName && <UI.Icon size="md" disabled={loading} name={props.suffixIconName} style={{ marginLeft: 8 }} />}
       </UI.View>
     </UI.TouchableOpacity>

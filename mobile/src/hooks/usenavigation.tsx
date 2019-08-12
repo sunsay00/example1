@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Component, useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Easing, Animated } from 'react-native';
 import {
   NavigationTransitionProps, createStackNavigator as createStackNavigatorRN,

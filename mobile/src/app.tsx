@@ -6,7 +6,7 @@ import {
   createSwitchNavigator, createDrawerNavigator, createBottomTabNavigator, createAppContainer,
   createStackNavigator, useNavigation, createNavWrapper,
 } from './hooks/usenavigation';
-import { Auth } from './components/auth';
+import { Screens } from './components/auth';
 import { Landing } from './screens/landing';
 import { AccountProvider } from 'cf-cognito';
 import { ApolloProvider } from '@inf/apollo';
@@ -43,22 +43,32 @@ const AuthGuard = (props: { children?: React.ReactNode }) => {
   React.useEffect(() => {
     if (account.ready) {
       if (account.user) nav.navigate('Main');
-      else nav.navigate('Landing');
+      else nav.navigate('Guest');
     }
   }, [account.ready, account.user]);
   return <>{props.children}</>;
 }
 
 const Main = createDrawerNavigator(
-  { Home: Tabs('Home'), Profile: Tabs('Profile') },
+  { Home: Tabs('Home'), StyleGuide: Tabs('StyleGuide'), Profile: Tabs('Profile') },
   { drawerType: 'slide', contentComponent: Drawer });
 
-export const Layout = createAppContainer(createNavWrapper(
+const Layout = createAppContainer(createNavWrapper(
   children => <AuthGuard>{children}</AuthGuard>,
   createSwitchNavigator({
     Loading: UI.Loading,
-    Landing,
-    Auth,
+    Guest: createStackNavigator({
+      Landing,
+      LogIn: Screens.LogInScreen,
+      SignUp: Screens.SignUpScreen,
+      Confirmation: Screens.ConfirmationScreen,
+      ForgotPassword: Screens.ForgotPasswordScreen,
+      ResetPassword: Screens.ResetPasswordScreen,
+    }, {
+        cardStyle: {},
+        initialRouteName: 'Landing',
+        defaultNavigationOptions: { headerTransparent: true },
+      }),
     Main,
   }, { initialRouteName: 'Loading' })
 ));

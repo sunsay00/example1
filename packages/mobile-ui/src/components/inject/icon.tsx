@@ -15,13 +15,21 @@ const fontSizes = {
 export const Icon = (props: UI.IconProps) => {
   const slop = 16;
   const fontSize = fontSizes[props.size || 'lg'];
-  return (
-    <UI.TouchableWithoutFeedback
-      disabled={props.disabled} onPress={props.onPress}
-      hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
+  if (props.onPress) {
+    return (
+      <UI.TouchableWithoutFeedback
+        disabled={props.disabled} onPress={props.onPress}
+        hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
+        <UI.View style={{ height: fontSize, ...props.style }}>
+          <IonIcon style={{ color: props.color || (props.disabled ? UI.rgba(UI.Colors.black, .5) : UI.Colors.green), fontSize }} name={props.name} />
+        </UI.View>
+      </UI.TouchableWithoutFeedback>
+    );
+  } else {
+    return (
       <UI.View style={{ height: fontSize, ...props.style }}>
         <IonIcon style={{ color: props.color || (props.disabled ? UI.rgba(UI.Colors.black, .5) : UI.Colors.green), fontSize }} name={props.name} />
       </UI.View>
-    </UI.TouchableWithoutFeedback>
-  );
+    );
+  }
 }
