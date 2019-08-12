@@ -1,13 +1,15 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
 import { useAccount } from 'cf-cognito';
-import { useNavigationOptions } from '../hooks/usenavigation';
+import { useNavigationOptions, useNavigation } from '../hooks/usenavigation';
 import { NavHeaderButton } from '../components/navheaderbutton';
 
 export const Profile = () => {
+  const nav = useNavigation();
   const { user, logOut } = useAccount();
   useNavigationOptions({
     title: 'Profile',
+    headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />,
     headerRight: <NavHeaderButton onPress={logOut}>Log out</NavHeaderButton>
   });
 

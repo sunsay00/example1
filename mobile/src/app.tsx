@@ -14,6 +14,7 @@ import { Profile } from './screens/profile';
 import { Drawer } from './screens/drawer';
 import { Home } from './screens/home';
 import { StyleGuide } from './screens/styleguide';
+import { NavHeaderButton } from './components/navheaderbutton';
 
 const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focused: boolean }) => {
   const nav = useNavigation();
@@ -67,7 +68,11 @@ const Layout = createAppContainer(createNavWrapper(
     }, {
         cardStyle: {},
         initialRouteName: 'Landing',
-        defaultNavigationOptions: { headerTransparent: true },
+        defaultNavigationOptions: {
+          headerTransparent: true,
+          headerBackImage: <NavHeaderButton prefixIconName="arrow-back" />,
+          headerBackTitle: null
+        },
       }),
     Main,
   }, { initialRouteName: 'Loading' })
