@@ -2,6 +2,7 @@
 
 const program = require("commander");
 const { spawn } = require("child_process");
+const colors = require('./colors');
 
 let projectName;
 
@@ -39,7 +40,27 @@ lg.stdout.on("data", data => {
 
   all.forEach(({ timestamp, eventMessage }) => {
     const time = new Date(timestamp).toLocaleTimeString([], { hour12: false });
-    console.log([time, eventMessage].join(", "));
+    const m = eventMessage.trim();
+    const matches = /'\[(ERROR|WARN|LOG|DEBUG)\].*$/gms.exec(m);
+    if (!matches) {
+      console.log(`${'[MSG]'}`, m.gray);
+    } else {
+      const re = /'((?:[^'\\]|\\.)*)'/gs;
+      const params = [];
+      let m = undefined;
+      do {
+        m = re.exec(matches[0]);
+        if (m) params.push(m[1])
+      } while (m);
+
+      const [type, ...rest] = params;
+      const last = rest.pop().grey;
+      if (type == '[WARN]') console.log.apply(this, [type.yellow, ...rest, last]);
+      else if (type == '[ERROR]') console.log.apply(this, [type.red, ...rest, last]);
+      else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.grey, ...rest, last]);
+      else if (type == '[DEBUG]') console.log.apply(this, [type.blue, ...rest, last]);
+      else console.log.apply(this, [type.bold, ...rest, last]);
+    }
   });
 });
 

@@ -20,29 +20,29 @@ lg.stdout.on('data', data => {
       } else {
         const [_, type, msg] = m;
         if (type == 'I') {
-          //console.log(`${'[RN:INFO]'.grey} ${msg}`);
+          //console.log(`${'[MSG]'.grey} ${msg.gray}`);
         } else if (type == 'W') {
-          console.log(`${'[RN:WARN]'.yellow} ${msg}`);
+          console.log(`${'[MSG]'.yellow} ${msg.gray}`);
         } else if (type == 'E') {
-          console.log(`${'[RN:ERROR]'.red} ${msg}`);
+          console.log(`${'[MSG]'.red} ${msg.gray}`);
         } else if (type == 'D') {
-          //console.log(`${'[RN:DEBUG]'.blue} ${msg}`);
+          //console.log(`${'[MSG]'.blue} ${msg.gray}`);
         } else {
-          console.log(`${type.bold}: ${msg}`);
+          console.log(`${MSG}: ${msg.gray}`);
         }
       }
     } else {
       const [_, type, msg] = m;
       if (type == 'I') {
-        console.log(`${'[INFO]'.grey} ${msg}`);
+        console.log(`${'[INFO]'.grey} ${msg.gray}`);
       } else if (type == 'W') {
-        console.log(`${'[WARN]'.yellow} ${msg}`);
+        console.log(`${'[WARN]'.yellow} ${msg.gray}`);
       } else if (type == 'E') {
-        console.log(`${'[ERROR]'.red} ${msg}`);
+        console.log(`${'[ERROR]'.red} ${msg.gray}`);
       } else if (type == 'D') {
-        console.log(`${'[DEBUG]'.blue} ${msg}`);
+        console.log(`${'[DEBUG]'.blue} ${msg.gray}`);
       } else {
-        console.log(`${type.bold}: ${msg}`);
+        console.log(`${type.bold}: ${msg.gray}`);
       }
     }
   } else {

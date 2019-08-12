@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+PROJECTNAME=$(cat $DIR/../ios/Podfile | grep ^target | grep -v "\-tvOS" | sed "s/target\ '\(.*\)\' do/\1/")
+
+$DIR/.ioslogger $PROJECTNAME
+
