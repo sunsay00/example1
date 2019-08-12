@@ -145,7 +145,7 @@ export const useNavigationOptions = (opts: {
 export const createNavWrapper = <State extends NavigationState, Options extends {}, Props extends {}>(
   renderWrapper: (children?: React.ReactNode) => React.ReactNode,
   Wrapped: NavigationContainer) => {
-  return class extends Component<NavigationContainerProps & NavigationNavigatorProps<Options, State>, Props> {
+  return class extends React.Component<NavigationContainerProps & NavigationNavigatorProps<Options, State>, Props> {
     static router: NavigationRouter<State, Options> = Wrapped.router;
     static navigationOptions?: NavigationScreenConfig<Options> = Wrapped.navigationOptions;
     render() {
