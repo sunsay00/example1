@@ -8,6 +8,7 @@ import {
   NavigationRoute, NavigationParams, NavigationEventCallback, NavigationEventPayload,
   NavigationContainer, NavigationContainerProps, NavigationNavigatorProps, NavigationRouter, NavigationScreenConfig, NavigationState
 } from 'react-navigation';
+import * as UI from 'core-ui';
 
 export * from 'react-navigation';
 
@@ -101,6 +102,7 @@ export const createStackNavigator = (
   stackConfig?: StackNavigatorConfig
 ): NavigationContainer => {
   return createStackNavigatorRN(routeConfigMap, {
+    ...stackConfig,
     transitionConfig: () => ({
       transitionSpec: {
         duration: 400,
@@ -123,8 +125,12 @@ export const createStackNavigator = (
       title: props.navigation.getParam('title'),
       headerLeft: props.navigation.getParam('headerLeft'),
       headerRight: props.navigation.getParam('headerRight'),
+      headerTitleStyle: {
+        color: UI.Colors.green,
+        fontFamily: UI.Fonts.sansSerif.weightProps.medium.name,
+      },
+      ...(stackConfig ? stackConfig.defaultNavigationOptions : {})
     }),
-    ...stackConfig
   });
 }
 

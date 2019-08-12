@@ -26,17 +26,32 @@ const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focu
 const Tabs = (initialRouteName: string) => createBottomTabNavigator({
   Home: {
     screen: createStackNavigator({ Home }),
-    navigationOptions: { tabBarIcon: (props: any) => <BottomTabButton iconName="home" routeName="Home" focused={props.focused} /> },
+    navigationOptions: {
+      tabBarIcon: (props: any) => <BottomTabButton iconName="home" routeName="Home" focused={props.focused} />,
+    },
   },
   StyleGuide: {
     screen: createStackNavigator({ StyleGuide }),
-    navigationOptions: { tabBarIcon: (props: any) => <BottomTabButton iconName="brush" routeName="StyleGuide" focused={props.focused} /> },
+    navigationOptions: {
+      tabBarIcon: (props: any) => <BottomTabButton iconName="brush" routeName="StyleGuide" focused={props.focused} />,
+    },
   },
   Profile: {
     screen: createStackNavigator({ Profile }),
-    navigationOptions: { tabBarIcon: (props: any) => <BottomTabButton iconName="person" routeName="Profile" focused={props.focused} /> },
+    navigationOptions: {
+      tabBarIcon: (props: any) => <BottomTabButton iconName="person" routeName="Profile" focused={props.focused} />,
+    },
   }
-}, { initialRouteName });
+}, {
+    initialRouteName,
+    tabBarOptions: {
+      activeTintColor: UI.Colors.green,
+      inactiveTintColor: UI.rgba(UI.Colors.black, .5),
+      labelStyle: {
+        fontFamily: UI.Fonts.sansSerif.weightProps.medium.name,
+      }
+    }
+  });
 
 const AuthGuard = (props: { children?: React.ReactNode }) => {
   const account = useAccount();
@@ -66,7 +81,6 @@ const Layout = createAppContainer(createNavWrapper(
       ForgotPassword: Screens.ForgotPasswordScreen,
       ResetPassword: Screens.ResetPasswordScreen,
     }, {
-        cardStyle: {},
         initialRouteName: 'Landing',
         defaultNavigationOptions: {
           headerTransparent: true,

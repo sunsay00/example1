@@ -16,7 +16,7 @@ export const Profile = () => {
   if (!user) return <UI.Loading />;
 
   return (
-    <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: UI.rgba(UI.Colors.black, .05) }}>
       <UI.Header3>Username: {user.username}</UI.Header3>
       <UI.Spacer />
       <UI.Header3>Email: {user.email}</UI.Header3>
