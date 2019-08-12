@@ -13,10 +13,28 @@ import { ApolloProvider } from '@inf/apollo';
 import { Profile } from './screens/profile';
 import { Drawer } from './screens/drawer';
 import { Home } from './screens/home';
+import { StyleGuide } from './screens/styleguide';
+
+const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focused: boolean }) => {
+  const nav = useNavigation();
+  return (
+    <UI.Icon name={props.iconName} size="sm" onPress={() => nav.navigate(props.routeName)} disabled={!props.focused} />
+  );
+}
 
 const Tabs = (initialRouteName: string) => createBottomTabNavigator({
-  Home: createStackNavigator({ Home }),
-  Profile: createStackNavigator({ Profile }),
+  Home: {
+    screen: createStackNavigator({ Home }),
+    navigationOptions: { tabBarIcon: (props: any) => <BottomTabButton iconName="home" routeName="Home" focused={props.focused} /> },
+  },
+  StyleGuide: {
+    screen: createStackNavigator({ StyleGuide }),
+    navigationOptions: { tabBarIcon: (props: any) => <BottomTabButton iconName="brush" routeName="StyleGuide" focused={props.focused} /> },
+  },
+  Profile: {
+    screen: createStackNavigator({ Profile }),
+    navigationOptions: { tabBarIcon: (props: any) => <BottomTabButton iconName="person" routeName="Profile" focused={props.focused} /> },
+  }
 }, { initialRouteName });
 
 const AuthGuard = (props: { children?: React.ReactNode }) => {
