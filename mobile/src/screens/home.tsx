@@ -23,6 +23,7 @@ export const Home = () => {
           <UI.Text weight="medium" numberOfLines={1}>123456789</UI.Text>
           <UI.Text weight="light" numberOfLines={1}>123456789</UI.Text>
           <UI.Text weight="thin" numberOfLines={1}>123456789</UI.Text>
+          <UI.Button onPress={() => console.warn('!!!' + '123' + '!', 'abc')}>Log</UI.Button>
           <UI.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <UI.Button onPress={nav.openDrawer}>Open Drawer</UI.Button>
           </UI.View>

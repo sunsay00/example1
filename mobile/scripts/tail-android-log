@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+'use strict';
+const { spawn } = require('child_process');
+const colors = require('./colors');
+
+const args = ['react-native', 'log-android'];
+
+const lg = spawn('yarn', args);
+
+lg.stdout.on('data', data => {
+  const str = data.toString().trim();
+
+  const matches = /'\[(ERROR|WARN|LOG|DEBUG)\].*$/gms.exec(str);
+  if (!matches) {
+    const m = /] (.) .*ReactNativeJS ▶︎ (.*)/gms.exec(str);
+    if (!m) {
+      const m = /] (.) .*ReactNative ▶︎ (.*)/gms.exec(str);
+      if (!m) {
+        console.log(str.trim());
+      } else {
+        const [_, type, msg] = m;
+        if (type == 'I') {
+          //console.log(`${'[RN:INFO]'.grey} ${msg}`);
+        } else if (type == 'W') {
+          console.log(`${'[RN:WARN]'.yellow} ${msg}`);
+        } else if (type == 'E') {
+          console.log(`${'[RN:ERROR]'.red} ${msg}`);
+        } else if (type == 'D') {
+          //console.log(`${'[RN:DEBUG]'.blue} ${msg}`);
+        } else {
+          console.log(`${type.bold}: ${msg}`);
+        }
+      }
+    } else {
+      const [_, type, msg] = m;
+      if (type == 'I') {
+        console.log(`${'[INFO]'.grey} ${msg}`);
+      } else if (type == 'W') {
+        console.log(`${'[WARN]'.yellow} ${msg}`);
+      } else if (type == 'E') {
+        console.log(`${'[ERROR]'.red} ${msg}`);
+      } else if (type == 'D') {
+        console.log(`${'[DEBUG]'.blue} ${msg}`);
+      } else {
+        console.log(`${type.bold}: ${msg}`);
+      }
+    }
+  } else {
+    const re = /'((?:[^'\\]|\\.)*)'/gs;
+    const params = [];
+    let m = undefined;
+    do {
+      m = re.exec(matches[0]);
+      if (m) params.push(m[1])
+    } while (m);
+
+    const [type, ...rest] = params;
+    if (type == '[WARN]') console.log.apply(this, [type.yellow, ...rest]);
+    else if (type == '[ERROR]') console.log.apply(this, [type.red, ...rest]);
+    else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.grey, ...rest]);
+    else if (type == '[DEBUG]') console.log.apply(this, [type.blue, ...rest]);
+    else console.log.apply(this, [type.bold, ...rest]);
+  }
+});
+
+lg.stderr.on('data', data => {
+  console.log(`stderr: ${data}`);
+});
+
+lg.on('close', code => {
+  console.log(`child process exited with code ${code}`);
+});

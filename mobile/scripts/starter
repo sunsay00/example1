@@ -111,6 +111,7 @@ const runAndroidStart = async (avdName) => {
         done = true;
         process.stdout.write('.');
         shell('yarn', ['react-native', 'run-android'], {});
+        shell('./scripts/tail-android-log', [], {});
       } else {
         process.stdout.write('.');
       }
