@@ -20,15 +20,15 @@ lg.stdout.on('data', data => {
       } else {
         const [_, type, msg] = m;
         if (type == 'I') {
-          //console.log(`${'[MSG]'.grey} ${msg.gray}`);
+          //console.log(`${'[INFO]'.grey} ${msg.gray}`);
         } else if (type == 'W') {
-          console.log(`${'[MSG]'.yellow} ${msg.gray}`);
+          console.log(`${'[WARN]'.yellow} ${msg.gray}`);
         } else if (type == 'E') {
-          console.log(`${'[MSG]'.red} ${msg.gray}`);
+          console.log(`${'[ERROR]'.red} ${msg.gray}`);
         } else if (type == 'D') {
           //console.log(`${'[MSG]'.blue} ${msg.gray}`);
         } else {
-          console.log(`${MSG}: ${msg.gray}`);
+          console.log(msg.gray);
         }
       }
     } else {

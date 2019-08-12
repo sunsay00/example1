@@ -43,7 +43,7 @@ lg.stdout.on("data", data => {
     const m = eventMessage.trim();
     const matches = /'\[(ERROR|WARN|LOG|DEBUG)\].*$/gms.exec(m);
     if (!matches) {
-      console.log(`${'[MSG]'}`, m.gray);
+      console.log(m.gray);
     } else {
       const re = /'((?:[^'\\]|\\.)*)'/gs;
       const params = [];
