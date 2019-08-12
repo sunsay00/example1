@@ -1,19 +1,18 @@
 import * as React from 'react';
-import { rgba, Colors, Carousel, View, Header3, ImageBackground } from 'core-ui';
-import { Headline1 } from './headline';
+import * as UI from 'core-ui';
 
 export const Cover = () =>
-  <Carousel infinite style={{ height: 500, marginHorizontal: -32 }}>
-    <ImageBackground
+  <UI.Carousel infinite style={{ height: 500, marginHorizontal: -32 }}>
+    <UI.ImageBackground
       source={{ uri: 'image1.jpg' }}
       style={{ flex: 1, width: '100%', height: '100%', zIndex: -1 }}>
-      <View style={{
+      <UI.View style={{
         padding: 32, height: '100%',
         flex: 1, justifyContent: 'center', alignItems: 'center',
-        backgroundColor: rgba(Colors.blue, .3)
+        backgroundColor: UI.rgba(UI.Colors.blue, .3)
       }}>
-        <Headline1 secondary>Business + Techology = Success</Headline1>
-        <Header3 secondary serifed weight="medium">Advocating for businesses since 2000</Header3>
-      </View>
-    </ImageBackground>
-  </Carousel>
+        <UI.Headline secondary>Business + Techology = Success</UI.Headline>
+        <UI.Header3 secondary serifed weight="medium">Advocating for businesses since 2000</UI.Header3>
+      </UI.View>
+    </UI.ImageBackground>
+  </UI.Carousel>

@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as UI from 'core-ui';
 import * as Web from 'gatsby-theme-core-ui';
 import { Cover } from '../components/cover';
-import { Headline2 } from '../components/headline';
 import { ContactUs } from '../components/contactus';
 import { Footer } from '../components/footer';
 
@@ -27,7 +26,9 @@ const PostView = (props: { data: { title: string, content: string, image?: { uri
 
 const Services = () =>
   <UI.View style={{ margin: 16, alignItems: 'center' }}>
-    <Headline2 serifed>Services</Headline2>
+    <UI.View style={{ flexDirection: 'row' }}>
+      <UI.Header1 serifed>Services</UI.Header1>
+    </UI.View>
     <PostView data={[{
       title: 'Infrastructure Integration',
       content: 'Infinage provides infrastructure integration services, from building new data center to upgrading existing infrastructure. We thoroughly assess any entire IT environment, including desktops, servers, and networks infrastructure to develop necessary improvement plans. Infinage always adapts new technology standards in order to propose the most secure and reliable infrastructure design for our clients’ enterprise network. Because we understand the importance for our clients to maintain a competitive edge at all times, Infinage commits to the delivery of our “least impact” implementation plan for any changes in our clients’ IT infrastructure – that is to keep operational disruption and mechanic resistance, if any, at a minimal level during the integration process, thus streamlining our clients’ current business operations into the novel infrastructure with efficiency. We further assist our clients by minimizing the long-term costs for supporting their infrastructure. In achieving so, Infinage equips our clients’ staffs with technical training and self-help guides to promote internal support and productivity. Our accomplishment is to furnish our clients with a secure, reliable, and manageable support infrastructure.',

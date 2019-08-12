@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* mobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* mobileTests.m */; };
 		04F3A1E6EB97446AB0F21500 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8525AB1E39FD4A93AF7868BB /* Ionicons.ttf */; };
