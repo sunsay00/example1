@@ -134,14 +134,14 @@ export const createStackNavigator = (
   });
 }
 
-export const useNavigationOptions = (opts: {
+export const useNavigationOptions = (opts?: {
   title?: string,
   headerLeft?: React.ReactNode,
   headerRight?: React.ReactNode,
 }) => {
   const nav = useNavigation();
   useEffect(() => {
-    nav.setParams(opts);
+    nav.setParams(opts || {});
     return () => {
       nav.setParams({});
     };

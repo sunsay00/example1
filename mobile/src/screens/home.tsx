@@ -7,10 +7,10 @@ import { NavHeaderButton } from '../components/navheaderbutton';
 export const Home = () => {
   const { user } = useAccount();
   const nav = useNavigation();
-  useNavigationOptions({
+  useNavigationOptions(user ? {
     title: 'Home',
     headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />
-  });
+  } : undefined);
   return (
     <UI.ScrollView style={{ flex: 1 }}>
       <UI.ImageBackground source={require('../../assets/images/image1.jpg')} style={{ width: '100%' }} resizeMode="cover">
