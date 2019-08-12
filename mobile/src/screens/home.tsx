@@ -16,7 +16,7 @@ export const Home = () => {
   const nav = useNavigation();
   useNavigationOptions({
     title: 'Home',
-    headerLeft: <NavHeaderButton prefixIconName="arrow-back" onPress={nav.openDrawer}>Drawer</NavHeaderButton>
+    headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />
   });
   return (
     <UI.ScrollView style={{ flex: 1, padding: 16 }}>
@@ -74,11 +74,12 @@ export const Home = () => {
         <Specimen title="NumericInput">
           <UI.EmailInput placeholder="Age" value="25" />
         </Specimen>
-        <UI.Text weight="black" numberOfLines={1}>123456789</UI.Text>
-        <UI.Text weight="bold" numberOfLines={1}>123456789</UI.Text>
-        <UI.Text weight="medium" numberOfLines={1}>123456789</UI.Text>
-        <UI.Text weight="light" numberOfLines={1}>123456789</UI.Text>
-        <UI.Text weight="thin" numberOfLines={1}>123456789</UI.Text>
+        <UI.Header1>Header 1</UI.Header1>
+        <UI.Header2>Header 2</UI.Header2>
+        <UI.Header3>Header 3</UI.Header3>
+        <UI.Header4>Header 4</UI.Header4>
+        <UI.Header5>Header 5</UI.Header5>
+        <UI.Header6>Header 6</UI.Header6>
         <UI.Spacer />
         <UI.Button onPress={() => console.warn('!!!' + '123' + '!', 'abc')}>Log</UI.Button>
         <UI.Spacer />

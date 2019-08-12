@@ -16,7 +16,7 @@ export const Icon = (props: UI.IconProps) => {
   const fontSize = fontSizes[props.size || 'lg'];
   return (
     <UI.TouchableWithoutFeedback
-      disabled={props.disabled || !props.onPress} onPress={props.onPress}
+      disabled={props.disabled} onPress={props.onPress}
       hitSlop={{ left: slop, top: slop, bottom: slop, right: slop }}>
       <UI.View style={{ height: fontSize, ...props.style }}>
         {

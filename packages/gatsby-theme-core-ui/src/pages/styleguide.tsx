@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Section, View, Header1, Header2, Header3, Header4, Header5, Header6 } from 'core-ui';
+import * as UI from 'core-ui';
 import { Code } from '../components/code';
 
 /*
@@ -29,50 +29,50 @@ import { Code } from '../components/code';
 
 export default (props: {}) =>
   <>
-    <Section>
-      <View style={{ marginVertical: 32, marginHorizontal: 16 }}>
+    <UI.Section>
+      <UI.View style={{ marginVertical: 32, marginHorizontal: 16 }}>
 
-        <Header1>Infinage Styleguide</Header1>
+        <UI.Header1>Infinage Styleguide</UI.Header1>
 
-        <Header2>Table of Contents</Header2>
+        <UI.Header2>Table of Contents</UI.Header2>
         {/*
       - [Components](#components)
       - [Base Tags](#basetags)
       */}
 
-        <Header2>Components</Header2>
+        <UI.Header2>Components</UI.Header2>
 
-        <Header4>Accent</Header4>
+        <UI.Header4>Accent</UI.Header4>
 
         <Code live>{
           `<Accent secondary={false}>Accent</Accent>`
         }</Code>
 
-        <Header4>Badge</Header4>
+        <UI.Header4>Badge</UI.Header4>
 
         <Code live>{
           `<Badge value="13" />`
         }</Code>
 
-        <Header4>BulletCrumbs</Header4>
+        <UI.Header4>BulletCrumbs</UI.Header4>
 
         <Code live>{
           `<BulletCrumbs crumbs={['one', 'two', ' three']} />`
         }</Code>
 
-        <Header4>BulletCrumbButtons</Header4>
+        <UI.Header4>BulletCrumbButtons</UI.Header4>
 
         <Code live>{
           `<BulletCrumbButtons crumbs={['one', 'two', 'three']} />`
         }</Code>
 
-        <Header4>Button</Header4>
+        <UI.Header4>Button</UI.Header4>
 
         <Code live>{
           `<Button onPress={() => alert('button pressed!')}>Primary Button</Button>`
         }</Code>
 
-        <Header4>Carousel</Header4>
+        <UI.Header4>Carousel</UI.Header4>
 
         <Code live>{
           `<Carousel scrollEnabled infinite autoplay>
@@ -94,31 +94,31 @@ export default (props: {}) =>
 </Carousel>`
         }</Code>
 
-        <Header4>Icon</Header4>
+        <UI.Header4>Icon</UI.Header4>
 
         <Code live>{
           `<Icon name="planet" color="tomato" />`
         }</Code>
 
-        <Header4>UserNameInput</Header4>
+        <UI.Header4>UserNameInput</UI.Header4>
 
         <Code live>{
           `<UserNameInput placeholder="User Name" />`
         }</Code>
 
-        <Header4>PasswordInput</Header4>
+        <UI.Header4>PasswordInput</UI.Header4>
 
         <Code live>{
           `<PasswordInput placeholder="Password" message="password required" />`
         }</Code>
 
-        <Header4>EmailInput</Header4>
+        <UI.Header4>EmailInput</UI.Header4>
 
         <Code live>{
           `<EmailInput placeholder="Email" disabled />`
         }</Code>
 
-        <Header4>NumericInput</Header4>
+        <UI.Header4>NumericInput</UI.Header4>
 
         <Code live>{
           `<NumericInput placeholder="Age" value={25} />`
@@ -128,17 +128,12 @@ export default (props: {}) =>
       ## Basic Tags <a name="basetags" />
       */}
 
-        <Header1>h1</Header1>
-
-        <Header2>h2</Header2>
-
-        <Header3>h3</Header3>
-
-        <Header4>h4</Header4>
-
-        <Header5>h5</Header5>
-
-        <Header6>h6</Header6>
+        <UI.Header1>Header 1</UI.Header1>
+        <UI.Header2>Header 2</UI.Header2>
+        <UI.Header3>Header 3</UI.Header3>
+        <UI.Header4>Header 4</UI.Header4>
+        <UI.Header5>Header 5</UI.Header5>
+        <UI.Header6>Header 6</UI.Header6>
 
         {/*
 
@@ -186,6 +181,6 @@ export default (props: {}) =>
 
       ![alt](https://static1.squarespace.com/static/59ea4ce9b1ffb6d0755d0fa3/t/5a9dcfc1ec212d191ef4b333/1508695516730/?format=100w)
       */}
-      </View>
-    </Section>
+      </UI.View>
+    </UI.Section>
   </>
