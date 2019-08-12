@@ -19,8 +19,8 @@ export const StyleGuide = () => {
     headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />
   });
   return (
-    <UI.ScrollView style={{ flex: 1, padding: 16, backgroundColor: UI.rgba(UI.Colors.black, 0.05) }}>
-      <UI.View style={{ flex: 1, alignItems: 'stretch', justifyContent: 'center' }}>
+    <UI.ScrollView style={{ flex: 1, backgroundColor: UI.rgba(UI.Colors.black, 0.05) }}>
+      <UI.View style={{ flex: 1, padding: 16, alignItems: 'stretch', justifyContent: 'center' }}>
         <UI.StatusBar barStyle='dark-content' />
         <UI.Header1>Infinage Styleguide</UI.Header1>
         <UI.Header2>Table of Contents</UI.Header2>
