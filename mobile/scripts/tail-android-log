@@ -55,11 +55,12 @@ lg.stdout.on('data', data => {
     } while (m);
 
     const [type, ...rest] = params;
-    if (type == '[WARN]') console.log.apply(this, [type.yellow, ...rest]);
-    else if (type == '[ERROR]') console.log.apply(this, [type.red, ...rest]);
-    else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.grey, ...rest]);
-    else if (type == '[DEBUG]') console.log.apply(this, [type.blue, ...rest]);
-    else console.log.apply(this, [type.bold, ...rest]);
+    const last = rest.pop().grey;
+    if (type == '[WARN]') console.log.apply(this, [type.yellow, ...rest, last]);
+    else if (type == '[ERROR]') console.log.apply(this, [type.red, ...rest, last]);
+    else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.grey, ...rest, last]);
+    else if (type == '[DEBUG]') console.log.apply(this, [type.blue, ...rest, last]);
+    else console.log.apply(this, [type.bold, ...rest, last]);
   }
 });
 
