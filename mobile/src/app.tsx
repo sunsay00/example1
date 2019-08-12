@@ -19,7 +19,7 @@ const Tabs = (initialRouteName: string) => createBottomTabNavigator({
   Profile: createStackNavigator({ Profile }),
 }, { initialRouteName });
 
-const AuthChecker = (props: { children?: React.ReactNode }) => {
+const AuthGuard = (props: { children?: React.ReactNode }) => {
   const account = useAccount();
   const nav = useNavigation();
   React.useEffect(() => {
@@ -28,9 +28,7 @@ const AuthChecker = (props: { children?: React.ReactNode }) => {
       else nav.navigate('Landing');
     }
   }, [account.ready, account.user]);
-  return (
-    <UI.View style={{ flex: 1 }}>{props.children}</UI.View>
-  );
+  return <>{props.children}</>;
 }
 
 const Main = createDrawerNavigator(
@@ -38,7 +36,7 @@ const Main = createDrawerNavigator(
   { drawerType: 'slide', contentComponent: Drawer });
 
 export const Layout = createAppContainer(createNavWrapper(
-  children => <AuthChecker>{children}</AuthChecker>,
+  children => <AuthGuard>{children}</AuthGuard>,
   createSwitchNavigator({
     Loading: UI.Loading,
     Landing,

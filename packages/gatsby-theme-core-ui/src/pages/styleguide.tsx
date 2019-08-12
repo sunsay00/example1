@@ -51,13 +51,13 @@ export default (props: {}) =>
         <Header4>Badge</Header4>
 
         <Code live>{
-          `<Badge value={13} />`
+          `<Badge value="13" />`
         }</Code>
 
         <Header4>BulletCrumbs</Header4>
 
         <Code live>{
-          `< BulletCrumbs crumbs={['one', 'two', ' three']} />`
+          `<BulletCrumbs crumbs={['one', 'two', ' three']} />`
         }</Code>
 
         <Header4>BulletCrumbButtons</Header4>
