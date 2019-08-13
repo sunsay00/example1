@@ -6,11 +6,11 @@ type ContextValue = {
   setCurrent: (c: React.ReactNode) => void,
 };
 
-const ModalContext = React.createContext<ContextValue | undefined>(undefined);
+const PopUpContext = React.createContext<ContextValue | undefined>(undefined);
 
 export const usePopUp = () => {
-  const ctx = React.useContext(ModalContext);
-  if (!ctx) throw new Error('invalid modal context');
+  const ctx = React.useContext(PopUpContext);
+  if (!ctx) throw new Error('invalid popup context');
   return ctx;
 }
 
@@ -57,9 +57,9 @@ const PopUp = (props: {
           </UI.View>}
       />
       <UI.Spacer />
-      <UI.SingletonAsserter fn={PopUp}>
+      <UI.AssertSingleton fn={PopUp}>
         {props.children}
-      </UI.SingletonAsserter>
+      </UI.AssertSingleton>
     </UI.Breakable>
   </UI.Animated.View>
 
@@ -114,8 +114,8 @@ export const PopUpProvider = (props: {
   }, [loading]);
 
   return (
-    <ModalContext.Provider value={{ current, setCurrent }}>
+    <PopUpContext.Provider value={{ current, setCurrent }}>
       {props.children}
-    </ModalContext.Provider>
+    </PopUpContext.Provider>
   );
 }

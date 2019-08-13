@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "react": "^16.9.0",
+    "@react-native-community/async-storage": "^1.6.1",
     "react-native-ionicons": "https://github.com/kyunghoon/react-native-ionicons.git"
   }
 }

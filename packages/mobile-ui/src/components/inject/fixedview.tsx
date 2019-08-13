@@ -9,7 +9,7 @@ export const FixedView = (props: { style?: UI.ViewStyle, children?: React.ReactN
 
   React.useEffect(() => {
     if (ref.current)
-      ref.current.measure((_x, _y, _w, _h, px, py) => setPos({ px, py }));
+      ref.current.measure((_x, _y, _w, _h, px, py) => setPos({ px: px || 0, py: py || 0 }));
   }, [ref.current]);
 
   return (

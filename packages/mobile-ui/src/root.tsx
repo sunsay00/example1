@@ -3,6 +3,8 @@ import * as UI from 'core-ui';
 import { Keyboard, Slider, Alert, Image, ImageBackground, Modal } from 'react-native';
 import { Icon } from './components/inject/icon';
 import { FixedView } from './components/inject/fixedview';
+import { KeyboardProvider } from './hooks/usekeyboard';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export const Injector = (props: { children?: React.ReactNode }) =>
   <UI.InjectorProvider client={{
@@ -13,6 +15,7 @@ export const Injector = (props: { children?: React.ReactNode }) =>
     Modal: props => <Modal {...props} />,
     Slider: props => <Slider {...props} />,
     FixedView,
+    AsyncStorage
   }}>
     {props.children}
   </UI.InjectorProvider>
@@ -24,9 +27,11 @@ export const Root = (props: { children?: (overlays: React.ReactNode) => React.Re
         <UI.TopViewStackProvider>{overlays =>
           <UI.ToastProvider>
             <UI.View style={{ flex: 1 }} onStartShouldSetResponder={() => { Keyboard.dismiss(); return false; }}>
-              <UI.SingletonAsserter fn={Root}>
-                {props.children && props.children(overlays) || null}
-              </UI.SingletonAsserter>
+              <KeyboardProvider>
+                <UI.AssertSingleton fn={Root}>
+                  {props.children && props.children(overlays) || null}
+                </UI.AssertSingleton>
+              </KeyboardProvider>
             </UI.View>
           </UI.ToastProvider>}
         </UI.TopViewStackProvider>

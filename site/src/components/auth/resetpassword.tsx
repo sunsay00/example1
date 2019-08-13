@@ -24,7 +24,7 @@ export const ResetPassword = (props: {
       <UI.Spacer size="md" />
       <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <UI.Link testID="LOGIN" size="md" disabled={loading} onPress={props.onGoToLogIn}>
-          <UI.Icon size="sm" name="chevronLeft" color={UI.Colors.green} />Back to Login</UI.Link>
+          <UI.Icon size="sm" name="arrow-back" color={UI.Colors.green} />Back to Login</UI.Link>
         <UI.Button disabled={loading} onPress={form.submit} loading={loading}>Reset Password</UI.Button>
       </UI.View>
       <UI.HRule />

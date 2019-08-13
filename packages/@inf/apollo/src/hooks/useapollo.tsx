@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AsyncStorage } from 'react-native';
+import { AsyncStorage } from 'core-ui';
 import gql from 'graphql-tag';
 import { ApolloProvider as Apollo } from 'react-apollo-hooks';
 import { ApolloClient } from 'apollo-client';

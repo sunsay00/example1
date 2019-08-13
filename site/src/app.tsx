@@ -36,10 +36,10 @@ export const App = (props: { children?: React.ReactNode }) =>
   <Web.Root>{overlays =>
     <AccountProvider region="us-east-1">
       <ApolloProvider>
-        <Layout>
-          {props.children}
-        </Layout>
-        {overlays}
+        <UI.AssertSingleton fn={App}>
+          <Layout>{props.children}</Layout>
+          {overlays}
+        </UI.AssertSingleton>
       </ApolloProvider>
     </AccountProvider>}
   </Web.Root>

@@ -1,22 +1,18 @@
 import * as React from 'react';
 import { useState, useContext, useEffect } from 'react';
 import { Easing, Animated } from 'react-native';
-import {
-  NavigationTransitionProps, createStackNavigator as createStackNavigatorRN,
-  NavigationScreenConfigProps, NavigationStackScreenOptions, NavigationRouteConfigMap,
-  StackNavigatorConfig, NavigationContext, NavigationScreenProp, EventType,
-  NavigationRoute, NavigationParams, NavigationEventCallback, NavigationEventPayload,
-  NavigationContainer, NavigationContainerProps, NavigationNavigatorProps, NavigationRouter, NavigationScreenConfig, NavigationState
-} from 'react-navigation';
+import * as Nav from 'react-navigation';
 import * as UI from 'core-ui';
+import * as Mobile from 'mobile-ui';
+import { NavHeaderButton } from '../components/navheaderbutton';
 
 export * from 'react-navigation';
 
-export function useNavigation<S>(): NavigationScreenProp<S & NavigationRoute> {
-  return useContext(NavigationContext as any);
+export function useNavigation<S>(): Nav.NavigationScreenProp<S & Nav.NavigationRoute> {
+  return useContext(Nav.NavigationContext as any);
 }
 
-export function useNavigationParam<T extends keyof NavigationParams>(
+export function useNavigationParam<T extends keyof Nav.NavigationParams>(
   paramName: T
 ) {
   return useNavigation().getParam(paramName);
@@ -30,7 +26,7 @@ export function useNavigationKey() {
   return useNavigation().state.key;
 }
 
-export function useNavigationEvents(handleEvt: NavigationEventCallback) {
+export function useNavigationEvents(handleEvt: Nav.NavigationEventCallback) {
   const navigation = useNavigation();
   useEffect(
     () => {
@@ -70,7 +66,7 @@ const didBlurState = { ...emptyFocusState, isBlurred: true };
 const willFocusState = { ...emptyFocusState, isFocusing: true };
 const getInitialFocusState = (isFocused: boolean) =>
   isFocused ? didFocusState : didBlurState;
-function focusStateOfEvent(eventName: EventType) {
+function focusStateOfEvent(eventName: Nav.EventType) {
   switch (eventName) {
     case 'didFocus':
       return didFocusState;
@@ -89,7 +85,7 @@ export function useFocusState() {
   const navigation = useNavigation();
   const isFocused = navigation.isFocused();
   const [focusState, setFocusState] = useState(getInitialFocusState(isFocused));
-  function handleEvt(e: NavigationEventPayload) {
+  function handleEvt(e: Nav.NavigationEventPayload) {
     const newState = focusStateOfEvent(e.type);
     newState && setFocusState(newState);
   }
@@ -98,10 +94,10 @@ export function useFocusState() {
 }
 
 export const createStackNavigator = (
-  routeConfigMap: NavigationRouteConfigMap,
-  stackConfig?: StackNavigatorConfig
-): NavigationContainer => {
-  return createStackNavigatorRN(routeConfigMap, {
+  routeConfigMap: Nav.NavigationRouteConfigMap,
+  stackConfig?: Nav.StackNavigatorConfig
+): Nav.NavigationContainer => {
+  return Nav.createStackNavigator(routeConfigMap, {
     ...stackConfig,
     transitionConfig: () => ({
       transitionSpec: {
@@ -110,7 +106,7 @@ export const createStackNavigator = (
         timing: Animated.timing,
         useNativeDriver: true,
       },
-      screenInterpolator: (sceneProps: NavigationTransitionProps) => {
+      screenInterpolator: (sceneProps: Nav.NavigationTransitionProps) => {
         const { layout, position, scene } = sceneProps
         const thisSceneIndex = scene.index
         const width = layout.initWidth
@@ -121,7 +117,7 @@ export const createStackNavigator = (
         return { transform: [{ translateX }] }
       }
     }),
-    defaultNavigationOptions: (props: NavigationScreenConfigProps): NavigationStackScreenOptions => ({
+    defaultNavigationOptions: (props: Nav.NavigationScreenConfigProps): Nav.NavigationStackScreenOptions => ({
       title: props.navigation.getParam('title'),
       headerLeft: props.navigation.getParam('headerLeft'),
       headerRight: props.navigation.getParam('headerRight'),
@@ -129,6 +125,8 @@ export const createStackNavigator = (
         color: UI.Colors.green,
         fontFamily: UI.Fonts.sansSerif.weightProps.medium.name,
       },
+      headerBackImage: <NavHeaderButton prefixIconName="arrow-back" />,
+      headerBackTitle: null,
       ...(stackConfig ? stackConfig.defaultNavigationOptions : {})
     }),
   });
@@ -148,14 +146,59 @@ export const useNavigationOptions = (opts?: {
   }, []);
 }
 
-export const createNavWrapper = <State extends NavigationState, Options extends {}, Props extends {}>(
-  renderWrapper: (children?: React.ReactNode) => React.ReactNode,
-  Wrapped: NavigationContainer) => {
-  return class extends React.Component<NavigationContainerProps & NavigationNavigatorProps<Options, State>, Props> {
-    static router: NavigationRouter<State, Options> = Wrapped.router;
-    static navigationOptions?: NavigationScreenConfig<Options> = Wrapped.navigationOptions;
+export const createNavWrapper = <State extends Nav.NavigationState, Options extends {}, Props extends {}>(
+  renderWrapper: (props: { children?: React.ReactNode }) => React.ReactNode,
+  Wrapped: Nav.NavigationContainer) => {
+  return class extends React.Component<Nav.NavigationContainerProps & Nav.NavigationNavigatorProps<Options, State>, Props> {
+    static router: Nav.NavigationRouter<State, Options> = Wrapped.router;
+    static navigationOptions?: Nav.NavigationScreenConfig<Options> = Wrapped.navigationOptions;
     render() {
-      return <>{renderWrapper(<Wrapped {...this.props} />)}</>;
+      return <>{renderWrapper({ children: <Wrapped {...this.props} /> })}</>;
     }
+  }
+}
+
+const BottomTabBar = (props: Nav.BottomTabBarProps) => {
+  const { visible } = Mobile.useKeyboard();
+  return visible ? <UI.View /> : <Nav.BottomTabBar {...props} />;
+}
+
+export const createBottomTabNavigator = <State extends Nav.NavigationState, Options extends {}, Props extends {}>(
+  routeConfigMap: Nav.NavigationRouteConfigMap,
+  drawConfig?: Nav.BottomTabNavigatorConfig
+) => {
+  const windowHeight = UI.Dimensions.get('window').height - (UI.Platform.OS == 'android' ? (UI.StatusBar.currentHeight || 0) : 0);
+  const Wrapped = Nav.createBottomTabNavigator(routeConfigMap, {
+    ...drawConfig,
+    tabBarComponent: BottomTabBar,
+    tabBarOptions: {
+      ...drawConfig && drawConfig.tabBarOptions,
+      activeTintColor: UI.Colors.green,
+      inactiveTintColor: UI.rgba(UI.Colors.black, .5),
+      labelStyle: {
+        fontFamily: UI.Fonts.sansSerif.weightProps.medium.name,
+      },
+    },
+  });
+  if (UI.Platform.OS == 'android') {
+    return class extends React.Component<Nav.NavigationContainerProps & Nav.NavigationNavigatorProps<Options, State>, Props> {
+      static router = Wrapped.router;
+      static navigationOptions = Wrapped.navigationOptions;
+      render() {
+        return (
+          <Mobile.KeyboardConsumer>{ctx => {
+            if (!ctx) return null;
+            return (
+              <UI.View style={{ flex: 1, minHeight: windowHeight - ctx.height }}>
+                <Wrapped {...this.props} />
+              </UI.View>
+            );
+          }}
+          </Mobile.KeyboardConsumer>
+        );
+      }
+    };
+  } else {
+    return Wrapped;
   }
 }

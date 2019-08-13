@@ -20,7 +20,7 @@ lg.stdout.on('data', data => {
       } else {
         const [_, type, msg] = m;
         if (type == 'I') {
-          //console.log(`${'[INFO]'.grey} ${msg.gray}`);
+          //console.log(`${'[INFO]'.gray} ${msg.gray}`);
         } else if (type == 'W') {
           console.log(`${'[WARN]'.yellow} ${msg.gray}`);
         } else if (type == 'E') {
@@ -34,7 +34,7 @@ lg.stdout.on('data', data => {
     } else {
       const [_, type, msg] = m;
       if (type == 'I') {
-        console.log(`${'[INFO]'.grey} ${msg.gray}`);
+        console.log(`${'[INFO]'.gray} ${msg.gray}`);
       } else if (type == 'W') {
         console.log(`${'[WARN]'.yellow} ${msg.gray}`);
       } else if (type == 'E') {
@@ -55,10 +55,10 @@ lg.stdout.on('data', data => {
     } while (m);
 
     const [type, ...rest] = params;
-    const last = rest.pop().grey;
+    const last = (rest.pop() || '').gray;
     if (type == '[WARN]') console.log.apply(this, [type.yellow, ...rest, last]);
     else if (type == '[ERROR]') console.log.apply(this, [type.red, ...rest, last]);
-    else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.grey, ...rest, last]);
+    else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.gray, ...rest, last]);
     else if (type == '[DEBUG]') console.log.apply(this, [type.blue, ...rest, last]);
     else console.log.apply(this, [type.bold, ...rest, last]);
   }

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { AsyncStorage } from 'react-native';
 import * as UI from 'core-ui';
 import { PopUpProvider } from './hooks/usepopup';
 import { useBodyScrollLocker } from './hooks/usebodyscrolllocker';
@@ -20,6 +21,7 @@ const Injector = (props: { children?: React.ReactNode }) =>
     ImageBackground,
     Modal: props => <Modal {...props} />,
     Slider: props => <Slider {...props} />,
+    AsyncStorage
   }}>
     {props.children}
   </UI.InjectorProvider>
@@ -43,9 +45,9 @@ export const Root = (props: {
             <UI.ToastProvider>
               <AlertProvider>
                 <PopUpProvider style={{ maxWidth: 500 }}>
-                  <UI.SingletonAsserter fn={Root}>
+                  <UI.AssertSingleton fn={Root}>
                     {props.children && props.children(overlays)}
-                  </UI.SingletonAsserter>
+                  </UI.AssertSingleton>
                 </PopUpProvider>
               </AlertProvider>
             </UI.ToastProvider>

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState, useContext } from 'react';
-import { AsyncStorage } from 'react-native';
 import { Account } from '../account';
 import { UserPoolMode } from '../types';
 import * as UI from 'core-ui';
@@ -36,7 +35,7 @@ type ContextValue = {
 
 const _account: Account | undefined = new Account(
   UI.Platform.OS == 'web' ? UserPoolMode.Web : UserPoolMode.Mobile,
-  AsyncStorage
+  UI.AsyncStorage
 );
 
 const AccountContext = React.createContext<ContextValue | undefined>(undefined);
