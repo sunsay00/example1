@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { KeyboardAvoidingView } from 'react-native';
 import * as UI from 'core-ui';
 import { useLogInForm } from 'cf-cognito';
 
@@ -20,6 +21,7 @@ export const LogIn = (props: {
     <UI.View style={{
       flex: 1,
       justifyContent: 'center',
+      paddingTop: 80,
       paddingHorizontal: 40,
     }}>
       <UI.UserNameInput {...form.fields.emailOrUsername} />

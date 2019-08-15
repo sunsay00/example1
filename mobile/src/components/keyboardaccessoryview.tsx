@@ -6,14 +6,13 @@ import { useAnimation, useTopViewStack } from 'core-ui';
 const DURATION = Platform.OS == 'android' ? 0 : 250;
 
 export const KeyboardAccessoryView = (props: {
-  alwaysVisible?: boolean,
   accessoryElement: React.ReactNode,
   accessoryHeight: number,
   children?: React.ReactNode,
   style?: ViewStyle,
 }) => {
   const windowHeight = Dimensions.get('window').height - (Platform.OS == 'android' ? (StatusBar.currentHeight || 0) : 0);
-  const [accessoryHeight, setAccessoryHeight] = React.useState(props.alwaysVisible ? props.accessoryHeight : 0);
+  const [accessoryHeight, setAccessoryHeight] = React.useState(0);
   const [viewHeight, setViewHeight] = React.useState(0);
   const innerRef = React.useRef<View | null>(null);
   const { visible, height: _height } = useKeyboard();
@@ -33,8 +32,7 @@ export const KeyboardAccessoryView = (props: {
       next += windowHeight - accessoryHeight - _height;
     } else {
       next += viewHeight - height;
-      if (!props.alwaysVisible || visible)
-        next += bottom - accessoryHeight;
+      next += bottom - accessoryHeight;
     }
     setAccessoryOffset({ toValue: next });
   }, [viewHeight, accessoryHeight, bottom, visible]);
@@ -45,7 +43,7 @@ export const KeyboardAccessoryView = (props: {
 
   React.useEffect(() => {
     if (visible) setAccessoryHeight(props.accessoryHeight);
-    else setAccessoryHeight(props.alwaysVisible ? props.accessoryHeight : 0);
+    else setAccessoryHeight(0);
   }, [visible]);
 
   React.useLayoutEffect(() => {
@@ -73,10 +71,9 @@ export const KeyboardAccessoryView = (props: {
           visible={visible}
           accessoryOffset={accessoryOffset}
           height={height}
-          alwaysVisible={props.alwaysVisible}
         >{props.accessoryElement}</Accessory>
       )
-    }, [props.style, accessoryHeight, visible, accessoryOffset, height, props.alwaysVisible, props.accessoryElement]);
+    }, [props.style, accessoryHeight, visible, accessoryOffset, height, props.accessoryElement]);
   }
 
   const layout = (e: LayoutChangeEvent) => {
@@ -106,7 +103,7 @@ export const KeyboardAccessoryView = (props: {
           style={{
             transform: [{ translateY: offset }],
             flex: 1, ...StyleSheet.absoluteFillObject,
-            bottom: props.alwaysVisible ? accessoryHeight : 0,
+            bottom: 0,
           }}>
           <View
             onLayout={() => null}
@@ -122,7 +119,6 @@ export const KeyboardAccessoryView = (props: {
             visible={visible}
             accessoryOffset={accessoryOffset}
             height={height}
-            alwaysVisible={props.alwaysVisible}
           >{props.accessoryElement}</Accessory> || null}
       </View>
     </>

@@ -12,6 +12,7 @@ export const ForgotPassword = (props: {
     <UI.View style={{
       flex: 1,
       justifyContent: 'center',
+      paddingTop: 80,
       paddingHorizontal: 40,
     }}>
       <UI.View>

@@ -125,7 +125,10 @@ export const createStackNavigator = (
         color: UI.Colors.green,
         fontFamily: UI.Fonts.sansSerif.weightProps.medium.name,
       },
-      headerBackImage: <NavHeaderButton prefixIconName="arrow-back" />,
+      headerBackImage:
+        <Nav.NavigationContext.Consumer>{nav =>
+          <NavHeaderButton prefixIconName="arrow-back" onPress={() => nav.goBack()} />}
+        </Nav.NavigationContext.Consumer>,
       headerBackTitle: null,
       ...(stackConfig ? stackConfig.defaultNavigationOptions : {})
     }),
