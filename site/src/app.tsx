@@ -2,8 +2,13 @@ import * as React from 'react';
 import * as UI from 'core-ui';
 import * as Web from 'gatsby-theme-core-ui';
 import { AccountProvider, useAccount } from 'cf-cognito';
-import { ApolloProvider } from './hooks/useapollo';
+import { ApolloProvider } from '@inf/apollo';
 import { Auth } from './components/auth';
+
+const config = {
+  WEBSOCKET_ENDPOINT: undefined,
+  GRAPHQL_ENDPOINT: '',
+};
 
 const Layout = (props: { children?: React.ReactNode }) => {
   const { loading } = UI.useLoading(Layout);
@@ -35,7 +40,11 @@ const Layout = (props: { children?: React.ReactNode }) => {
 export const App = (props: { children?: React.ReactNode }) =>
   <Web.Root>{overlays =>
     <AccountProvider region="us-east-1">
-      <ApolloProvider>
+      <ApolloProvider
+        authorization="Guest"
+        websocketEndpoint={config.WEBSOCKET_ENDPOINT}
+        graphqlEndpoint={config.GRAPHQL_ENDPOINT}
+      >
         <UI.AssertSingleton fn={App}>
           <Layout>{props.children}</Layout>
           {overlays}
