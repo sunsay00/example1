@@ -4,7 +4,7 @@ import * as Mobile from 'mobile-ui';
 import { AccountProvider } from 'cf-cognito';
 import {
   createSwitchNavigator, createDrawerNavigator, createBottomTabNavigator, createAppContainer,
-  createStackNavigator, useNav, createNavWrapper,
+  createStackNavigator, createTabBarIcon, createNavWrapper,
 } from './hooks/usenav';
 import { AuthGuard } from './components/authguard';
 import { Screens } from './components/auth';
@@ -21,31 +21,18 @@ const config = {
   GRAPHQL_ENDPOINT: '',
 };
 
-const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focused: boolean }) => {
-  const nav = useNav();
-  return (
-    <UI.Icon name={props.iconName} size="sm" onPress={() => nav.navigate(props.routeName)} disabled={!props.focused} />
-  );
-}
-
 const Tabs = (initialRouteName: string) => createBottomTabNavigator({
   Home: {
     screen: createStackNavigator({ Home: () => <ExampleKeyboardAccessoryView name="home"><Home /></ExampleKeyboardAccessoryView> }),
-    navigationOptions: {
-      tabBarIcon: (props: any) => <BottomTabButton iconName="home" routeName="Home" focused={props.focused} />,
-    }
+    navigationOptions: { tabBarIcon: createTabBarIcon('home', 'Home') }
   },
   StyleGuide: {
     screen: createStackNavigator({ StyleGuide: () => <ExampleKeyboardAccessoryView name="sg"><StyleGuide /></ExampleKeyboardAccessoryView> }),
-    navigationOptions: {
-      tabBarIcon: (props: any) => <BottomTabButton iconName="brush" routeName="StyleGuide" focused={props.focused} />,
-    }
+    navigationOptions: { tabBarIcon: createTabBarIcon('brush', 'StyleGuide') }
   },
   Profile: {
     screen: createStackNavigator({ Profile: () => <ExampleKeyboardAccessoryView name="profile"><Profile /></ExampleKeyboardAccessoryView> }),
-    navigationOptions: {
-      tabBarIcon: (props: any) => <BottomTabButton iconName="person" routeName="Profile" focused={props.focused} />,
-    }
+    navigationOptions: { tabBarIcon: createTabBarIcon('person', 'Profile') }
   }
 }, { initialRouteName });
 

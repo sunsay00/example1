@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useNav, useNavOptions } from '../hooks/usenav';
-import { NavHeaderButton } from '../components/navheaderbutton';
+import { useNav, useNavOptions, NavHeaderButton } from '../hooks/usenav';
 
 const Specimen = (props: { title: string, children?: React.ReactNode }) =>
   <>

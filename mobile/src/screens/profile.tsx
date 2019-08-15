@@ -1,8 +1,7 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
 import { useAccount } from 'cf-cognito';
-import { useNavOptions, useNav } from '../hooks/usenav';
-import { NavHeaderButton } from '../components/navheaderbutton';
+import { useNavOptions, useNav, NavHeaderButton } from '../hooks/usenav';
 
 export const Profile = () => {
   const nav = useNav();

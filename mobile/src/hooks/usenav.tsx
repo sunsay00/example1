@@ -4,9 +4,39 @@ import { Easing, Animated } from 'react-native';
 import * as Nav from 'react-navigation';
 import * as UI from 'core-ui';
 import * as Mobile from 'mobile-ui';
-import { NavHeaderButton } from '../components/navheaderbutton';
 
 export * from 'react-navigation';
+
+const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focused: boolean }) => {
+  const nav = useNav();
+  return (
+    <UI.Icon name={props.iconName} size="sm" onPress={() => nav.navigate(props.routeName)} disabled={!props.focused} />
+  );
+}
+
+export const createTabBarIcon = (iconName: UI.IconName, routeName: string) => (props: { focused: boolean }) =>
+  <BottomTabButton iconName={iconName} routeName={routeName} focused={props.focused} />
+
+export const NavHeaderButton = (props: {
+  prefixIconName?: UI.IconName,
+  suffixIconName?: UI.IconName,
+  children?: string,
+  onPress?: () => void,
+}) => {
+  const { loading } = UI.useLoading(NavHeaderButton);
+  return (
+    <UI.TouchableOpacity onPress={props.onPress}>
+      <UI.View style={{ paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' }}>
+        {props.prefixIconName && <UI.Icon size="md" disabled={loading} name={props.prefixIconName} style={{ marginRight: 8 }} />}
+        {props.children &&
+          <UI.TouchableOpacity onPress={props.onPress}>
+            <UI.Text style={{ color: loading ? UI.rgba(UI.Colors.black, .5) : UI.Colors.green }}>{props.children}</UI.Text>
+          </UI.TouchableOpacity>}
+        {props.suffixIconName && <UI.Icon size="md" disabled={loading} name={props.suffixIconName} style={{ marginLeft: 8 }} />}
+      </UI.View>
+    </UI.TouchableOpacity>
+  );
+}
 
 export function useNav<S>(): Nav.NavigationScreenProp<S & Nav.NavigationRoute> {
   return useContext(Nav.NavigationContext as any);

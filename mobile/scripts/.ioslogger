@@ -54,7 +54,7 @@ lg.stdout.on("data", data => {
       } while (m);
 
       const [type, ...rest] = params;
-      const last = rest.pop().gray;
+      const last = (rest.pop() || '').gray;
       if (type == '[WARN]') console.log.apply(this, [type.yellow, ...rest, last]);
       else if (type == '[ERROR]') console.log.apply(this, [type.red, ...rest, last]);
       else if (type == '[LOG]' || i == '[INFO]') console.log.apply(this, [type.grey, ...rest, last]);
