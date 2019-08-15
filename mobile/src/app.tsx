@@ -50,7 +50,7 @@ const Tabs = (initialRouteName: string) => createBottomTabNavigator({
 }, { initialRouteName });
 
 const Main = createDrawerNavigator(
-  { Home: Tabs('StyleGuide'), StyleGuide: Tabs('StyleGuide'), Profile: Tabs('Profile') },
+  { Home: Tabs('Home'), StyleGuide: Tabs('StyleGuide'), Profile: Tabs('Profile') },
   { drawerType: 'slide', contentComponent: Drawer });
 
 const Layout = createAppContainer(createNavWrapper(
