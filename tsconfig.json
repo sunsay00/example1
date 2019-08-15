@@ -22,6 +22,9 @@
     },
     {
       "path": "./packages/@inf/apollo"
+    },
+    {
+      "path": "./packages/@inf/chat"
     }
   ]
 }
