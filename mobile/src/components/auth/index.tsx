@@ -5,7 +5,7 @@ import { ResetPassword } from './resetpassword';
 import { ForgotPassword } from './forgotpassword';
 import { Confirmation } from './confirmation';
 import { ChangePassword } from './changepassword';
-import { createStackNavigator, useNavigation } from '../../hooks/usenavigation';
+import { createStackNavigator, useNav } from '../../hooks/usenav';
 
 const useLocale = () => 'EN';
 
@@ -17,7 +17,7 @@ const useLocale = () => 'EN';
 
 export const Screens = {
   LogInScreen: (props: {}) => {
-    const nav = useNavigation();
+    const nav = useNav();
     return (
       <LogIn
         onLogInComplete={() => nav.navigate('Main')}
@@ -32,7 +32,7 @@ export const Screens = {
   },
 
   SignUpScreen: (props: {}) => {
-    const nav = useNavigation();
+    const nav = useNav();
     const locale = useLocale();
     return (
       <SignUp
@@ -48,7 +48,7 @@ export const Screens = {
     );
   },
   ConfirmationScreen: (props: {}) => {
-    const nav = useNavigation();
+    const nav = useNav();
     return (
       <Confirmation
         onGoToLogIn={() => nav.push('LogIn')}
@@ -56,7 +56,7 @@ export const Screens = {
     );
   },
   ForgotPasswordScreen: (props: {}) => {
-    const nav = useNavigation();
+    const nav = useNav();
     return (
       <ForgotPassword
         onGoToResetPassword={emailOrUsername => {
@@ -66,7 +66,7 @@ export const Screens = {
     );
   },
   ResetPasswordScreen: (props: {}) => {
-    const nav = useNavigation();
+    const nav = useNav();
     return (
       <ResetPassword
         emailOrUsername={nav.getParam('name')}
@@ -77,7 +77,7 @@ export const Screens = {
 };
 
 export const ChangePasswordScreen = (props: {}) => {
-  const nav = useNavigation();
+  const nav = useNav();
   const locale = useLocale();
   return (
     <ChangePassword

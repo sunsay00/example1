@@ -1,13 +1,13 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
 import { useAccount } from 'cf-cognito';
-import { useNavigation, useNavigationOptions } from '../hooks/usenavigation';
+import { useNav, useNavOptions } from '../hooks/usenav';
 import { NavHeaderButton } from '../components/navheaderbutton';
 
 export const Home = () => {
   const { user } = useAccount();
-  const nav = useNavigation();
-  useNavigationOptions(user ? {
+  const nav = useNav();
+  useNavOptions(user ? {
     title: 'Home',
     headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />
   } : undefined);

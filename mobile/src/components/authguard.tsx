@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useAccount } from 'cf-cognito';
-import { useNavigation } from '../hooks/usenavigation';
+import { useNav } from '../hooks/usenav';
 
 export const AuthGuard = (props: { children?: React.ReactNode }) => {
   const account = useAccount();
-  const nav = useNavigation();
+  const nav = useNav();
   React.useEffect(() => {
     if (account.ready) {
       if (account.user) nav.navigate('Main');

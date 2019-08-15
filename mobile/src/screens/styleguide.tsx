@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from 'core-ui';
-import { useNavigation, useNavigationOptions } from '../hooks/usenavigation';
+import { useNav, useNavOptions } from '../hooks/usenav';
 import { NavHeaderButton } from '../components/navheaderbutton';
 
 const Specimen = (props: { title: string, children?: React.ReactNode }) =>
@@ -13,8 +13,8 @@ const Specimen = (props: { title: string, children?: React.ReactNode }) =>
 
 export const StyleGuide = () => {
   const toast = UI.useToast();
-  const nav = useNavigation();
-  useNavigationOptions({
+  const nav = useNav();
+  useNavOptions({
     title: 'StyleGuide',
     headerLeft: <NavHeaderButton prefixIconName="menu" onPress={nav.openDrawer} />
   });

@@ -21,8 +21,12 @@ const ExampleKeyboardAccessory = () => {
   );
 }
 
-export const ExampleKeyboardAccessoryView = (props: { children?: React.ReactNode }) =>
+export const ExampleKeyboardAccessoryView = (props: {
+  name: string,
+  children?: React.ReactNode
+}) =>
   <KeyboardAccessoryView
+    name={props.name}
     accessoryElement={<ExampleKeyboardAccessory />}
     style={{ backgroundColor: 'white' }}
     accessoryHeight={56}

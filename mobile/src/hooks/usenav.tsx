@@ -8,26 +8,26 @@ import { NavHeaderButton } from '../components/navheaderbutton';
 
 export * from 'react-navigation';
 
-export function useNavigation<S>(): Nav.NavigationScreenProp<S & Nav.NavigationRoute> {
+export function useNav<S>(): Nav.NavigationScreenProp<S & Nav.NavigationRoute> {
   return useContext(Nav.NavigationContext as any);
 }
 
-export function useNavigationParam<T extends keyof Nav.NavigationParams>(
+export function useNavParam<T extends keyof Nav.NavigationParams>(
   paramName: T
 ) {
-  return useNavigation().getParam(paramName);
+  return useNav().getParam(paramName);
 }
 
-export function useNavigationState() {
-  return useNavigation().state;
+export function useNavState() {
+  return useNav().state;
 }
 
-export function useNavigationKey() {
-  return useNavigation().state.key;
+export function useNavKey() {
+  return useNav().state.key;
 }
 
-export function useNavigationEvents(handleEvt: Nav.NavigationEventCallback) {
-  const navigation = useNavigation();
+export function useNavEvents(handleEvt: Nav.NavigationEventCallback) {
+  const navigation = useNav();
   useEffect(
     () => {
       const subsA = navigation.addListener(
@@ -82,14 +82,14 @@ function focusStateOfEvent(eventName: Nav.EventType) {
 }
 
 export function useFocusState() {
-  const navigation = useNavigation();
+  const navigation = useNav();
   const isFocused = navigation.isFocused();
   const [focusState, setFocusState] = useState(getInitialFocusState(isFocused));
   function handleEvt(e: Nav.NavigationEventPayload) {
     const newState = focusStateOfEvent(e.type);
     newState && setFocusState(newState);
   }
-  useNavigationEvents(handleEvt);
+  useNavEvents(handleEvt);
   return focusState;
 }
 
@@ -135,12 +135,12 @@ export const createStackNavigator = (
   });
 }
 
-export const useNavigationOptions = (opts?: {
+export const useNavOptions = (opts?: {
   title?: string,
   headerLeft?: React.ReactNode,
   headerRight?: React.ReactNode,
 }) => {
-  const nav = useNavigation();
+  const nav = useNav();
   useEffect(() => {
     nav.setParams(opts || {});
     return () => {

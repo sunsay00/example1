@@ -4,8 +4,8 @@ import * as Mobile from 'mobile-ui';
 import { AccountProvider } from 'cf-cognito';
 import {
   createSwitchNavigator, createDrawerNavigator, createBottomTabNavigator, createAppContainer,
-  createStackNavigator, useNavigation, createNavWrapper,
-} from './hooks/usenavigation';
+  createStackNavigator, useNav, createNavWrapper,
+} from './hooks/usenav';
 import { AuthGuard } from './components/authguard';
 import { Screens } from './components/auth';
 import { Landing } from './screens/landing';
@@ -22,7 +22,7 @@ const config = {
 };
 
 const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focused: boolean }) => {
-  const nav = useNavigation();
+  const nav = useNav();
   return (
     <UI.Icon name={props.iconName} size="sm" onPress={() => nav.navigate(props.routeName)} disabled={!props.focused} />
   );
@@ -30,19 +30,19 @@ const BottomTabButton = (props: { iconName: UI.IconName, routeName: string, focu
 
 const Tabs = (initialRouteName: string) => createBottomTabNavigator({
   Home: {
-    screen: createStackNavigator({ Home: () => <ExampleKeyboardAccessoryView><Home /></ExampleKeyboardAccessoryView> }),
+    screen: createStackNavigator({ Home: () => <ExampleKeyboardAccessoryView name="home"><Home /></ExampleKeyboardAccessoryView> }),
     navigationOptions: {
       tabBarIcon: (props: any) => <BottomTabButton iconName="home" routeName="Home" focused={props.focused} />,
     }
   },
   StyleGuide: {
-    screen: createStackNavigator({ StyleGuide: () => <ExampleKeyboardAccessoryView><StyleGuide /></ExampleKeyboardAccessoryView> }),
+    screen: createStackNavigator({ StyleGuide: () => <ExampleKeyboardAccessoryView name="sg"><StyleGuide /></ExampleKeyboardAccessoryView> }),
     navigationOptions: {
       tabBarIcon: (props: any) => <BottomTabButton iconName="brush" routeName="StyleGuide" focused={props.focused} />,
     }
   },
   Profile: {
-    screen: createStackNavigator({ Profile: () => <ExampleKeyboardAccessoryView><Profile /></ExampleKeyboardAccessoryView> }),
+    screen: createStackNavigator({ Profile: () => <ExampleKeyboardAccessoryView name="profile"><Profile /></ExampleKeyboardAccessoryView> }),
     navigationOptions: {
       tabBarIcon: (props: any) => <BottomTabButton iconName="person" routeName="Profile" focused={props.focused} />,
     }
