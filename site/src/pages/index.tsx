@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as UI from '@inf/core-ui';
-import * as Web from 'gatsby-theme-core-ui';
+import * as Web from '@inf/gatsby-theme-web-ui';
 import { Cover } from '../components/cover';
 import { ContactUs } from '../components/contactus';
 import { Footer } from '../components/footer';

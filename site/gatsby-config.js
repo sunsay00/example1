@@ -30,7 +30,7 @@ const config = {
     'gatsby-plugin-sharp',
     'gatsby-transformer-sharp'
   ],
-  __experimentalThemes: ['gatsby-theme-core-ui']
+  __experimentalThemes: ['@inf/gatsby-theme-web-ui']
 }
 
 module.exports = config;

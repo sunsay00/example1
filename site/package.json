@@ -14,7 +14,7 @@
     "@types/node": "^12.6.8",
     "babel-plugin-react-native-web": "^0.11.5",
     "gatsby": "^2.13.39",
-    "gatsby-theme-core-ui": "*",
+    "@inf/gatsby-theme-web-ui": "*",
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.1",
     "react": "16.9.0",

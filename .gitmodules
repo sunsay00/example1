@@ -5,5 +5,5 @@
 	path = packages/@inf/core-ui
 	url = https://github.com/kyunghoon/core-ui.git
 [submodule "packages/web-ui"]
-	path = packages/web-ui
+	path = packages/@inf/web-ui
 	url = https://github.com/kyunghoon/web-ui.git

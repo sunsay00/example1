@@ -1,5 +1,5 @@
 {
-  "name": "gatsby-theme-core-ui",
+  "name": "@inf/gatsby-theme-web-ui",
   "version": "1.0.0",
   "types": "./lib/index.d.ts",
   "main": "./index.ts",
