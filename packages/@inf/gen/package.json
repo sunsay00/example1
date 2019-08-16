@@ -1,0 +1,8 @@
+{
+  "name": "@inf/gen",
+  "version": "0.0.1",
+  "bin": {
+    "gen": "gen"
+  },
+  "license": "MIT"
+}

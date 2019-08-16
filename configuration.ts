@@ -57,6 +57,13 @@ const configuration: Configuration = {
       args: ['configure'],
       outfile: '.envs.lambda'
     },
+    {
+      type: 'shell',
+      key: 'GEN',
+      cwd: '.',
+      command: 'yarn',
+      args: ['gen'],
+    }
   ]
 }
 

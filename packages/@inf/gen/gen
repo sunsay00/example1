@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [ -L $DIR/gen ]; then
+  GENDIR=`dirname $DIR/$(readlink $DIR/gen)`
+else
+  GENDIR="$DIR"
+fi
+
+if [ ! -f $GENDIR/../../../ledger.scm ]; then
+  echo "ledger.scm file not found";
+  exit 1
+fi
+
+rm -rf $GENDIR/front $GENDIR/back $GENDIR/infra
+
+cd $GENDIR/generator/ && csi -s main.scm $GENDIR/../../../ledger.scm
