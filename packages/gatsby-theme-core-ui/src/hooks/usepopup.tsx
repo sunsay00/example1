@@ -24,7 +24,7 @@ const PopUp = (props: {
   <UI.Animated.View style={{ opacity: props.opacity, flex: 1 }}>
     <UI.Breakable
       renderSmall={children =>
-        <UI.View>
+        <UI.View style={{ flex: 1 }}>
           <UI.TouchableWithoutFeedback disabled={props.loading}>
             <UI.View style={{ height: '100vh', padding: 40, backgroundColor: UI.Colors.white, alignItems: 'stretch', flex: 1, }}>
               <UI.View style={{ alignSelf: 'flex-start' }}>
