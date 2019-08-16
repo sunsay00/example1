@@ -1,7 +1,10 @@
-import { createConfig } from '@inf/common';
+import { verifyVars } from '@inf/common';
 import { Configuration } from '@inf/configure';
+import * as Cognito from '@inf/cf-cognito/config';
+import * as ServerlessPostgress from '@inf/cf-serverless-postgres/config';
+import * as Gen from '@inf/gen/config';
 
-const config = createConfig({
+const config = verifyVars({
   AWS_REGION: process.env.AWS_REGION,
   STAGE: process.env.STAGE,
   MASTER_USERNAME: process.env.MASTER_USERNAME,
@@ -14,19 +17,14 @@ const configuration: Configuration = {
   region: config.AWS_REGION,
   stage: config.STAGE,
   modules: [
-    {
-      type: 'cloudformation',
-      name: 'cf-serverless-postgres',
-      key: 'SLSPG',
-      inputs: {
-        Stage: config.STAGE,
-        DatabaseName: 'main',
-        MasterUsername: config.MASTER_USERNAME,
-        MasterUserPassword: config.MASTER_USER_PASSWORD,
-        MinCapacity: 2,
-        MaxCapacity: 2
-      }
-    },
+    ServerlessPostgress.Config({
+      Stage: config.STAGE,
+      DatabaseName: 'main',
+      MasterUsername: config.MASTER_USERNAME,
+      MasterUserPassword: config.MASTER_USER_PASSWORD,
+      MinCapacity: 2,
+      MaxCapacity: 2
+    }),
     /*{
       type: 'cloudformation',
       name: 'cf-cert',
@@ -36,34 +34,22 @@ const configuration: Configuration = {
       },
       outputs: ['CertificateArn']
     },*/
-    {
-      type: 'cloudformation',
-      name: 'cf-cognito',
-      key: 'COG',
-      inputs: {
-        Stage: config.STAGE,
-        Domain: config.DOMAIN,
-        InvitationEmailSubject: `Welcome To ${config.NICE_NAME}`,
-        VerificationEmailSubject: `${config.NICE_NAME} requires your verification`,
-        FromEmail: `verification@${config.DOMAIN}`
-      },
-      outputs: ['IdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId']
-    },
+    Cognito.Config({
+      Stage: config.STAGE,
+      Domain: config.DOMAIN,
+      InvitationEmailSubject: `Welcome To ${config.NICE_NAME}`,
+      VerificationEmailSubject: `${config.NICE_NAME} requires your verification`,
+      FromEmail: `verification@${config.NICE_NAME}`
+    }),
     {
       type: 'shell',
       key: 'API',
       cwd: './api',
       command: 'make',
       args: ['configure'],
-      outfile: '.envs.lambda'
+      outfile: '.envs.lambda',
     },
-    {
-      type: 'shell',
-      key: 'GEN',
-      cwd: '.',
-      command: 'yarn',
-      args: ['gen'],
-    }
+    Gen.Config()
   ]
 }
 

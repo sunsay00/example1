@@ -27,12 +27,12 @@ const ShellRecord = RT.Record({
 
 const Record = RT.Union(CFRecord, ShellRecord);
 
-type Record = RT.Static<typeof Record>;
+export type ConfigRecord = RT.Static<typeof Record>;
 
 export type Configuration = {
   region: string,
   stage: string,
-  modules: Record[],
+  modules: (((outputs: unknown) => ConfigRecord) | ConfigRecord)[],
 };
 
 const error = (msg: string) => console.error(`[CONF] error: ${msg}`);
@@ -286,10 +286,11 @@ const main = async (cmd: string) => {
   } else if (cmd == 'down') {
     let previous = {};
     const ms = configuration.modules.map(f => {
+      const n = typeof f == 'function' ? f({}) : f;
       const ret = parseModule(f, previous);
       const p = {};
-      if (f.outputs && Array.isArray(f.outputs))
-        f.outputs.forEach(o => p[o] = true);
+      if (n.outputs && Array.isArray(n.outputs))
+        n.outputs.forEach(o => p[o] = true);
       previous = p;
       return ret;
     });
