@@ -3,6 +3,7 @@ import { Configuration } from '@inf/configure';
 import * as Cognito from '@inf/cf-cognito/config';
 import * as ServerlessPostgress from '@inf/cf-serverless-postgres/config';
 import * as Gen from '@inf/gen/config';
+import * as Cert from '@inf/cf-cert/config';
 
 const config = verifyVars({
   AWS_REGION: process.env.AWS_REGION,
@@ -25,15 +26,9 @@ const configuration: Configuration = {
       MinCapacity: 2,
       MaxCapacity: 2
     }),
-    /*{
-      type: 'cloudformation',
-      name: 'cf-cert',
-      key: 'CRT',
-      inputs: {
+    Cert.Config({
         Domain: config.DOMAIN
-      },
-      outputs: ['CertificateArn']
-    },*/
+    }),
     Cognito.Config({
       Stage: config.STAGE,
       Domain: config.DOMAIN,

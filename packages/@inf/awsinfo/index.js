@@ -3,9 +3,9 @@
 const AWS = require('aws-sdk');
 const path = require('path');
 const fs = require('fs');
-const { createConfig } = require('common');
+const { verifyVars } = require('@inf/common');
 
-const config = createConfig({
+const config = verifyVars({
   AWS_REGION: process.env.AWS_REGION,
   DOMAIN: process.env.DOMAIN,
 });
