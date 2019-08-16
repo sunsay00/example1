@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 
 export const FinePrint = (props: { secondary?: boolean, children?: React.ReactChild }) =>
   <UI.Text

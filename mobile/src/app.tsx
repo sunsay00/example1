@@ -1,7 +1,7 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
-import * as Mobile from 'mobile-ui';
-import { AccountProvider } from 'cf-cognito';
+import * as UI from '@inf/core-ui';
+import * as Mobile from '@inf/mobile-ui';
+import { AccountProvider } from '@inf/cf-cognito';
 import {
   createSwitchNavigator, createDrawerNavigator, createBottomTabNavigator, createAppContainer,
   createStackNavigator, createTabBarIcon, createNavWrapper,

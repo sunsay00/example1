@@ -1,6 +1,0 @@
-{
-  "name": "awsinfo",
-  "version": "0.0.1",
-  "bin": { "awsinfo": "index.js" },
-  "license": "MIT"
-}

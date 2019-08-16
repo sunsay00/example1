@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 import Highlight, { Language, PrismTheme, defaultProps } from 'prism-react-renderer';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 
 const lightTheme: PrismTheme = {
   plain: { backgroundColor: undefined/*"#faf8f5"*/, color: "#728fcb" },

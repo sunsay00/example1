@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { AsyncStorage } from 'react-native';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 import { PopUpProvider } from './hooks/usepopup';
 import { useBodyScrollLocker } from './hooks/usebodyscrolllocker';
 

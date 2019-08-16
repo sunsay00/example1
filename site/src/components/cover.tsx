@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 
 export const Cover = () =>
   <UI.Carousel infinite style={{ height: 500, marginHorizontal: -32 }}>

@@ -1,0 +1,11 @@
+{
+  "name": "@inf/configure",
+  "version": "0.0.1",
+  "bin": {
+    "configure": "./run"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@inf/vars": "*"
+  }
+}

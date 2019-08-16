@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text } from 'core-ui';
+import { View, Text } from '@inf/core-ui';
 
 export default (props: { pageContext: { body: string } }) =>
   <View>

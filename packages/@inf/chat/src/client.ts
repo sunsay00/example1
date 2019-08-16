@@ -143,7 +143,7 @@ export const descriptorToDesc = (desc: TwilioChannelDescriptor): ChatChannel => 
   };
 };
 
-export default class ChatClient<UserAttributes, ChannelAttributes> {
+export class ChatClient<UserAttributes, ChannelAttributes> {
   private _chatIdentity: string;
   private _chat?: TwilioChatClient;
   private _onPushNotification?: (notificiation: ChatPushNotification) => void = undefined;
@@ -244,7 +244,7 @@ export default class ChatClient<UserAttributes, ChannelAttributes> {
       });
       client.on('channelAdded', async (channel: TwilioChannel) => {
         this._cache.addChannel(channel);
-        const messageCount = await channel.getMessagesCount(); // optional
+        //const messageCount = await channel.getMessagesCount(); // optional
         const unconsumed = await channel.getUnconsumedMessagesCount();
         const index = unconsumed == null ? 0 : unconsumed;
         //console.log('CHANNEL_ADDED', 'UN:', unconsumed, 'IDX:', index, 'LCMI:', channel.lastConsumedMessageIndex, 'TTL:', messageCount);

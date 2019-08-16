@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
-import { View, computeTextStyle } from 'core-ui';
+import { View, computeTextStyle } from '@inf/core-ui';
 
 export const Table = (props: { children?: React.ReactNode }) =>
   <View style={{ flexDirection: 'row', marginBottom: 16 }}>

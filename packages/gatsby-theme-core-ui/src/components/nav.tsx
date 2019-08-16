@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text } from 'core-ui';
+import { Colors, rgba, Fonts, View, Section, Icon, Breakable, Animated, Easing, TouchableOpacity, Text } from '@inf/core-ui';
 import { Link, navigate } from 'gatsby';
 
 const Sticky = (props: { offsetY: number, children?: React.ReactNode }) => {

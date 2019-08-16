@@ -1,5 +1,5 @@
-import { createConfig } from 'common';
-import { Configuration } from 'configure';
+import { createConfig } from '@inf/common';
+import { Configuration } from '@inf/configure';
 
 const config = createConfig({
   AWS_REGION: process.env.AWS_REGION,

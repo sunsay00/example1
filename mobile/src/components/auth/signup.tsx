@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
-import { useSignUpForm } from 'cf-cognito';
+import * as UI from '@inf/core-ui';
+import { useSignUpForm } from '@inf/cf-cognito';
 
 export const SignUp = (props: {
   onGoToLogIn: () => void,

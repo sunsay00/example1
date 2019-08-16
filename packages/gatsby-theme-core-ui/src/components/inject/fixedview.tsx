@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 
 export const FixedView = (props: { style?: UI.ViewStyle, children?: React.ReactNode }) => {
   const style = (props.style || {}) as React.CSSProperties;

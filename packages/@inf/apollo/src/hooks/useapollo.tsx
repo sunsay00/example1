@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { AsyncStorage } from 'core-ui';
-import gql from 'graphql-tag';
+import { AsyncStorage } from '@inf/core-ui';
 import { ApolloProvider as Apollo } from 'react-apollo-hooks';
-import { ApolloClient } from 'apollo-client';
+import { ApolloClient, Resolvers } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { persistCache } from 'apollo-cache-persist';
 import { HttpLink } from 'apollo-link-http';
@@ -12,6 +11,8 @@ import { onError } from 'apollo-link-error';
 import { getMainDefinition } from 'apollo-utilities';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { setContext } from 'apollo-link-context';
+
+export type ApolloResolvers = Resolvers;
 
 const createCache = async () => {
   const cache = new InMemoryCache();
@@ -60,7 +61,8 @@ export const ApolloProvider = (props: {
   authorization: string,
   websocketEndpoint: string | undefined,
   graphqlEndpoint: string,
-  children?: React.ReactNode
+  children?: React.ReactNode,
+  resolvers?: ApolloResolvers | ApolloResolvers[],
 }) => {
   const [client, setClient] = React.useState<ApolloClient<unknown> | undefined>(undefined);
 
@@ -82,20 +84,10 @@ export const ApolloProvider = (props: {
           concatWebSocket(authLink.concat(httpLink), props.websocketEndpoint),
         ]),
         cache,
-        resolvers: {
-          Video: {
-            logs: (video, _args, { cache, getCacheKey }) => {
-              const id = getCacheKey({ __typename: 'Video', id: video.id });
-              const fragment = gql`fragment video on Video { logs @client }`;
-              const prev = cache.readFragment({ fragment, id });
-              if (!prev) return [];
-              return prev.logs;
-            },
-          }
-        }
+        resolvers: props.resolvers
       }));
     }).catch(console.error);
-  }, [authLink, props.graphqlEndpoint, props.websocketEndpoint]);
+  }, [authLink, props.graphqlEndpoint, props.websocketEndpoint, props.resolvers]);
 
   if (!client) return null;
 

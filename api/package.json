@@ -16,8 +16,8 @@
     "aws-lambda": "^0.1.2"
   },
   "devDependencies": {
-    "vars": "*",
-    "cf-cognito": "*",
+    "@inf/vars": "*",
+    "@inf/cf-cognito": "*",
     "@types/aws-lambda": "^8.10.31",
     "@types/node": "^12.6.8",
     "jwk-to-pem": "^2.0.1",

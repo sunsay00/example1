@@ -1,6 +1,6 @@
 import * as React from 'react';
 import GTBackgroundImage from 'gatsby-background-image';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 import { StaticQuery, graphql } from 'gatsby';
 
 export const convertImageBackgroundStyle = (imageStyle?: UI.ImageStyle, style?: UI.ViewStyle, resizeMode?: UI.ImageResizeMode) => ({

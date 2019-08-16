@@ -1,8 +1,8 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 import * as Web from 'gatsby-theme-core-ui';
-import { AccountProvider, useAccount } from 'cf-cognito';
-import { ApolloProvider } from '@inf/apollo';
+import { AccountProvider, useAccount } from '@inf/cf-cognito';
+import { ApolloProvider, ApolloResolvers } from '@inf/apollo';
 import { Auth } from './components/auth';
 
 const config = {
@@ -37,6 +37,18 @@ const Layout = (props: { children?: React.ReactNode }) => {
   );
 }
 
+import gql from 'graphql-tag';
+const resolvers: ApolloResolvers = {
+  Video: {
+    logs: (video, _args, { cache, getCacheKey }) => {
+      const id = getCacheKey({ __typename: 'Video', id: video.id });
+      const fragment = gql`fragment video on Video { logs @client }`;
+      const prev = cache.readFragment({ fragment, id });
+      if (!prev) return [];
+      return prev.logs;
+    },
+  }
+}
 export const App = (props: { children?: React.ReactNode }) =>
   <Web.Root>{overlays =>
     <AccountProvider region="us-east-1">
@@ -44,6 +56,7 @@ export const App = (props: { children?: React.ReactNode }) =>
         authorization="Guest"
         websocketEndpoint={config.WEBSOCKET_ENDPOINT}
         graphqlEndpoint={config.GRAPHQL_ENDPOINT}
+        resolvers={resolvers}
       >
         <UI.AssertSingleton fn={App}>
           <Layout>{props.children}</Layout>

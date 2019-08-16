@@ -1,8 +1,8 @@
 [submodule "packages/common"]
-	path = packages/common
+	path = packages/@inf/common
 	url = https://github.com/kyunghoon/common.git
 [submodule "packages/core-ui"]
-	path = packages/core-ui
+	path = packages/@inf/core-ui
 	url = https://github.com/kyunghoon/core-ui.git
 [submodule "packages/web-ui"]
 	path = packages/web-ui

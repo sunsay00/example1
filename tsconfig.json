@@ -3,19 +3,19 @@
   "includes": [],
   "references": [
     {
-      "path": "./packages/common"
+      "path": "./packages/@inf/common"
     },
     {
-      "path": "./packages/core"
+      "path": "./packages/@inf/core"
     },
     {
-      "path": "./packages/core-ui"
+      "path": "./packages/@inf/core-ui"
     },
     {
-      "path": "./packages/mobile-ui"
+      "path": "./packages/@inf/mobile-ui"
     },
     {
-      "path": "./packages/cf-cognito"
+      "path": "./packages/@inf/cf-cognito"
     },
     {
       "path": "./packages/gatsby-theme-core-ui"

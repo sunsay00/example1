@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Image as RNImage } from 'react-native';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 import { StaticQuery, graphql } from 'gatsby';
 import GTImage from 'gatsby-image';
 

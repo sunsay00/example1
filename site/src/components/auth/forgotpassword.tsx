@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from 'core-ui';
-import { useForgotPasswordForm } from 'cf-cognito';
+import * as UI from '@inf/core-ui';
+import { useForgotPasswordForm } from '@inf/cf-cognito';
 
 export const ForgotPassword = (props: {
   onGoToResetPassword: (emailOrUsername: string) => void,
@@ -25,7 +25,7 @@ export const ForgotPassword = (props: {
       <UI.View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         {props.onGoToLogIn && <>
           <UI.Link testID="LOGIN" size="md" disabled={loading} onPress={props.onGoToLogIn}>
-            <UI.Icon size="sm" name="chevronLeft" color={UI.Colors.green} />Back to Login</UI.Link>
+            <UI.Icon size="sm" name="arrow-back" color={UI.Colors.green} />Back to Login</UI.Link>
         </>}
         <UI.Button disabled={loading} loading={loading} onPress={form.submit}>Send Recovery Email</UI.Button>
       </UI.View>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Animated, Dimensions, Easing, TouchableWithoutFeedback } from 'react-native';
-import * as UI from 'core-ui';
+import * as UI from '@inf/core-ui';
 
 const ModalPortal = (props: {
   children?: React.ReactNode
