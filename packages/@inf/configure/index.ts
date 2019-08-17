@@ -277,9 +277,9 @@ const main = async (cmd: string) => {
         async cloudformation => {
           const { name, key, inputs, outputs } = cloudformation;
           const inputDirty = isInputDirty(key, inputs);
-          const envsdir = `${__dirname}/../../../.envs`;
-          if (!fs.existsSync(envsdir))
-            fs.mkdirSync(envsdir);
+          //const envsdir = `${__dirname}/../../../.envs`;
+          //if (!fs.existsSync(envsdir))
+          //fs.mkdirSync(envsdir);
           const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/cf.yaml`;
           const ot = lastmod(`${__dirname}/.cache/${key}`);
           const cfDirty = lastmod(cfpath) > ot;

@@ -23,7 +23,6 @@ const configuration: Configuration = {
       MaxCapacity: 2
     }),
     Cert.Config({ Domain: vars.DOMAIN }),
-    /*
     Cognito.Config({
       Stage: vars.STAGE,
       Domain: vars.DOMAIN,
@@ -31,7 +30,6 @@ const configuration: Configuration = {
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
       FromEmail: `verification@${vars.NICE_NAME}`
     }),
-    */
     /*
     {
       type: 'shell',
