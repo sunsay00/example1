@@ -68,6 +68,6 @@ let env = { ...additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseEnv(p) }), {
 env = { ...env, ...parseEnv('envs') };
 env = { ...env, ...parseEnv('.env', '.env.example') };
 
-genTypes(`${__dirname}/index2.d.ts`, env);
+genTypes(`${__dirname}/index.d.ts`, env);
 
 exports.vars = {};// ...env, ...process.env };
