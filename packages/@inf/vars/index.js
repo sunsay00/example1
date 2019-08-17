@@ -1,3 +1,5 @@
+// @ts-check
+
 const fs = require('fs');
 
 const repoDir = `${__dirname}/../../..`;
@@ -13,6 +15,20 @@ ${Object.keys(env).map(k => `  ${k}: string`).join(',\n')}
 export const vars: Vars;
 `;
   fs.writeFileSync(outfile, data, { encoding: 'utf8' });
+}
+
+const makeSafe = env => {
+  let ret = {};
+  Object.entries(env).map(([k, v]) => {
+    ret = {
+      ...ret, get [k]() {
+        const v = env[k];
+        if (!v) throw new Error(`Undefined envvar detected ${k}`);
+        return v;
+      }
+    };
+  });
+  return ret;
 }
 
 const parseEnv = (envsPath, examples = undefined) => {
@@ -64,10 +80,13 @@ const parseEnv = (envsPath, examples = undefined) => {
 }
 
 const additionalEnvPaths = fs.existsSync(`${repoDir}/.envs`) ? fs.readdirSync(`${repoDir}/.envs`).map(f => `.envs/${f}`) : [];
-let env = { ...additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseEnv(p) }), {}) };
-env = { ...env, ...parseEnv('envs') };
-env = { ...env, ...parseEnv('.env', '.env.example') };
+const additionalEnv = additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseEnv(p) }), {});
+
+const env = makeSafe({
+  ...parseEnv('envs'),
+  ...parseEnv('.env', '.env.example')
+});
 
 genTypes(`${__dirname}/index.d.ts`, env);
 
-exports.vars = {};// ...env, ...process.env };
+exports.vars = { ...additionalEnv, ...env, ...process.env };

@@ -1,9 +1,9 @@
 node_modules
-.cache
 yarn-error.log
 site/public
 packages/*/lib
 .DS_Store
+.env
 .envs
 .envs.*
 site/.env.*
@@ -14,7 +14,6 @@ build/
 .tsconfig.json
 .tsconfig.tsbuildinfo
 envs
-.secrets*
 packages/cf-*/index.ts
 packages/cf-*/src/vars.ts
 packages/*/lib
