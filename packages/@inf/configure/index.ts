@@ -266,7 +266,7 @@ const main = async (cmd: string) => {
       (ret.outputs && typeof ret.outputs == 'object' || true) && ret || undefined;
   }
 
-  const getStackname = name => `${configuration.stage}-${name}`;
+  const getStackname = (name: string) => `${configuration.stage}-${name}`;
 
   if (cmd == 'up') {
     let previous = {};

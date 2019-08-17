@@ -1,5 +1,3 @@
-include ../envs
-
 TS_FILES = $(shell find ./src -regex ".*\.ts$$")
 
 build/_api.js build/_auth.js: $(TS_FILES)

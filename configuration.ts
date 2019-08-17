@@ -30,17 +30,14 @@ const configuration: Configuration = {
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
       FromEmail: `verification@${vars.NICE_NAME}`
     }),
-    /*
     {
       type: 'shell',
       key: 'API',
       cwd: './api',
       command: 'make',
       args: ['configure'],
-      outfile: '.envs.lambda',
     },
-    Gen.Config(),
-    */
+    //Gen.Config(),
   ]
 }
 
