@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import { spawn } from 'child_process';
 import * as RT from 'runtypes';
 import * as crypto from 'crypto';
+import * as mm from 'micromatch';
+import * as path from 'path';
 
 const CFRecord = RT.Record({
   type: RT.Literal('cloudformation'),
@@ -37,6 +39,30 @@ export type Configuration = {
 
 const error = (msg: string) => process.stderr.write(`[CONF] error: ${msg}`);
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
+
+const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean) => {
+  const d = path.resolve(dir);
+  const nodes = fs.readdirSync(d);
+  let done = false;
+  for (let n of nodes) {
+    const p = d.endsWith('/') ? `${d}${n}` : `${d}/${n}`;
+    if (fs.statSync(p).isDirectory()) {
+      if (opts.recurse) {
+        done = forEachFile(p, opts, continueFn);
+        if (done)
+          break;
+      }
+    } else {
+      if (mm.isMatch(n, opts.glob)) {
+        if (!continueFn(p)) {
+          done = true;
+          break;
+        }
+      }
+    }
+  }
+  return done;
+}
 
 const getHash = (data: { [_: string]: string | number | boolean }) => {
   const shasum = crypto.createHash('sha1');
@@ -83,6 +109,23 @@ const cleanJson = (data: unknown) => {
 }
 
 const isAnyNewerThanCache = (key: string, dependsOn: string[]) => {
+  const t1 = lastmod(`${__dirname}/.cache/${key}`);
+  let ret = false;
+  for (let glob of dependsOn) {
+    forEachFile(`${__dirname}/../../../`, { glob, recurse: glob.startsWith('**/') }, n => {
+      const t2 = lastmod(n);
+      if (t2 <= t1)
+        return true;
+      ret = true;
+      return false;
+    });
+    if (ret)
+      break;
+  }
+  return ret;
+}
+
+const isAnyNewerThanCache2 = (key: string, dependsOn: string[]) => {
   const t1 = lastmod(`${__dirname}/.cache/${key}`);
   for (let f of dependsOn) {
     const t2 = lastmod(`${__dirname}/../../../${f}`)
@@ -275,7 +318,7 @@ const main = async (cmd: string) => {
         async cloudformation => {
           const { name, inputs, outputs } = cloudformation;
           const key = name.replace(/-/g, '_').toUpperCase();
-          log(`cloudformation ${key} `);
+          log(`${name} `);
 
           const inputDirty = isInputDirty(key, inputs);
           const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/cf.yaml`;
@@ -308,7 +351,7 @@ const main = async (cmd: string) => {
         shell => new Promise((resolve, reject) => {
           const { name, command, args, cwd, env, dependsOn } = shell;
           const key = name.replace(/-/g, '_').toUpperCase();
-          log(`shell ${key} `);
+          log(`${name} `);
 
           let dirty = false;
           const prev = {};

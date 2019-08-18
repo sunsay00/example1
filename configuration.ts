@@ -30,14 +30,14 @@ const configuration: Configuration = {
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
       FromEmail: `verification@${vars.NICE_NAME}`
     }),
+    Gen.Config(),
     {
       type: 'shell',
-      key: 'API',
+      name: 'cf-api',
       cwd: './api',
       command: 'make',
       args: ['configure'],
     },
-    Gen.Config(),
   ]
 }
 

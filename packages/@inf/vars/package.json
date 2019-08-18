@@ -6,5 +6,9 @@
     "vars": "./vars",
     "configure": "./configure"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/micromatch": "^3.1.0",
+    "micromatch": "^4.0.2"
+  }
 }
