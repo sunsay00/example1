@@ -1,9 +1,9 @@
 import { ConfigRecord } from '@inf/vars/configure';
 
-export const Config = (): ConfigRecord => ({
+export const Config = (opts: { ledgerPath: string }): ConfigRecord => ({
   type: 'shell',
   name: 'cf-gen',
-  cwd: __dirname,
-  command: 'gen',
+  command: `${__dirname}/gen`,
   args: [],
+  dependsOn: [`${__dirname}/generator/**/*.scm`, opts.ledgerPath]
 });

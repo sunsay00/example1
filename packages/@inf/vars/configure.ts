@@ -17,7 +17,7 @@ const CFRecord = RT.Record({
 const ShellRecord = RT.Record({
   type: RT.Literal('shell'),
   name: RT.String.withConstraint(s => verifyKey(s)),
-  cwd: RT.String,
+  //cwd: RT.String,
   command: RT.String,
   args: RT.Array(RT.String),
 }).And(RT.Partial({
@@ -25,9 +25,7 @@ const ShellRecord = RT.Record({
   env: RT.Dictionary(RT.String),
 }));
 
-const NoMatchRecord = RT.Record({});
-
-const Record = RT.Union(CFRecord, ShellRecord, NoMatchRecord);
+const Record = RT.Union(CFRecord, ShellRecord);
 
 export type ConfigRecord = RT.Static<typeof Record>;
 
@@ -115,8 +113,15 @@ const cleanJson = (data: unknown) => {
 const isAnyNewerThanCache = (key: string, dependsOn: string[]) => {
   const t1 = lastmod(`${__dirname}/.cache/${key}`);
   let ret = false;
-  for (let glob of dependsOn) {
-    forEachFile(`${__dirname}/../../../`, { glob, recurse: glob.startsWith('**/') }, n => {
+  for (let fullglob of dependsOn) {
+    const split = fullglob.split('/');
+    if (split.length == 0) continue;
+    const recurse = split.length > 1 && (split[split.length - 2] == '**');
+    const glob = split[split.length - 1];
+    if (split.length > 0) split.pop();
+    if (split.length > 0 && split[split.length - 1] == '**') split.pop();
+    const path = split.join('/');
+    forEachFile(path.startsWith('/') ? path : `${__dirname}/../../../${path}`, { glob, recurse }, n => {
       const t2 = lastmod(n);
       if (t2 <= t1)
         return true;
@@ -353,7 +358,7 @@ const main = async (cmd: string) => {
           return;
         },
         shell => new Promise((resolve, reject) => {
-          const { name, command, args, cwd, env, dependsOn } = shell;
+          const { name, command, args, env, dependsOn } = shell;
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
 
@@ -382,7 +387,10 @@ const main = async (cmd: string) => {
             }
           }
 
-          const proc = spawn(command, args, { env: { ...process.env, ...env }, cwd });
+          const cwd = path.dirname(command);
+          const cmd = path.basename(command);
+          //console.log(''); console.log('command:', command, 'CWD:', cwd, 'CMD:', cmd);
+          const proc = spawn(cmd, args, { env: { ...process.env, ...env }, cwd });
           let buffer = '';
           proc.stdout.on('data', data => {
             const buf = data.toString();
@@ -432,9 +440,6 @@ const main = async (cmd: string) => {
             }
           });
         }),
-        async _ => {
-          process.exit(1);
-        }
       )(rec);
 
       //console.logLn('PREV', previous);

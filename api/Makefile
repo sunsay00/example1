@@ -17,4 +17,6 @@ logs.auth:
 logs.api:
 	yarn vars sls logs -s {{STAGE}} -f api -t -r {{AWS_REGION}}
 
-configure: .envs.lambda
+#configure: .envs.lambda
+configure:
+	echo "WAKKA"

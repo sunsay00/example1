@@ -30,12 +30,13 @@ const configuration: Configuration = {
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
       FromEmail: `verification@${vars.NICE_NAME}`
     }),
-    Gen.Config(),
+    Gen.Config({
+      ledgerPath: 'ledger.scm'
+    }),
     {
       type: 'shell',
       name: 'cf-api',
-      cwd: './api',
-      command: 'make',
+      command: './api/make',
       args: ['configure'],
     },
   ]
