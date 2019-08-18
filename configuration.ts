@@ -37,7 +37,7 @@ const configuration: Configuration = {
       command: 'make',
       args: ['configure'],
     },
-    //Gen.Config(),
+    Gen.Config(),
   ]
 }
 

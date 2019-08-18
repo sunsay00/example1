@@ -37,8 +37,8 @@ export type Configuration = {
   modules: (((outputs: unknown) => ConfigRecord) | ConfigRecord)[],
 };
 
-const error = (msg: string) => console.error(`[CONF] error: ${msg}`);
-const log = (msg: string) => console.log(`[CONF] ${msg}`);
+const error = (msg: string) => process.stderr.write(`[CONF] error: ${msg}`);
+const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
 
 const getHash = (data: { [_: string]: string | number | boolean }) => {
   const shasum = crypto.createHash('sha1');
@@ -139,7 +139,7 @@ const writeTs = (outPath: string, key: string, data: { [k: string]: string }) =>
 const main = async (cmd: string) => {
   const configPath = 'configuration.ts';
   if (!fs.existsSync(configPath)) {
-    log('no configuration.ts found, exiting...');
+    console.log('no configuration.ts found, exiting...');
     process.exit(1);
   }
 
@@ -211,7 +211,7 @@ const main = async (cmd: string) => {
     const exists = await stackExists(StackName);
     try {
       if (exists) {
-        log(`updating stack ${configuration.region} ${StackName}...`);
+        console.log(`updating stack ${configuration.region} ${StackName}...`);
         await cf.updateStack({
           StackName,
           TemplateBody,
@@ -221,7 +221,7 @@ const main = async (cmd: string) => {
 
         await cf.waitFor('stackUpdateComplete', { StackName }).promise();
       } else {
-        log(`creating stack ${configuration.region} ${StackName}...`);
+        console.log(`creating stack ${configuration.region} ${StackName}...`);
         await cf.createStack({
           StackName,
           TemplateBody,
@@ -251,7 +251,7 @@ const main = async (cmd: string) => {
       if (!expectedOutputs)
         unused.push(o);
     if (unused.length > 0)
-      log(`unused outputs (${unused.join(', ')})`);
+      console.log(`unused outputs (${unused.join(', ')})`);
     const ret = {};
     outputs.forEach(o => ret[o.OutputKey] = o.OutputValue);
     return ret;
@@ -276,6 +276,8 @@ const main = async (cmd: string) => {
       await Record.match(
         async cloudformation => {
           const { name, key, inputs, outputs } = cloudformation;
+          log(`cloudformation ${key}... `);
+
           const inputDirty = isInputDirty(key, inputs);
           //const envsdir = `${__dirname}/../../../.envs`;
           //if (!fs.existsSync(envsdir))
@@ -284,7 +286,7 @@ const main = async (cmd: string) => {
           const ot = lastmod(`${__dirname}/.cache/${key}`);
           const cfDirty = lastmod(cfpath) > ot;
           if (!cfDirty && !inputDirty) {
-            log(`${name} is up to date`);
+            console.log('done (up to date)');
             const prev = readCache(key);
             if (prev) {
               previous = { ...previous, [key]: prev };
@@ -303,14 +305,16 @@ const main = async (cmd: string) => {
           if (!fs.existsSync(tsdir))
             fs.mkdirSync(tsdir);
           writeTs(`${tsdir}/vars.ts`, key, prev);
+
+          console.log('done');
           return;
         },
         shell => new Promise((resolve, reject) => {
-          let dirty = false;
-          let outputs = false;
-          let mode = '';
-          const prev = {};
           const { key, command, args, cwd, env, dependsOn } = shell;
+          log(`shell ${key}... `);
+
+          let dirty = false;
+          const prev = {};
 
           if (dependsOn) {
             if (dependsOn.length == 0) {
@@ -328,6 +332,7 @@ const main = async (cmd: string) => {
             const prev = readCache(key);
             if (prev) {
               previous = { ...previous, [key]: prev };
+              console.log('done');
               resolve();
               return;
             }
@@ -375,12 +380,17 @@ const main = async (cmd: string) => {
                 previous = { ...previous, [key]: prev };
               }
             }
-            code != 0 ? reject(new Error('shell failed')) : resolve();
+            if (code != 0) {
+              reject(new Error('shell failed'));
+            } else {
+              console.log('done');
+              resolve();
+            }
           });
         })
       )(rec);
 
-      //console.log('PREV', previous);
+      //console.logLn('PREV', previous);
     }
   } else if (cmd == 'down') {
     let previous = {};

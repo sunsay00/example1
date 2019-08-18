@@ -16,4 +16,3 @@ if [ ! -f $GENDIR/../../../ledger.scm ]; then
 fi
 
 cd $GENDIR/generator/ && LEDGER_PATH=$GENDIR/../../../ledger.scm make configure
-
