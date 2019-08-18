@@ -31,6 +31,21 @@ const makeSafe = env => {
   return ret;
 }
 
+const parseJson = (key, jsonPath) => {
+  if (!fs.existsSync(jsonPath))
+    return {};
+
+  const data = fs.readFileSync(jsonPath, { encoding: 'utf-8' });
+  try {
+    const json = JSON.parse(data);
+    let ret = {};
+    Object.entries(json).forEach(([k, v]) => { ret = { ...ret, [`${key}_${k}`]: v }; });
+    return ret;
+  } catch {
+    return {};
+  }
+}
+
 const parseEnv = (envsPath, examples = undefined) => {
   const path = `${repoDir}/${envsPath}`;
   if (!fs.existsSync(path))
@@ -79,8 +94,10 @@ const parseEnv = (envsPath, examples = undefined) => {
   return ret;
 }
 
-const additionalEnvPaths = fs.existsSync(`${repoDir}/.envs`) ? fs.readdirSync(`${repoDir}/.envs`).map(f => `.envs/${f}`) : [];
-const additionalEnv = additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseEnv(p) }), {});
+const additionalEnvPaths = fs.existsSync(`${__dirname}/.cache`) ? fs.readdirSync(`${__dirname}/.cache`).map(f =>
+  ({ key: f, path: `${__dirname}/.cache/${f}` })) : [];
+
+const additionalEnv = additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseJson(p.key, p.path) }), {});
 
 const env = makeSafe({
   ...parseEnv('envs'),

@@ -1,4 +1,4 @@
-import { Configuration } from '@inf/configure';
+import { Configuration } from '@inf/vars/configure';
 import { vars } from '@inf/vars';
 
 import * as AwsInfo from '@inf/awsinfo/config';

@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "types": "index.d.ts",
   "bin": {
-    "vars": "./vars"
+    "vars": "./vars",
+    "configure": "./configure"
   },
   "license": "MIT"
 }

@@ -13,8 +13,8 @@ invoke:
 	curl -H 'Authorization: Bearer' -d "hello world" https://b5a2mkvqbj.execute-api.us-east-1.amazonaws.com/dev
 
 logs.auth:
-	yarn vars sls logs -s $(STAGE) -f auth -t -r $(AWS_REGION)
+	yarn vars sls logs -s $${STAGE} -f auth -t -r $${AWS_REGION}
 logs.api:
-	yarn vars sls logs -s $(STAGE) -f api -t -r $(AWS_REGION)
+	yarn vars sls logs -s $$(STAGE} -f api -t -r $${AWS_REGION}
 
 configure: .envs.lambda

@@ -10,4 +10,4 @@ else
   CONFDIR="$DIR"
 fi
 
-ts-node --transpile-only -O "{ \"resolveJsonModule\": true }" "$CONFDIR/index.ts" $@
+ts-node --transpile-only -O "{ \"resolveJsonModule\": true }" "$CONFDIR/configure.ts" $@
