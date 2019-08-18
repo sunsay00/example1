@@ -8,8 +8,7 @@ import * as path from 'path';
 
 const CFRecord = RT.Record({
   type: RT.Literal('cloudformation'),
-  //key: RT.String.withConstraint(s => verifyKey(s)),
-  name: RT.String,
+  name: RT.String.withConstraint(s => verifyKey(s)),
 }).And(RT.Partial({
   inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
   outputs: RT.Array(RT.String),
@@ -17,8 +16,7 @@ const CFRecord = RT.Record({
 
 const ShellRecord = RT.Record({
   type: RT.Literal('shell'),
-  //key: RT.String.withConstraint(s => verifyKey(s)),
-  name: RT.String,
+  name: RT.String.withConstraint(s => verifyKey(s)),
   cwd: RT.String,
   command: RT.String,
   args: RT.Array(RT.String),
@@ -27,7 +25,9 @@ const ShellRecord = RT.Record({
   env: RT.Dictionary(RT.String),
 }));
 
-const Record = RT.Union(CFRecord, ShellRecord);
+const NoMatchRecord = RT.Record({});
+
+const Record = RT.Union(CFRecord, ShellRecord, NoMatchRecord);
 
 export type ConfigRecord = RT.Static<typeof Record>;
 
@@ -91,10 +91,14 @@ const touch = (filepath: string) => {
 
 const _keys = {};
 const verifyKey = (key: string) => {
-  if (!/^[A-Z0-9]+$/.exec(key))
-    throw new Error(`invalid key '${key}' - only uppercase letters and digits allowed`);
-  if (_keys[key])
+  if (!/^[a-zA-Z0-9-_]+$/.exec(key)) {
+    console.error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
+    throw new Error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
+  }
+  if (_keys[key]) {
+    console.error(`duplicate key '${key}' detected`);
     throw new Error(`duplicate key '${key}' detected`);
+  }
   _keys[key] = true;
   return true;
 }
@@ -325,7 +329,7 @@ const main = async (cmd: string) => {
           const ot = lastmod(`${__dirname}/.cache/${key}`);
           const cfDirty = lastmod(cfpath) > ot;
           if (!cfDirty && !inputDirty) {
-            console.log('...done (up to date)');
+            console.log('');
             const prev = readCache(key);
             if (prev) {
               previous = { ...previous, [key]: prev };
@@ -345,7 +349,7 @@ const main = async (cmd: string) => {
             fs.mkdirSync(tsdir);
           writeTs(`${tsdir}/vars.ts`, key, prev);
 
-          console.log('...done');
+          console.log('(updated)');
           return;
         },
         shell => new Promise((resolve, reject) => {
@@ -372,7 +376,7 @@ const main = async (cmd: string) => {
             const prev = readCache(key);
             if (prev) {
               previous = { ...previous, [key]: prev };
-              console.log('...done');
+              console.log('');
               resolve();
               return;
             }
@@ -423,11 +427,14 @@ const main = async (cmd: string) => {
             if (code != 0) {
               reject(new Error('shell failed'));
             } else {
-              console.log('...done');
+              console.log('(updated)');
               resolve();
             }
           });
-        })
+        }),
+        async _ => {
+          process.exit(1);
+        }
       )(rec);
 
       //console.logLn('PREV', previous);
