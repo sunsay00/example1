@@ -10,7 +10,7 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Resource:
-        - arn:aws:cognito-idp:${env:AWS_REGION}:${env:AWS_ACCOUNT_ID}:userpool/${env:COG_UserPoolId}
+        - arn:aws:cognito-idp:${env:AWS_REGION}:${env:AWS_ACCOUNT_ID}:userpool/${env:CF_COGNITO_UserPoolId}
       Action:
         - cognito-idp:AdminCreateUser
         - cognito-idp:AdminDeleteUser

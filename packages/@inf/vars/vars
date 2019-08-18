@@ -4,7 +4,7 @@ const { vars } = require('./index');
 const { spawn } = require('child_process');
 
 const substitute = (arg, envs) => {
-  const re = /\${([^}]+)}/gm;
+  const re = /{{([^}]+)}}/gm;
   let m = re.exec(arg);
   const keys = [];
   while (m) {
@@ -15,7 +15,7 @@ const substitute = (arg, envs) => {
   return keys.reduce((a, b) => {
     const v = envs[b];
     if (!v) throw new Error(`invalid variable substitution: ${b}`);
-    return a.replace(`\${${b}}`, v);
+    return a.replace(`{{${b}}}`, v);
   }, arg);
 }
 
