@@ -1,11 +1,11 @@
 import { Configuration } from '@inf/vars/configure';
 import { vars } from '@inf/vars';
 
-import * as AwsInfo from '@inf/awsinfo/config';
+import * as AwsInfo from '@inf/cf-awsinfo/config';
 import * as ServerlessPostgress from '@inf/cf-serverless-postgres/config';
 import * as Cognito from '@inf/cf-cognito/config';
 import * as Cert from '@inf/cf-cert/config';
-import * as Gen from '@inf/gen/config';
+import * as Gen from '@inf/cf-gen/config';
 
 const configuration: Configuration = {
   region: vars.AWS_REGION,

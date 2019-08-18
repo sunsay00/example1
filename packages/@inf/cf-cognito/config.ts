@@ -1,4 +1,4 @@
-import { ConfigRecord } from '@inf/configure';
+import { ConfigRecord } from '@inf/vars/configure';
 
 export type Inputs = {
   Stage: string,
@@ -18,7 +18,6 @@ export type Outputs = {
 export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation' as const,
   name: 'cf-cognito',
-  key: 'COG',
   inputs,
   outputs: ['IdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId'] as (keyof Outputs)[]
 });

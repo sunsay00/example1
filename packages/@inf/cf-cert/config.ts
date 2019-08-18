@@ -1,4 +1,4 @@
-import { ConfigRecord } from '@inf/configure';
+import { ConfigRecord } from '@inf/vars/configure';
 
 export type Inputs = {
   Domain: string,
@@ -11,7 +11,6 @@ export type Outputs = {
 export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation',
   name: 'cf-cert',
-  key: 'CRT',
   inputs,
   outputs: ['CertificateArn'] as (keyof Outputs)[]
 });

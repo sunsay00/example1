@@ -1,4 +1,4 @@
-import { ConfigRecord } from '@inf/configure';
+import { ConfigRecord } from '@inf/vars/configure';
 
 export type Inputs = {
   Stage: string,
@@ -12,6 +12,5 @@ export type Inputs = {
 export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation',
   name: 'cf-serverless-postgres',
-  key: 'SLSPG',
   inputs
 });

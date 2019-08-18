@@ -1,8 +1,8 @@
-import { ConfigRecord } from '@inf/configure';
+import { ConfigRecord } from '@inf/vars/configure';
 
 export const Config = (): ConfigRecord => ({
   type: 'shell',
-  key: 'GEN',
+  name: 'cf-gen',
   cwd: __dirname,
   command: 'gen',
   args: [],

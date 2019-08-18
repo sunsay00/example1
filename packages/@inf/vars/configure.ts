@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 
 const CFRecord = RT.Record({
   type: RT.Literal('cloudformation'),
-  key: RT.String.withConstraint(s => verifyKey(s)),
+  //key: RT.String.withConstraint(s => verifyKey(s)),
   name: RT.String,
 }).And(RT.Partial({
   inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
@@ -15,16 +15,14 @@ const CFRecord = RT.Record({
 
 const ShellRecord = RT.Record({
   type: RT.Literal('shell'),
-  key: RT.String.withConstraint(s => verifyKey(s)),
+  //key: RT.String.withConstraint(s => verifyKey(s)),
+  name: RT.String,
   cwd: RT.String,
   command: RT.String,
   args: RT.Array(RT.String),
 }).And(RT.Partial({
   dependsOn: RT.Array(RT.String),
   env: RT.Dictionary(RT.String),
-  //inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
-  //outputs: RT.Array(RT.String),
-  //outfile: RT.String,
 }));
 
 const Record = RT.Union(CFRecord, ShellRecord);
@@ -211,7 +209,7 @@ const main = async (cmd: string) => {
     const exists = await stackExists(StackName);
     try {
       if (exists) {
-        console.log(`updating stack ${configuration.region} ${StackName}...`);
+        process.stdout.write(`updating `);
         await cf.updateStack({
           StackName,
           TemplateBody,
@@ -221,7 +219,7 @@ const main = async (cmd: string) => {
 
         await cf.waitFor('stackUpdateComplete', { StackName }).promise();
       } else {
-        console.log(`creating stack ${configuration.region} ${StackName}...`);
+        process.stdout.write(`creating...`);
         await cf.createStack({
           StackName,
           TemplateBody,
@@ -275,18 +273,16 @@ const main = async (cmd: string) => {
 
       await Record.match(
         async cloudformation => {
-          const { name, key, inputs, outputs } = cloudformation;
-          log(`cloudformation ${key}... `);
+          const { name, inputs, outputs } = cloudformation;
+          const key = name.replace(/-/g, '_').toUpperCase();
+          log(`cloudformation ${key} `);
 
           const inputDirty = isInputDirty(key, inputs);
-          //const envsdir = `${__dirname}/../../../.envs`;
-          //if (!fs.existsSync(envsdir))
-          //fs.mkdirSync(envsdir);
           const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/cf.yaml`;
           const ot = lastmod(`${__dirname}/.cache/${key}`);
           const cfDirty = lastmod(cfpath) > ot;
           if (!cfDirty && !inputDirty) {
-            console.log('done (up to date)');
+            console.log('...done (up to date)');
             const prev = readCache(key);
             if (prev) {
               previous = { ...previous, [key]: prev };
@@ -306,12 +302,13 @@ const main = async (cmd: string) => {
             fs.mkdirSync(tsdir);
           writeTs(`${tsdir}/vars.ts`, key, prev);
 
-          console.log('done');
+          console.log('...done');
           return;
         },
         shell => new Promise((resolve, reject) => {
-          const { key, command, args, cwd, env, dependsOn } = shell;
-          log(`shell ${key}... `);
+          const { name, command, args, cwd, env, dependsOn } = shell;
+          const key = name.replace(/-/g, '_').toUpperCase();
+          log(`shell ${key} `);
 
           let dirty = false;
           const prev = {};
@@ -332,7 +329,7 @@ const main = async (cmd: string) => {
             const prev = readCache(key);
             if (prev) {
               previous = { ...previous, [key]: prev };
-              console.log('done');
+              console.log('...done');
               resolve();
               return;
             }
@@ -383,7 +380,7 @@ const main = async (cmd: string) => {
             if (code != 0) {
               reject(new Error('shell failed'));
             } else {
-              console.log('done');
+              console.log('...done');
               resolve();
             }
           });
