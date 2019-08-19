@@ -40,7 +40,7 @@ export type ConfigRecord = RT.Static<typeof Record>;
 export type Configuration = {
   region: string,
   stage: string,
-  modules: (((outputs: unknown) => ConfigRecord) | ConfigRecord)[],
+  modules: (((outputs: { [_: string]: string }) => ConfigRecord) | ConfigRecord)[],
 };
 
 const error = (msg: string) => process.stderr.write(`[CONF] error: ${msg}`);
@@ -301,8 +301,11 @@ const main = async (cmd: string, verbose: boolean) => {
         await cf.waitFor('stackCreateComplete', { StackName }).promise();
       }
     } catch (err) {
-      if (!err.message.includes('No updates are to be performed'))
+      if (!err.message.includes('No updates are to be performed')) {
+        console.log('');
+        console.error(colors.red(err.message));
         throw err;
+      }
     }
 
     const desc = await cf.describeStacks({ StackName }).promise();
@@ -335,6 +338,12 @@ const main = async (cmd: string, verbose: boolean) => {
       (ret.outputs && typeof ret.outputs == 'object' || true) && ret || undefined;
   }
 
+  const appendPrev = (previous: { [_: string]: string }, key: string, prev: { [_: string]: string }) => {
+    const p = {};
+    Object.entries(prev).map(([k, v]) => p[`${key}_${k}`] = v);
+    return { ...previous, ...p };
+  }
+
   const getStackname = (name: string) => `${configuration.stage}-${name}`;
 
   if (cmd == 'up') {
@@ -342,7 +351,8 @@ const main = async (cmd: string, verbose: boolean) => {
     for (let f of configuration.modules) {
       const rec = typeof f == 'function' ? f(previous) : f;
 
-      await Record.match(
+      const ret = await Record.match(
+
         async cloudformation => {
           const { name, inputs, outputs } = cloudformation;
           const key = name.replace(/-/g, '_').toUpperCase();
@@ -356,8 +366,8 @@ const main = async (cmd: string, verbose: boolean) => {
             console.log('');
             const prev = readCache(key);
             if (prev) {
-              previous = { ...previous, [key]: prev };
-              return;
+              previous = appendPrev(previous, key, prev);
+              return true;
             }
           }
 
@@ -366,7 +376,7 @@ const main = async (cmd: string, verbose: boolean) => {
           const prev = await up(getStackname(name), cfpath, inputs, outputs);
           writeCache(key, prev);
           writeInput(key, inputs);
-          previous = { ...previous, [key]: prev };
+          previous = appendPrev(previous, key, prev);
 
           const tsdir = `${__dirname}/../../../node_modules/@inf/${name}/src`;
           if (!fs.existsSync(tsdir))
@@ -374,8 +384,9 @@ const main = async (cmd: string, verbose: boolean) => {
           writeTs(`${tsdir}/vars.ts`, key, prev);
 
           console.log('(updated)');
-          return;
+          return true;
         },
+
         shell => new Promise((resolve, reject) => {
           const { name, command, args, env, dependsOn, outputMatchers, cwd } = shell;
           const key = name.replace(/-/g, '_').toUpperCase();
@@ -399,9 +410,9 @@ const main = async (cmd: string, verbose: boolean) => {
           if (!dirty) {
             const prev = readCache(key);
             if (prev) {
-              previous = { ...previous, [key]: prev };
+              previous = appendPrev(previous, key, prev);
               console.log('');
-              resolve();
+              resolve(true);
               return;
             }
           }
@@ -432,7 +443,7 @@ const main = async (cmd: string, verbose: boolean) => {
                 buffer = '';
                 printOutputs(key, json);
                 writeCache(key, json);
-                previous = { ...previous, [key]: json };
+                previous = appendPrev(previous, key, json);
               } else {
                 let json = undefined;
                 if (outputMatchers) {
@@ -450,11 +461,11 @@ const main = async (cmd: string, verbose: boolean) => {
                 if (json) {
                   printOutputs(key, json);
                   writeCache(key, json);
-                  previous = { ...previous, [key]: json };
+                  previous = appendPrev(previous, key, json);
                 } else {
                   printOutputs(key, json);
                   writeCache(key, prev);
-                  previous = { ...previous, [key]: prev };
+                  previous = appendPrev(previous, key, prev);
                 }
               }
             }
@@ -462,11 +473,16 @@ const main = async (cmd: string, verbose: boolean) => {
               reject(new Error('shell failed'));
             } else {
               console.log('(updated)');
-              resolve();
+              resolve(true);
             }
           });
         }),
       )(rec);
+
+      if (ret == undefined) {
+        console.error(colors.red(`record match failed: ${JSON.stringify(rec, null, 2)}`));
+        process.exit(1);
+      }
 
       //console.logLn('PREV', previous);
     }

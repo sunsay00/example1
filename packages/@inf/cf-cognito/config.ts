@@ -16,7 +16,7 @@ export type Outputs = {
 };
 
 export const Config = (inputs: Inputs): ConfigRecord => ({
-  type: 'cloudformation' as const,
+  type: 'cloudformation',
   name: 'cf-cognito',
   inputs,
   outputs: ['IdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId'] as (keyof Outputs)[]

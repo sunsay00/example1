@@ -6,6 +6,7 @@ import * as ServerlessPostgress from '@inf/cf-serverless-postgres/config';
 import * as Cognito from '@inf/cf-cognito/config';
 import * as Cert from '@inf/cf-cert/config';
 import * as Gen from '@inf/cf-gen/config';
+import * as CDN from '@inf/cf-cdn/config';
 
 const configuration: Configuration = {
   region: vars.AWS_REGION,
@@ -61,7 +62,13 @@ const configuration: Configuration = {
       outputMatchers: {
         SiteURL: /Serverless: Success! Your site should be available at (.*)/
       }
-    }
+    },
+    o => CDN.Config({
+      SiteCertificateArn: o.CF_CERT_CertificateArn,
+      Domain: vars.DOMAIN,
+      Stage: vars.STAGE,
+      HostedZoneId: o.CF_AWSINFO_HostedZoneId,
+    })
   ]
 }
 
