@@ -57,7 +57,10 @@ const configuration: Configuration = {
       cwd: './site',
       command: 'yarn',
       args: ['vars', 'serverless', 'client', 'deploy', '--stage', '{{STAGE}}', '--region', '{{AWS_REGION}}', '--no-confirm'],
-      dependsOn: ['./site/public/**/*']
+      dependsOn: ['./site/public/**/*'],
+      outputMatchers: {
+        SiteURL: /Serverless: Success! Your site should be available at (.*)/
+      }
     }
   ]
 }
