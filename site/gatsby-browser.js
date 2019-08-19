@@ -1,10 +1,10 @@
 // @ts-check
 import * as React from 'react';
-import * as Web from '@inf/gatsby-theme-web-ui';
+import * as UI from '@inf/core-ui';
 import { App } from './src/app';
 
 export const wrapPageElement = ({ element }) => (
-  <Web.SSRProvider enabled={false}>
+  <UI.SSRProvider enabled={false}>
     <App>{element}</App>
-  </Web.SSRProvider>
+  </UI.SSRProvider>
 );
