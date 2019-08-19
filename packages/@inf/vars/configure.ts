@@ -5,7 +5,14 @@ import * as RT from 'runtypes';
 import * as crypto from 'crypto';
 import * as mm from 'micromatch';
 import * as path from 'path';
+import * as colors from 'colors/safe';
 
+const verifyRegEx = (value: unknown, errMessage: string) => {
+  if (Object.prototype.toString.call(value) == '[object RegExp]')
+    return true;
+  console.error(colors.red(errMessage));
+  throw new Error(errMessage);
+}
 const CFRecord = RT.Record({
   type: RT.Literal('cloudformation'),
   name: RT.String.withConstraint(s => verifyKey(s)),
@@ -17,12 +24,12 @@ const CFRecord = RT.Record({
 const ShellRecord = RT.Record({
   type: RT.Literal('shell'),
   name: RT.String.withConstraint(s => verifyKey(s)),
-  //cwd: RT.String,
   command: RT.String,
   args: RT.Array(RT.String),
 }).And(RT.Partial({
   dependsOn: RT.Array(RT.String),
   env: RT.Dictionary(RT.String),
+  outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions')))
 }));
 
 const Record = RT.Union(CFRecord, ShellRecord);
@@ -37,6 +44,7 @@ export type Configuration = {
 
 const error = (msg: string) => process.stderr.write(`[CONF] error: ${msg}`);
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
+const logLn = (msg: string) => console.log(`[CONF] ${msg}`);
 
 const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean) => {
   const d = path.resolve(dir);
@@ -186,7 +194,7 @@ const writeTs = (outPath: string, key: string, data: { [k: string]: string }) =>
   fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const vars = {\n${out}};`);
 };
 
-const main = async (cmd: string) => {
+const main = async (cmd: string, verbose: boolean) => {
   const configPath = 'configuration.ts';
   if (!fs.existsSync(configPath)) {
     console.log('no configuration.ts found, exiting...');
@@ -358,7 +366,7 @@ const main = async (cmd: string) => {
           return;
         },
         shell => new Promise((resolve, reject) => {
-          const { name, command, args, env, dependsOn } = shell;
+          const { name, command, args, env, dependsOn, outputMatchers } = shell;
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
 
@@ -389,11 +397,14 @@ const main = async (cmd: string) => {
 
           const cwd = path.dirname(command);
           const cmd = path.basename(command);
-          //console.log(''); console.log('command:', command, 'CWD:', cwd, 'CMD:', cmd);
           const proc = spawn(cmd, args, { env: { ...process.env, ...env }, cwd });
           let buffer = '';
           proc.stdout.on('data', data => {
             const buf = data.toString();
+            if (verbose) {
+              if (!buffer.length) console.log('');
+              process.stdout.write(colors.gray(buf));
+            }
             buffer += buf;
             /*
             const str = buf.trim();
@@ -420,16 +431,46 @@ const main = async (cmd: string) => {
           });
           proc.stderr.on('data', data => process.stderr.write(data.toString()));
           proc.on('close', code => {
+            const printOutputs = (json: { [_: string]: string }) => {
+              if (verbose) {
+                const ents = Object.entries(json);
+                if (ents.length > 0) {
+                  console.log('outputs:');
+                  ents.forEach(([k, v]) => console.log(`  ${k}: ${v}`));
+                }
+              }
+            }
             if (code == 0) {
               let json = undefined;
               try { json = cleanJson(JSON.parse(buffer.trim())); } catch (ex) { }
-              buffer = '';
               if (json) {
+                buffer = '';
+                printOutputs(json);
                 writeCache(key, json);
                 previous = { ...previous, [key]: json };
               } else {
-                writeCache(key, prev);
-                previous = { ...previous, [key]: prev };
+                let json = undefined;
+                if (outputMatchers) {
+                  const matchers = Object.entries(outputMatchers);
+                  matchers.forEach(([k, m]) => {
+                    const match = (m as RegExp).exec(buffer);
+                    if (match && match.length > 1) {
+                      if (!json) json = {};
+                      json[k] = match[1];
+                    }
+                  });
+
+                }
+                buffer = '';
+                if (json) {
+                  printOutputs(json);
+                  writeCache(key, json);
+                  previous = { ...previous, [key]: json };
+                } else {
+                  printOutputs(json);
+                  writeCache(key, prev);
+                  previous = { ...previous, [key]: prev };
+                }
               }
             }
             if (code != 0) {
@@ -464,13 +505,26 @@ const main = async (cmd: string) => {
   }
 };
 
-if (process.argv.length != 3) {
+let verbose = false;
+
+const [_1, _2, ...rest] = process.argv;
+const cmdargs = rest.filter(r => {
+  if (r.startsWith('-')) {
+    if (r == '-v' || r == '--verbose')
+      verbose = true;
+    return false;
+  } else {
+    return true;
+  }
+});
+
+if (cmdargs.length == 0) {
   console.log(`usage: configure <up|down>`);
   process.exit(1);
 }
 
-const cmd = process.argv[2];
-main(cmd).catch(err => {
+const cmd = cmdargs[0];
+main(cmd, verbose).catch(err => {
   error(err && err.message || err);
   process.exit(1);
 });

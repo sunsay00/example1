@@ -19,4 +19,4 @@ logs.api:
 
 #configure: .envs.lambda
 configure:
-	echo "WAKKA"
+	yarn vars yarn sls deploy

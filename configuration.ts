@@ -38,6 +38,10 @@ const configuration: Configuration = {
       name: 'cf-api',
       command: './api/make',
       args: ['configure'],
+      dependsOn: ['./api/src/**/*.ts'],
+      outputMatchers: {
+        GraphQLEndpoint: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm,
+      }
     },
   ]
 }

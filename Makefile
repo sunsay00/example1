@@ -4,7 +4,7 @@ vars:
 	@yarn vars -V
 
 configure:
-	@yarn vars yarn configure up
+	@yarn vars yarn configure up -v
 
 sync:
 	tsc -b && cd ./mobile && \
