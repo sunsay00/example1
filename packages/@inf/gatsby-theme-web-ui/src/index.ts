@@ -13,3 +13,4 @@ export * from './components/code';
 // hooks
 export * from './hooks/usebodyscrolllocker';
 export * from './hooks/usepopup';
+export * from './hooks/usessr';
