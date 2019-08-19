@@ -11,10 +11,10 @@
     "serve": "gatsby serve"
   },
   "dependencies": {
+    "@inf/gatsby-theme-web-ui": "*",
     "@types/node": "^12.6.8",
     "babel-plugin-react-native-web": "^0.11.5",
     "gatsby": "^2.13.39",
-    "@inf/gatsby-theme-web-ui": "*",
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.1",
     "react": "16.9.0",
@@ -26,7 +26,6 @@
   },
   "devDependencies": {
     "@types/react-native": "^0.60.2",
-    "dotenv": "^8.0.0",
     "gatsby-cli": "^2.7.20",
     "gatsby-plugin-google-fonts": "^1.0.1",
     "gatsby-plugin-page-creator": "^2.1.5",
@@ -36,6 +35,9 @@
     "gatsby-plugin-typescript": "^2.1.2",
     "gatsby-source-filesystem": "^2.1.6",
     "gatsby-transformer-sharp": "^2.2.4",
-    "prettier": "^1.18.2"
+    "prettier": "^1.18.2",
+    "serverless": "^1.48.4",
+    "serverless-finch": "^2.4.2",
+    "@inf/vars": "*"
   }
 }

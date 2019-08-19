@@ -43,6 +43,22 @@ const configuration: Configuration = {
         GraphQLEndpoint: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm,
       }
     },
+    {
+      type: 'shell',
+      name: 'cf-site-build',
+      cwd: './site',
+      command: 'gatsby',
+      args: ['build', '--prefix-path'],
+      dependsOn: ['./site/src/**/*', './site/serverless.yml', './site/*.js']
+    },
+    {
+      type: 'shell',
+      name: 'cf-site',
+      cwd: './site',
+      command: 'yarn',
+      args: ['vars', 'serverless', 'client', 'deploy', '--stage', '{{STAGE}}', '--region', '{{AWS_REGION}}', '--no-confirm'],
+      dependsOn: ['./site/public/**/*']
+    }
   ]
 }
 

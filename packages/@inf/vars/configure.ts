@@ -27,6 +27,7 @@ const ShellRecord = RT.Record({
   command: RT.String,
   args: RT.Array(RT.String),
 }).And(RT.Partial({
+  cwd: RT.String,
   dependsOn: RT.Array(RT.String),
   env: RT.Dictionary(RT.String),
   outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions')))
@@ -95,8 +96,8 @@ const touch = (filepath: string) => {
   }
 }
 
-const printOutputs = (key: string, json: { [_: string]: string }) => {
-  if (verbose) {
+const printOutputs = (key: string, json?: { [_: string]: string }) => {
+  if (verbose && json) {
     const ents = Object.entries(json);
     if (ents.length > 0) {
       console.log('outputs:');
@@ -376,7 +377,7 @@ const main = async (cmd: string, verbose: boolean) => {
           return;
         },
         shell => new Promise((resolve, reject) => {
-          const { name, command, args, env, dependsOn, outputMatchers } = shell;
+          const { name, command, args, env, dependsOn, outputMatchers, cwd } = shell;
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
 
@@ -405,9 +406,10 @@ const main = async (cmd: string, verbose: boolean) => {
             }
           }
 
-          const cwd = path.dirname(command);
-          const cmd = path.basename(command);
-          const proc = spawn(cmd, args, { env: { ...process.env, ...env }, cwd });
+          const cwdEnabled = !command.startsWith('.') && !command.startsWith('/') && cwd;
+          const cwd2 = cwdEnabled ? cwd : path.dirname(command);
+          const cmd = cwdEnabled ? command : path.basename(command);
+          const proc = spawn(cmd, args, { env: { ...process.env, ...env }, cwd: cwd2 });
           let buffer = '';
           proc.stdout.on('data', data => {
             const buf = data.toString();
@@ -416,32 +418,14 @@ const main = async (cmd: string, verbose: boolean) => {
               process.stdout.write(colors.gray(buf));
             }
             buffer += buf;
-            /*
-            const str = buf.trim();
-            if (!outputs) {
-              if (command == 'make' && /^make.*: Nothing to be done for/.exec(str))
-                dirty = false;
-              else if (/^Service Information/.exec(str))
-                outputs = true;
-            } else {
-              if (/^Serverless: Run/.exec(str)) {
-                outputs = false;
-              } else {
-                const sexec = /^(.+):/.exec(str);
-                if (sexec && sexec.length == 2)
-                  mode = sexec[1];
-                if (mode == 'endpoints') {
-                  const exec = /POST - (.+\/)(.+)/.exec(str);
-                  if (exec && exec.length == 3)
-                    prev[`${exec[2]}Endpoint`] = `${exec[1]}${exec[2]}`;
-                }
-              }
-            }
-            */
           });
           proc.stderr.on('data', data => process.stderr.write(data.toString()));
           proc.on('close', code => {
             if (code == 0) {
+
+              if (verbose && buffer.length > 0)
+                console.log('');
+
               let json = undefined;
               try { json = cleanJson(JSON.parse(buffer.trim())); } catch (ex) { }
               if (json) {

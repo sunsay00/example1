@@ -1,0 +1,20 @@
+service: site
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+  stage: ${env:STAGE}
+  region: ${env:AWS_REGION}
+
+plugins:
+  - serverless-finch
+
+custom:
+  client:
+    bucketName: ${env:STAGE}-${env:AWS_REGION}.${env:DOMAIN}
+    distributionFolder: public
+    objectHeaders:
+      "*.html":
+        - name: Cache-Control
+          value: public, max-age=0, must-revalidate
