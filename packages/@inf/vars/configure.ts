@@ -95,6 +95,16 @@ const touch = (filepath: string) => {
   }
 }
 
+const printOutputs = (key: string, json: { [_: string]: string }) => {
+  if (verbose) {
+    const ents = Object.entries(json);
+    if (ents.length > 0) {
+      console.log('outputs:');
+      ents.forEach(([k, v]) => console.log(`  ${key}_${k}=${v}`));
+    }
+  }
+}
+
 const _keys = {};
 const verifyKey = (key: string) => {
   if (!/^[a-zA-Z0-9-_]+$/.exec(key)) {
@@ -431,21 +441,12 @@ const main = async (cmd: string, verbose: boolean) => {
           });
           proc.stderr.on('data', data => process.stderr.write(data.toString()));
           proc.on('close', code => {
-            const printOutputs = (json: { [_: string]: string }) => {
-              if (verbose) {
-                const ents = Object.entries(json);
-                if (ents.length > 0) {
-                  console.log('outputs:');
-                  ents.forEach(([k, v]) => console.log(`  ${k}: ${v}`));
-                }
-              }
-            }
             if (code == 0) {
               let json = undefined;
               try { json = cleanJson(JSON.parse(buffer.trim())); } catch (ex) { }
               if (json) {
                 buffer = '';
-                printOutputs(json);
+                printOutputs(key, json);
                 writeCache(key, json);
                 previous = { ...previous, [key]: json };
               } else {
@@ -463,11 +464,11 @@ const main = async (cmd: string, verbose: boolean) => {
                 }
                 buffer = '';
                 if (json) {
-                  printOutputs(json);
+                  printOutputs(key, json);
                   writeCache(key, json);
                   previous = { ...previous, [key]: json };
                 } else {
-                  printOutputs(json);
+                  printOutputs(key, json);
                   writeCache(key, prev);
                   previous = { ...previous, [key]: prev };
                 }
