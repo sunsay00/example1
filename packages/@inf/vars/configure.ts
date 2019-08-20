@@ -382,6 +382,7 @@ const main = async (cmd: string, verbose: boolean) => {
           if (!fs.existsSync(tsdir))
             fs.mkdirSync(tsdir);
           writeTs(`${tsdir}/vars.ts`, key, prev);
+          writeTs(`${tsdir}/vars.js`, key, prev);
 
           console.log('(updated)');
           return true;

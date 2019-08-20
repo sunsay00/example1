@@ -10,7 +10,8 @@ vars:
 	yarn vars -V
 
 invoke:
-	curl -H 'Authorization: Bearer' -d "hello world" https://b5a2mkvqbj.execute-api.us-east-1.amazonaws.com/dev
+	#yarn vars curl -v -H 'Authorization: Guest' -d "hello world" {{CF_API_GraphQLEndpoint}}
+	yarn vars curl -v -H 'Authorization: Poopy' -d "hello world" {{CF_API_GraphQLEndpoint}}
 
 logs.auth:
 	yarn vars sls logs -s {{STAGE}} -f auth -t -r {{AWS_REGION}}
@@ -19,4 +20,5 @@ logs.api:
 
 #configure: .envs.lambda
 configure:
-	yarn vars yarn sls deploy
+	rm -f tsconfig.tsbuildinfo && tsc && yarn webpack && cp build/_api.js build/api.js && cp build/_auth.js build/auth.js && \
+		yarn vars yarn sls deploy --no-confirm

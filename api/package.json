@@ -16,14 +16,14 @@
     "aws-lambda": "^0.1.2"
   },
   "devDependencies": {
-    "@inf/vars": "*",
     "@inf/cf-cognito": "*",
+    "@inf/vars": "*",
     "@types/aws-lambda": "^8.10.31",
     "@types/node": "^12.6.8",
     "jwk-to-pem": "^2.0.1",
     "serverless": "^1.48.4",
     "serverless-offline": "^5.8.0",
-    "webpack": "^4.38.0",
-    "webpack-cli": "^3.3.6"
+    "webpack": "4.28.4",
+    "webpack-cli": "3.3.6"
   }
 }
