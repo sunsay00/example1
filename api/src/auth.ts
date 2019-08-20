@@ -152,7 +152,6 @@ export const handler = domainWrapper((event: CustomAuthorizerEvent, context: Con
       if (!event.authorizationToken) { throw new Error('missing authorization token'); }
 
       const token = event.authorizationToken;
-      console.log('AUTH-TOK', token);
       if (token.toLowerCase().startsWith('bearer ')) {
         const result = /^arn:aws:execute-api:([a-z0-9-]+):([a-zA-Z0-9-<> ]+):([a-zA-Z0-9-<> ]+)\/([a-zA-Z0-9]+)\//.exec(event.methodArn);
         if (!result || result.length !== 5) { throw new Error(`invalid methodArn '${event.methodArn}'`); }
@@ -164,7 +163,6 @@ export const handler = domainWrapper((event: CustomAuthorizerEvent, context: Con
           stage: result[4],
         };
 
-        console.log('AUTH (1)');
         const userPoolURI = `https://cognito-idp.${config.AWS_REGION}.amazonaws.com/${config.UserPoolId}`;
         if (PEMS === null) {
           if (config.NODE_ENV === 'local') {
@@ -193,19 +191,15 @@ export const handler = domainWrapper((event: CustomAuthorizerEvent, context: Con
             }
           }
         } else {
-          console.log('AUTH (2)');
           processAuthRequest(event, userPoolURI, awsAccountId, apiOptions, next);
         }
       } else if (token.toLowerCase() === 'guest') {
-        console.log('AUTH (3)');
         next(null, generateGuestPolicy(event.methodArn));
       } else {
-        console.log('AUTH (4)');
         next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
       }
     } catch (err) {
       console.log('auth service - unhandler error', err);
-      console.log('AUTH (5)');
       next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
     }
   }));

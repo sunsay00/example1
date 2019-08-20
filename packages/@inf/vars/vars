@@ -46,6 +46,7 @@ if (argv.length == 2) {
     process.stderr.write(data.toString());
   });
   proc.on('close', code => {
+    console.log('');
     process.exit(failed ? 1 : code);
   });
 }
