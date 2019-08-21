@@ -1,7 +1,7 @@
 import { domainWrapper } from './domainwrapper';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
-export const apiWrapper = (cfg: {
+export const apiWrapper = (params: {
   stage: string,
   nodeEnv: string,
   corsAllowOrigin: string,
@@ -31,7 +31,7 @@ export const apiWrapper = (cfg: {
     return {
       statusCode: 401,
       headers: {
-        'Access-Control-Allow-Origin': cfg.corsAllowOrigin, // Required for CORS support to work
+        'Access-Control-Allow-Origin': params.corsAllowOrigin, // Required for CORS support to work
       },
       body: JSON.stringify({ message: '401-Testing' }),
     };
@@ -57,7 +57,7 @@ export const apiWrapper = (cfg: {
     return {
       statusCode: payload.statusCode,
       headers: {
-        'Access-Control-Allow-Origin': cfg.corsAllowOrigin, // Required for CORS support to work
+        'Access-Control-Allow-Origin': params.corsAllowOrigin, // Required for CORS support to work
       },
       body: JSON.stringify({ message: payload.message }),
     };
@@ -118,20 +118,20 @@ export const apiWrapper = (cfg: {
       return {
         statusCode: 200,
         headers: {
-          'Access-Control-Allow-Origin': cfg.corsAllowOrigin, // Required for CORS support to work
+          'Access-Control-Allow-Origin': params.corsAllowOrigin, // Required for CORS support to work
         },
         body: JSON.stringify(result),
       };
     }
   } catch (err) {
-    if (cfg.nodeEnv !== 'test' && cfg.nodeEnv !== 'production') {
+    if (params.nodeEnv !== 'test' && params.nodeEnv !== 'production') {
       //if (process.env.NODE_ENV !== 'production') {
       console.log(err.stack);
     }
     return {
       statusCode: 400,
       headers: {
-        'Access-Control-Allow-Origin': cfg.corsAllowOrigin, // Required for CORS support to work
+        'Access-Control-Allow-Origin': params.corsAllowOrigin, // Required for CORS support to work
       },
       body: JSON.stringify({ message: err.message }),
     };
