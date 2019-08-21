@@ -1,3 +1,2 @@
-import * as AWS from 'aws-sdk';
-import * as RT from 'runtypes';
-export { domainWrapper } from './domainwrapper';
+export { apiWrapper } from './serverless/apiwrapper';
+export { authWrapper } from './serverless/authwrapper';

@@ -45,7 +45,6 @@ export type Configuration = {
 
 const error = (msg: string) => process.stderr.write(`[CONF] error: ${msg}`);
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
-const logLn = (msg: string) => console.log(`[CONF] ${msg}`);
 
 const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean) => {
   const d = path.resolve(dir);
@@ -203,6 +202,22 @@ const writeTs = (outPath: string, key: string, data: { [k: string]: string }) =>
     out += `  ${k}: ${JSON.stringify(v)},\n`;
   });
   fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const vars = {\n${out}};`);
+};
+
+const writeIgnore = (outPath: string) => {
+  const ents = ['src/vars.ts', 'src/vars.js', 'lib'];
+  if (!fs.existsSync(outPath)) {
+    fs.writeFileSync(outPath, ents.join('\n'), { encoding: 'utf8' });
+  } else {
+    const data = fs.readFileSync(outPath, { encoding: 'utf8' });
+    const pents = data.split('\n');
+    ents.forEach((e, i) => {
+      if (pents.includes(e))
+        ents[i] = undefined;
+    });
+    const nents = [...pents, ents.filter(e => e != undefined)];
+    fs.writeFileSync(outPath, nents.join('\n'), { encoding: 'utf8' });
+  }
 };
 
 const main = async (cmd: string, verbose: boolean) => {
@@ -378,11 +393,12 @@ const main = async (cmd: string, verbose: boolean) => {
           writeInput(key, inputs);
           previous = appendPrev(previous, key, prev);
 
-          const tsdir = `${__dirname}/../../../node_modules/@inf/${name}/src`;
+          const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
           if (!fs.existsSync(tsdir))
             fs.mkdirSync(tsdir);
-          writeTs(`${tsdir}/vars.ts`, key, prev);
-          writeTs(`${tsdir}/vars.js`, key, prev);
+          writeTs(`${tsdir}/src/vars.ts`, key, prev);
+          writeTs(`${tsdir}/src/vars.js`, key, prev);
+          writeIgnore(`${tsdir}/.gitignore`);
 
           console.log('(updated)');
           return true;
