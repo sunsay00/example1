@@ -1,4 +1,7 @@
+// @ts-check
+
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
@@ -12,8 +15,9 @@ module.exports = {
     filename: '_[name].js',
     libraryTarget: 'this'
   },
+  plugins: [new webpack.IgnorePlugin(/^pg-native$/)],
   module: {},
-  optimization: { 
+  optimization: {
     minimize: process.env.NODE_ENV == 'production',
     concatenateModules: true,
   }

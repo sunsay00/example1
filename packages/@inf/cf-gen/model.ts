@@ -1,0 +1,1 @@
+export * from './back/api/src/types/models';

@@ -1,14 +1,22 @@
+import { GraphQLError, ExecutionResult } from 'graphql';
 import { domainWrapper } from './domainwrapper';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+
+type UserContext = {
+  sub: string,
+  groups?: string[],
+  username?: string,
+};
 
 export const apiWrapper = (params: {
   stage: string,
   nodeEnv: string,
   corsAllowOrigin: string,
-}, onMain: (
+}) => (onMain: (
   headers: { [_: string]: string },
   query: string,
-  variables: string, user: {}) => Promise<{ errors: Error[], data: any }>
+  variables: { [_: string]: string },
+  user: UserContext) => Promise<{ errors?: readonly GraphQLError[], data?: ExecutionResult<unknown> }>
 ) => domainWrapper(async (event: APIGatewayProxyEvent, context: Context) => {
 
   context.callbackWaitsForEmptyEventLoop = false; // let's not wait around for event loop to empty out
@@ -16,14 +24,13 @@ export const apiWrapper = (params: {
   const headers: { [_: string]: string } = {};
   if (event.headers) {
     // collect headers and lowercase them
-    Object.keys(event.headers).forEach(key => {
-      headers[key.toLowerCase()] = event.headers[key];
-    });
+    Object.keys(event.headers).forEach(key =>
+      headers[key.toLowerCase()] = event.headers[key]
+    );
 
     // only allow json
-    if (headers['content-type'].indexOf('application/json') !== 0) {
+    if (headers['content-type'].indexOf('application/json') != 0)
       throw new Error(`expected json content-type, received '${headers['content-type']}'`);
-    }
   }
 
   // useful for testing 401 reponses
@@ -83,11 +90,10 @@ export const apiWrapper = (params: {
   if (!json.query)
     throw new Error('neither query nor variables not defined in the request');
 
-  const user = {
+  const user: UserContext = {
     sub: payload.sub,
     groups: payload['cognito:groups'],
     username: payload.username,
-    session: undefined,
   };
 
   if (process.env.NODE_ENV === 'local') {

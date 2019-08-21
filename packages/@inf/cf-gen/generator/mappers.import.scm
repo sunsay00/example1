@@ -2,8 +2,8 @@
   (import scheme chicken data-structures tools signatures)
   (require-extension srfi-13 srfi-1)
 
-	(define (method-emit ind model method) 
-		(let ((name (first-down (method->name method)))
+  (define (method-emit ind model method) 
+    (let ((name (first-down (method->name method)))
           (mode (method->mode method)))
       (list "\n" (indent ind) (model->name model) (method->name method) "_v" (inexact->exact (floor (method->version method))) " = async " (service-signature-emit model method) " => {"
             "\n" (indent (+ ind 1)) 
@@ -12,12 +12,18 @@
                   ");")
             "\n" (indent ind) "}")))
 
-	(define (dependencies fn delimit api)
+  (define (partial? all-methods)
+    (let ((service-methods (filter method-serviceonly? all-methods)))
+      (not (zero? (length service-methods)))))
+
+  (define (dependencies fn delimit api)
     (intersperse 
       (map (lambda (model)
-             (fn (model->name model)
-                 (or (model-serviceonly? model)
-                     (any method-serviceonly? (model->all-methods model)))))
+             (let ((all-methods (model->all-methods model)))
+               (fn (model->name model)
+                   (or (model-serviceonly? model)
+                       (any method-serviceonly? all-methods))
+                   (partial? all-methods))))
            (api->models api)) delimit))
 
   (define (mappers-generate prev-api delta-api vnum) 
@@ -26,54 +32,61 @@
        (prev-vnum (- vnum 1))
        (expr 
          (list
-           "// this file has been automatically generated, do not modify\n"
-           (if (null? prev-api) ""
-             (list "\nimport Mapper_v" prev-vnum " from './mapper_v" prev-vnum "';\n"))
-           "\nexport default class Mapper_v" vnum (if (null? prev-api) "" (list " extends Mapper_v" prev-vnum)) " {"
-					 (dependencies (lambda (p s?) (list "\n" (indent ind) "_" p ": I" (first-up p) "Service;")) "" delta-api)
-           "\n  constructor("
-					 (dependencies (lambda (p s?) (list "\n" (indent (+ 1 ind)) p ": I" (first-up p) "Service")) ", " prev-api)
+           "// this file has been automatically generated, do not modify"
+           "\n"
+           "\nimport { IUserContext, Point, Cursorize, Cursored } from '../../../../../types';"
+           "\nimport * as M from '../../types/serviceinterfaces';"
+           "\n"
+           "\nexport default class Mapper_v" vnum "<C extends IUserContext>" (if (null? prev-api) "" (list " extends Mapper_v<C>" prev-vnum)) " {"
+           (dependencies (lambda (p s? p?) (list "\n" (indent ind) "_" p ": M.I" (first-up p) "Service<C>;")) "" delta-api)
+           "\n  constructor(params: {"
+           (dependencies (lambda (p s? p?) (list "\n" (indent (+ 1 ind)) p ": M.I" (first-up p) "Service<C>")) ", " prev-api)
            (if (null? prev-api) "" ",")
-					 (dependencies (lambda (p s?) (list "\n" (indent (+ 1 ind)) p ": I" (first-up p) "Service")) ", " delta-api)
-           "\n  ) {"
+           (dependencies (lambda (p s? p?) (list "\n" (indent (+ 1 ind)) p ": M.I" (first-up p) "Service<C>")) ", " delta-api)
+           "\n  }) {"
            (if (null? prev-api) ""
-             (list "\n    super(" (dependencies (lambda (p s?) p) ", " prev-api) ");"))
-					 (dependencies (lambda (p s?) (list "\n" (indent (+ 1 ind)) "this._" p " = " p ";")) "" delta-api)
+             (list "\n    super(" (dependencies (lambda (p s? p?) p) ", " prev-api) ");"))
+           (dependencies (lambda (p s? p?) (list "\n" (indent (+ 1 ind)) "this._" p " = params." p ";")) "" delta-api)
            "\n  };"
            "\n"
            (map-queries-ex 'mappers (lambda (method model) (method-emit ind model method)) delta-api)
-					 "\n"
+           "\n"
            (map-mutations-ex 'mappers (lambda (method model) (method-emit ind model method)) delta-api)
-					 "\n};")))
-			(smoosh expr)))
+           "\n};")))
+      (smoosh expr)))
 
   (define (mappers-generate-index api vnum)
     (let* ((ind 1)
            (expr (list
-                   "// this file has been automatically generated, do not modify\n"
-                   (dependencies (lambda (p serviceonly?)
-                                   (list 
-                                     "\nimport " (first-up p) "BasicService from '../services/basic/" (lower p) "service';"
-                                     (if serviceonly?
-                                       (list "\nimport " (first-up p) "Service from '../services/" (lower p) "service';")
-                                       ""))) "" api)
+                   "// this file has been automatically generated, do not modify"
+                   "\n"
+                   "\nimport { IStore } from '../../types/storeinterfaces';"
+                   "\nimport * as Services from '../../types/serviceinterfaces';"
+                   "\nimport { IUserContext, INotificationManager } from '../../../../../types';"
+                   (dependencies (lambda (p serviceonly? partial?)
+                                   (list "\nimport " (first-up p) "BasicService from '../services/basic/" (lower p) "service';")) "" api)
                    "\n"
                    "\nimport Connectors from '../connectors';"
-                   "\nimport NotificationManager from '../../tools/notificationmanager';"
                    "\n"
                    "\nimport Mapper from './mapper_v" (inexact->exact (floor vnum)) "';"
                    "\n"
-                   "\nexport const createDefaultMapper = (notifications: NotificationManager, store: IStore) => {"
-                   "\n  const connectors = new Connectors(store);"
-                   "\n  return new Mapper("
-                   (dependencies (lambda (p needsservice?)
+                   "\nexport type MappedServices<C extends IUserContext> = {"
+                   (dependencies (lambda (p serviceonly? partial?)
+                                   (if serviceonly?
+                                     (list "\n  " p ": (store: IStore<C>) => Services.I" (first-up p) (if partial? "Partial" "") "Service<C>,") "")) "" api)
+                   "\n}"
+                   "\n"
+                   "\nexport const createServiceMapper = <C extends IUserContext>(notifications: INotificationManager<C>, store: IStore<C>, services: MappedServices<C>) => {"
+                   "\n  const connectors = new Connectors<C>(store);"
+                   "\n  return new Mapper({"
+                   (dependencies (lambda (p needsservice? partial?)
                                    (if needsservice?
-                                     (list "\n    new " (first-up p) "BasicService(connectors, notifications, store, new " (first-up p) "Service(notifications, store))")
-                                     (list "\n    new " (first-up p) "BasicService(connectors, notifications, store)"))) "," api)
-                   "\n  );"
+                                     (list "\n    " p ": new " (first-up p) "BasicService(connectors, notifications, store, services." p "(store))")
+                                     (list "\n    " p ": new " (first-up p) "BasicService(connectors, notifications, store)"))) "," api)
+                   "\n  });"
                    "\n}"
                    "\nexport default Mapper;")))
       (smoosh expr)))
 
-)
+  )
 

@@ -1,2 +1,2 @@
-export { apiWrapper } from './serverless/apiwrapper';
-export { authWrapper } from './serverless/authwrapper';
+export * from './serverless/apiwrapper';
+export * from './serverless/authwrapper';

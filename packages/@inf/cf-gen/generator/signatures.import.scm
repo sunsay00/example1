@@ -1,6 +1,6 @@
 (module signatures (
-                    service-signature-params store-signature-params store-signature-args return-datatype-emit
-                    param-emit return-type-emit service-sig-emit store-sig-emit service-signature-emit
+                    service-signature-params store-signature-params store-signature-args return-datatype-emit type->jstype
+                    param-emit param-emit/scope return-type-emit service-sig-emit store-sig-emit service-signature-emit
                     convert-to-input-param store-call-emit serviceapi-sig-emit)
   (import scheme chicken data-structures tools)
   (require-extension srfi-13 srfi-1)
@@ -26,7 +26,7 @@
       (map (lambda (param) (convert-to-input-param (model->api model) param)) params)))
 
   (define (service-signature-params model method)
-    (cons (make-param '$ctx 'IUserContext)
+    (cons (make-param '$ctx 'C)
           (let ((params (method->params method)))
             (if (get? method)
               (cons (make-param '__fields '(Array String)) params)
@@ -61,7 +61,7 @@
 
   (define (store-signature-emit model method)
     (let ((params (store-signature-params model method)))
-      (list "(" (intersperse (cons "$ctx: IUserContext" (map param-emit params)) ", ") "): "
+      (list "(" (intersperse (cons "$ctx: C" (map param-emit params)) ", ") "): "
             (if (method-dbonly? method)
               (list "Promise<" (cursorize return-datatype-emit (method->return-type method)) ">")
               (list "Promise<" (cursorize return-type-emit (method->return-type method)) ">")))))
@@ -78,14 +78,19 @@
   (define (serviceapi-sig-emit model method) 
      (list (first-down (method->name method)) " = async " (serviceapi-signature-emit model method)))
 
-  (define (type->jstype type)
+  (define whitelist (list 'C 'Point))
+
+  (define (type->jstype/scope type scoped?)
     (cond
       ((eq? type 'String) 'string)
       ((eq? type 'Int) 'number)
       ((eq? type 'Float) 'number)
       ((eq? type 'DateTime) 'Date)
       ((eq? type 'Boolean) 'boolean)
-      (else type)))
+      (else (if (and scoped? (not (member type whitelist))) (list "M." type)
+              type))))
+
+  (define (type->jstype type) (type->jstype/scope type #t))
 
   (define (return-datatype-emit type) 
     (cond
@@ -112,22 +117,26 @@
                 (recur (param->type param))
                 (param->specs param)))
 
-  (define (return-type-emit type) 
+  (define (return-type-emit/scope type scoped?) 
     (cond
-      ((optional? type) (list (return-type-emit (optional->type type)) " | undefined"))
+      ((optional? type) (list (return-type-emit/scope (optional->type type) scoped?) " | undefined"))
       ((array? type)
        (let ((child-type (array->type type)))
          (if (native-type? child-type)
-           (list "Cursored<" (return-type-emit child-type) ">[]")
-           (list (return-type-emit child-type) "[]"))))
-      ((plus-type? type) (intersperse (map type->jstype (plus-type->types type)) " & "))
-      (else (type->jstype type))))
+           (list "Cursored<" (return-type-emit/scope child-type scoped?) ">[]")
+           (list (return-type-emit/scope child-type scoped?) "[]"))))
+      ((plus-type? type) (intersperse (map (lambda (t) (type->jstype/scope t scoped?)) (plus-type->types type)) " & "))
+      (else (type->jstype/scope type scoped?))))
 
-  (define (param-emit param)
+  (define (return-type-emit type) (return-type-emit/scope type #t))
+
+  (define (param-emit/scope param scoped?)
     (let ((name (param->name param))
           (type (param->type param)))
       (cond
-        ((optional? type) (list name "?: " (return-type-emit (optional->type type))))
-        ((array? type) (list name ": " (return-type-emit (array->type type)) "[]"))
-        (else (list name ": " (type->jstype type))))))
+        ((optional? type) (list name "?: " (return-type-emit/scope (optional->type type) scoped?)))
+        ((array? type) (list name ": " (return-type-emit/scope (array->type type) scoped?) "[]"))
+        (else (list name ": " (type->jstype/scope type scoped?))))))
+
+  (define (param-emit param) (param-emit/scope param #t))
   )

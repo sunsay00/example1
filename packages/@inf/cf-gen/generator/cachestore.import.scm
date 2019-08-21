@@ -1,5 +1,5 @@
 (module cachestore (cachestore-generate)
-  (import scheme chicken data-structures tools signatures matchable migrations redis)
+  (import scheme chicken data-structures tools signatures matchable migrations redis interfaces)
   (require-extension srfi-13 srfi-1)
 
   (define (dynamic-command-emit ind api model method)
@@ -35,13 +35,16 @@
              "// this file has been automatically generated, do not modify"
              "\n"
              "\nimport * as _ from 'lodash';"
-             "\nimport * as SmokeTester from '../../tools/smoketester';"
+             "\nimport * as SmokeTester from '../../../../../tools/smoketester';"
+             "\nimport { Point, Dict, ICacheClient, IUserContext, Cursorize, Cursored } from '../../../../../types';"
+             "\nimport { IStore } from '../../types/storeinterfaces';"
+             "\nimport * as M from '../../types/models';"
              "\n"
-             "\nexport default class CachedStore implements IStore {"
-             "\n  private _store: IStore;"
+             "\nexport default class CachedStore<C extends IUserContext> implements IStore<C> {"
+             "\n  private _store: IStore<C>;"
              "\n  private _client: ICacheClient;"
              "\n"
-             "\n  constructor(store: IStore, client: ICacheClient) { this._store = store; this._client = client; }"
+             "\n  constructor(store: IStore<C>, client: ICacheClient) { this._store = store; this._client = client; }"
              "\n"
              "\n  runSmokeTests = () => SmokeTester.runCacheStoreSmokeTests(this._store, this._client);"
              "\n"

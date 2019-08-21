@@ -5,5 +5,5 @@ export const Config = (inputs: { dependsOn?: string[] }): ConfigRecord => ({
   name: 'cf-awsinfo',
   command: `${__dirname}/make`,
   dependsOn: inputs.dependsOn,
-  args: ['configure']
+  args: ['configure'],
 });

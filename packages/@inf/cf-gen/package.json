@@ -1,8 +1,16 @@
 {
   "name": "@inf/cf-gen",
   "version": "0.0.1",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "bin": {
     "gen": "gen"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "graphql-list-fields": "git+https://github.com/kyunghoon/graphql-list-fields.git#khk"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.17"
+  }
 }

@@ -10,5 +10,6 @@ export type Inputs = {
 export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation',
   name: 'cf-cdn',
+  cfpath: './cf.yaml',
   inputs
 });

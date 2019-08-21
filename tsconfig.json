@@ -25,6 +25,15 @@
     },
     {
       "path": "./packages/@inf/chat"
+    },
+    {
+      "path": "./packages/@inf/cf-serverless-postgres"
+    },
+    {
+      "path": "./packages/@inf/cf-gen"
+    },
+    {
+      "path": "./packages/@inf/cf-redis"
     }
   ]
 }

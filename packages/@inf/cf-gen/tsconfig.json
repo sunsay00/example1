@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig-base",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./lib",
+    "rootDir": ".",
+    "experimentalDecorators": true,
+    "types": [
+      "jest"
+    ],
+  },
+  "include": [
+    "./back/**/*",
+    "./front/**/*",
+    "./tools/**/*",
+    "./components/**/*",
+    "index.ts",
+    "types.ts",
+    "model.ts"
+  ],
+  "exclude": [
+    "./lib"
+  ]
+}

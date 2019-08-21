@@ -37,7 +37,7 @@
            (sel (foreign-field->selector metadata)))
       (if (null? sel)
         (list name ": " name "Map[p." key "],")
-        (list name ": " name "Map[p." key "] == undefined ? undefined : " name "Map[p. " key "]" (list "." sel) ","))))
+        (list name ": " name "Map[p." key "] == undefined ? undefined : " name "Map[p." key "]!" (list "." sel) ","))))
 
   (define (emit-ff-unique-ids ff-param)
     (let* ((metadata (param->metadata ff-param 'foreign-field))
@@ -50,7 +50,7 @@
            (name (foreign-field->name metadata))
            (type (foreign-field->type metadata))
            (fkey (foreign-field->fkey metadata)))
-      (list "const " name "Map = " name "List.reduce((sum, " name ") => ({...sum, [" name "." fkey "]: " name "}), {} as Hash<" type ">);")))
+      (list "const " name "Map = " name "List.reduce((sum, " name ") => ({...sum, [" name "." fkey "]: " name "}), {} as Dict<" (type->jstype type) ">);")))
 
   (define (emit-hidden-props model)
     (map (lambda (p) (list (param->name p) ", "))
@@ -61,7 +61,7 @@
            (special-props (method->special-props model api-method))
            (params (append special-props (typedef->params typedef))) ; does this need to be unique'd?
            (foreign-params (filter param-foreign-field? params)))
-      (list "\n\n  async " (model->name model) name "($ctx: IUserContext, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit (method->return-type api-method)) "> {"
+      (list "\n\n  async " (model->name model) name "($ctx: C, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit (method->return-type api-method)) "> {"
             (let ((ff-params (remove (lambda (name) (eq? name 'sub)) (map emit-ff-names foreign-params))))
               (if (zero? (length ff-params))
                 (list "\n    const { " (emit-hidden-props model) " ...rest } = param;")
@@ -77,7 +77,7 @@
     (let* ((typedef (model->typedef model))
            (params (typedef->params typedef))
            (foreign-params (filter param-foreign-field? params)))
-      (list "\n\n  async " (model->name model) name "($ctx: IUserContext, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit (method->return-type api-method)) "> {"
+      (list "\n\n  async " (model->name model) name "($ctx: C, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit (method->return-type api-method)) "> {"
             "\n    if (param == undefined) return undefined;"
             (let ((ff-params (remove (lambda (name) (eq? name 'sub)) (map emit-ff-names foreign-params))))
               (if (zero? (length ff-params))
@@ -107,7 +107,7 @@
            (params (typedef->params typedef))
            (foreign-params (filter param-foreign-field? params))
            (return-type (method->return-type api-method)))
-      (list "\n\n  async " (model->name model) name "($ctx: IUserContext, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit return-type) "> {"
+      (list "\n\n  async " (model->name model) name "($ctx: C, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit return-type) "> {"
             (if (foreign-keyed? model api-method)
               (list
                 "\n    if (param.length == 0) return [];"
@@ -116,7 +116,7 @@
                 (map (lambda (ff-param) (list "\n    " (emit-ff-mapping ff-param))) foreign-params)
                 (if (native-type? model-name)
                   (list "\n    return param.map((p: Cursored<" model-name ">) => ({")
-                  (list "\n    return param.map((p: " model-name "Data) => ({"))
+                  (list "\n    return param.map((p: M." model-name "Data) => ({"))
                 "\n      ...p,"
                 (map (lambda (ff-param) (list "\n      " (emit-ff-mapped-arg model ff-param))) foreign-params)
                 "\n    }));")
@@ -128,7 +128,7 @@
     (let* ((typedef (model->typedef model))
            (params (typedef->params typedef))
            (foreign-params (filter param-foreign-field? params)))
-      (list "\n\n  async " (model->name model) name "($ctx: IUserContext, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit (method->return-type api-method)) "> {"
+      (list "\n\n  async " (model->name model) name "($ctx: C, param: " (return-datatype-emit (method->return-type db-method)) "): Promise<" (return-type-emit (method->return-type api-method)) "> {"
             "\n    if (param == undefined) return undefined;"
             (let ((ff-params (remove (lambda (name) (eq? name 'sub)) (map emit-ff-names foreign-params))))
               (if (zero? (length ff-params))
@@ -184,13 +184,15 @@
 			((ind 1)
 			 (expr 
          (list
-           "// this file has been automatically generated, do not modify\n"
+           "// this file has been automatically generated, do not modify"
            "\n"
-           "import * as _ from 'lodash';"
+           "\nimport * as _ from 'lodash';"
+           "\nimport { Cursored, Dict, IStore, IUserContext } from '../../../../types';"
+           "\nimport * as M from '../types/models';"
            "\n"
-           "\nexport default class Connector {"
-           "\n  private _store: IStore;"
-           "\n  constructor(store: IStore) {"
+           "\nexport default class Connector<C extends IUserContext> {"
+           "\n  private _store: IStore<C>;"
+           "\n  constructor(store: IStore<C>) {"
            "\n    this._store = store;"
            "\n  }"
            (emit-permutations api)

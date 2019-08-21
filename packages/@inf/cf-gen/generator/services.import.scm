@@ -1,5 +1,5 @@
 (module services (services-generate)
-  (import scheme chicken data-structures tools signatures matchable)
+  (import scheme chicken data-structures tools signatures matchable interfaces)
   (require-extension srfi-13 srfi-1)
 
   (define (arbitrate-emit ind model method)
@@ -9,7 +9,7 @@
           (if (zero? (length keys)) ""
             (if (set? method)
               (list "\n" (indent (+ ind 1))
-                    "if (ret != undefined) { await this._notifications.arbitrate" (first-up (model->name model)) "(this._store, $ctx.sub, '" (first-down (method->name method)) "', ret); }")
+                    "if (ret != undefined) { await this._notifications.dispatch" (first-up (model->name model)) "(this._store, $ctx.sub, '" (first-down (method->name method)) "', ret); }")
               ""))))))
 
   ; method/output monad
@@ -135,7 +135,7 @@
                                                        (if (array? (param->type param))
                                                          (list
                                                            "\n" (indent (+ ind 2)) "const " key "List = " param-name ".map(c => c." key ");"
-                                                           "\n" (indent (+ ind 2)) "const " selector " = (await this._store." (typename->modelname api type) "FindBy" (first-up key) "In(" key "List, undefined, " param-name ".length)).reduce((sum, u) => ({...sum, [u." fkey "]: u." selector "}), {} as Hash<" (return-datatype-emit evaluated-type) ">);"
+                                                           "\n" (indent (+ ind 2)) "const " selector " = (await this._store." (typename->modelname api type) "FindBy" (first-up key) "In(" key "List, undefined, " param-name ".length)).reduce((sum, u) => ({...sum, [u." fkey "]: u." selector "}), {} as Dict<" (return-datatype-emit evaluated-type) ">);"
                                                            "\n" (indent (+ ind 2)) "const " new-param-name " = " param-name ".map(c => ({...c, " fmodel ": " selector "[c." key "]}));"
                                                            "\n")
                                                          (list
@@ -180,55 +180,51 @@
 			((ind 1)
 			 (expr 
 				 (let* ((model (models-assq model-name api))
-                (model-name (model->name model)))
+                (model-name (model->name model))
+                (typedef (model->typedef model))
+                (all-methods (remove (lambda (m) (method-disabled? m 'service-interfaces)) (model->methods model)))
+                (service-methods (filter method-serviceonly? all-methods))
+                (partial? (not (zero? (length service-methods)))))
 					 (list
 						 "// this file has been automatically generated, do not modify"
 						 "\n"
-						 ;"\nimport * as OrderedUUID from 'ordered-uuid';"
-						 ;"\nconst getFieldNames = require('graphql-list-fields');"
-             "// @ts-ignore"
-						 "\nimport { grant } from '../../../tools/decorators';"
+             "\nimport { grant } from '../../../../../../tools/grant';"
              "\nimport Connectors from '../../connectors';"
-             "\nimport NotificationManager from '../../../tools/notificationmanager';"
+             "\nimport { Point, Cursored, Cursorize, IUserContext, INotificationManager } from '../../../../../../types';"
+             "\nimport { " (if partial? (list "I" (first-up model-name) "PartialService, ") "") "I" (first-up model-name) "Service } from '../../../types/serviceinterfaces';"
+             "\nimport { IStore } from '../../../types/storeinterfaces';"
+             ;"\nimport { " (typedef->name typedef) ", " (typedef->name typedef) "Input } from '../../../types/serviceinterfaces';"
+             "\nimport * as M from '../../../types/serviceinterfaces';"
 						 "\n"
-						 "\nexport default class " (first-up model-name) "Service implements I" (first-up model-name) "Service {"
+						 "\nexport default class " (first-up model-name) "Service<C extends IUserContext> implements I" (first-up model-name) "Service<C> {"
              (cond
                ((model-serviceonly? model)
-                (list "\n  // @ts-ignore"
-                      "\n  _connectors: Connectors;"
-                      "\n  // @ts-ignore"
-                      "\n  _notifications: NotificationManager;"
-                      "\n  // @ts-ignore"
-                      "\n  _store: IStore;"
-                      "\n  private _service: I" (first-up model-name) "Service;"
-                      "\n  constructor(connectors: Connectors, notifications: NotificationManager, store: IStore, service: I" (first-up model-name) "Service) {"
+                (list "\n  _connectors: Connectors<C>;"
+                      "\n  _notifications: INotificationManager<C>;"
+                      "\n  _store: IStore<C>;"
+                      "\n  private _service: I" (first-up model-name) "Service<C>;"
+                      "\n  constructor(connectors: Connectors<C>, notifications: INotificationManager<C>, store: IStore<C>, service: I" (first-up model-name) "Service<C>) {"
                       "\n    this._connectors = connectors;"
                       "\n    this._notifications = notifications;"
                       "\n    this._store = store;"
                       "\n    this._service = service;"
                       "\n  }"))
                ((any method-serviceonly? (model->all-methods model))
-                (list "\n  // @ts-ignore"
-                      "\n  _connectors: Connectors;"
-                      "\n  // @ts-ignore"
-                      "\n  _notifications: NotificationManager;"
-                      "\n  // @ts-ignore"
-                      "\n  _store: IStore;"
-                      "\n  private _service: I" (first-up model-name) "PartialService;"
-                      "\n  constructor(connectors: Connectors, notifications: NotificationManager, store: IStore, service: I" (first-up model-name) "PartialService) {"
+                (list "\n  _connectors: Connectors<C>;"
+                      "\n  _notifications: INotificationManager<C>;"
+                      "\n  _store: IStore<C>;"
+                      "\n  private _service: I" (first-up model-name) "PartialService<C>;"
+                      "\n  constructor(connectors: Connectors<C>, notifications: INotificationManager<C>, store: IStore<C>, service: I" (first-up model-name) "PartialService<C>) {"
                       "\n    this._connectors = connectors;"
                       "\n    this._notifications = notifications;"
                       "\n    this._store = store;"
                       "\n    this._service = service;"
                       "\n  }"))
                (else
-                 (list "\n  // @ts-ignore"
-                       "\n  _connectors: Connectors;"
-                       "\n  // @ts-ignore"
-                       "\n  _notifications: NotificationManager;"
-                       "\n  // @ts-ignore"
-                       "\n  _store: IStore;"
-                       "\n  constructor(connectors: Connectors, notifications: NotificationManager, store: IStore) {"
+                 (list "\n  _connectors: Connectors<C>;"
+                       "\n  _notifications: INotificationManager<C>;"
+                       "\n  _store: IStore<C>;"
+                       "\n  constructor(connectors: Connectors<C>, notifications: INotificationManager<C>, store: IStore<C>) {"
                        "\n    this._connectors = connectors;"
                        "\n    this._notifications = notifications;"
                        "\n    this._store = store;"

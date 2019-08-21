@@ -35,7 +35,11 @@
            (list
              "// this file has been automatically generated, do not modify"
              "\n"
-             "\nexport default class MockStore implements IStore {"
+             "\nimport { IStore } from '../../../types/storeinterfaces';"
+             "\nimport { IUserContext, Cursorize, Point, Cursored } from '../../../../../../types';"
+             "\nimport * as M from '../../../types/models';"
+             "\n"
+             "\nexport default class MockStore<C extends IUserContext> implements IStore<IUserContext> {"
              "\n"
              "\n  async runSmokeTests(): Promise<string> { throw new Error('runSmokeTests should not be invoked'); }"
              "\n"

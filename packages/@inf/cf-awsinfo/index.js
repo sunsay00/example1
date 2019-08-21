@@ -7,6 +7,14 @@ const path = require('path');
 const fs = require('fs');
 const { vars } = require('@inf/vars');
 
+const writeTs = (outPath, data) => {
+  let out = '';
+  Object.entries(data).map(([k, v]) => {
+    out += `  ${k}: ${JSON.stringify(v)},\n`;
+  });
+  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const vars = {\n${out}};`);
+};
+
 const main = async () => {
   AWS.config = new AWS.Config({
     region: vars.AWS_REGION,
@@ -25,6 +33,8 @@ const main = async () => {
   }).promise();
 
   const props = {};
+
+  props['AWS_REGION'] = vars.AWS_REGION;
 
   props['VPC_ID'] = VPC_ID;
 
@@ -46,7 +56,7 @@ const main = async () => {
   return props;
 };
 
-if (process.argv.length != 2) {
+if (process.argv.length < 2) {
   console.log(`invalid usage: ${path.basename(process.argv[1])} (<outpath>)`);
   process.exit(1);
 } else {
@@ -56,6 +66,13 @@ if (process.argv.length != 2) {
     const output = Object.entries(result).map(([k, v]) => `${k}=${v}`).join('\n');
     if (outpath)
       fs.writeFileSync(outpath, output);
+
+    const tsdir = `${__dirname}/src`;
+    if (!fs.existsSync(tsdir))
+      fs.mkdirSync(tsdir);
+    const outvars = { AWS_REGION: vars.AWS_ACCESS_KEY_ID }
+    writeTs(`${tsdir}/vars.ts`, outvars);
+    writeTs(`${tsdir}/vars.js`, outvars);
   }).catch(err => {
     if (outpath)
       fs.existsSync(outpath) && fs.unlinkSync(outpath);

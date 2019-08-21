@@ -1,5 +1,5 @@
 (module rdsstore (rdsstore-generate)
-  (import scheme chicken data-structures tools signatures matchable migrations sql)
+  (import scheme chicken data-structures tools signatures matchable migrations sql interfaces)
   (require-extension srfi-13 srfi-1)
 
   (define (set-update-element model method query sql-params)
@@ -31,7 +31,7 @@
       "\n    } else if (result.rows.length == 0) {"
       "\n      return undefined;"
       "\n    } else {"
-      "\n      const row = result.rows[0] as Hash<any>;"
+      "\n      const row = result.rows[0] as Dict<any>;"
       "\n      return {"
       (emit-return-args (model->api model) (model->typedef model) (+ ind 2))
       "\n      };"
@@ -110,7 +110,7 @@
                          "\n    if (result.rows.length != 1) {"
                          "\n      return undefined;"
                          "\n    } else {"
-                         "\n      const row = result.rows[0] as Hash<any>;"
+                         "\n      const row = result.rows[0] as Dict<any>;"
                          "\n      return {"
                          (emit-dynamic-return-fields (+ ind 2) model method)
                          "\n      };"
@@ -124,7 +124,7 @@
                          "\n    if (result.rows.length != 1) {"
                          "\n      return undefined;"
                          "\n    } else {"
-                         "\n      const row = result.rows[0] as Hash<any>;"
+                         "\n      const row = result.rows[0] as Dict<any>;"
                          "\n      return {"
                          (emit-dynamic-return-fields (+ ind 2) model method)
                          "\n      };"
@@ -140,7 +140,7 @@
                          "\n    if (result.rows.length != 1) {"
                          "\n      throw new Error('failed to create " model-name "');"
                          "\n    } else {"
-                         "\n      const row = result.rows[0] as Hash<any>;"
+                         "\n      const row = result.rows[0] as Dict<any>;"
                          "\n      return {"
                          (emit-dynamic-return-fields (+ ind 2) model method)
                          "\n      };"
@@ -156,7 +156,7 @@
                          "\n    if (result.rows.length != 1) {"
                          "\n      throw new Error('failed to create " model-name "');"
                          "\n    } else {"
-                         "\n      const row = result.rows[0] as Hash<any>;"
+                         "\n      const row = result.rows[0] as Dict<any>;"
                          "\n      return {"
                          (emit-dynamic-return-fields (+ ind 2) model method)
                          "\n      };"
@@ -172,7 +172,7 @@
                          "\n    if (result.rows.length != 1) {"
                          "\n      throw new Error('failed to create " model-name "');"
                          "\n    } else {"
-                         "\n      const row = result.rows[0] as Hash<any>;"
+                         "\n      const row = result.rows[0] as Dict<any>;"
                          "\n      return {"
                          (emit-dynamic-return-fields (+ ind 2) model method)
                          "\n      };"
@@ -484,8 +484,11 @@
            (list
              "// this file has been automatically generated, do not modify"
              "\n"
-             "\nimport RDSDBClient from './clients/rdsdbclient';"
-             "\nimport * as SmokeTester from '../../tools/smoketester';"
+             "\nimport RDSDBClient from '@inf/cf-serverless-postgres';"
+             "\nimport * as SmokeTester from '../../../../../tools/smoketester';"
+             "\nimport { Point, Dict, IUserContext, Cursorize, Cursored } from '../../../../../types';"
+             "\nimport { IStore } from '../../types/storeinterfaces';"
+             "\nimport * as M from '../../types/models';"
              "\n"
              "\nconst parsePoint = (str: string): Point => {"
              "\n  const matches = /^POINT\\(([^ ]+) ([^)]+)\\)$/.exec(str);"
@@ -500,7 +503,7 @@
              "\nconst S = RDSDBClient.prepareString;"
              ;"\nconst I = RDSDBClient.prepareIdentifier;"
              "\n"
-             "\nexport default class RDSDBStore implements IStore {"
+             "\nexport default class RDSDBStore<C extends IUserContext> implements IStore<C> {"
              "\n  private _client: RDSDBClient;"
              "\n"
              "\n  now() { return new Date(Date.now()); }"

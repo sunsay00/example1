@@ -2,6 +2,12 @@
   "name": "@inf/cf-serverless-postgres",
   "version": "0.0.1",
   "license": "MIT",
-  "main": "./lib/index.d.ts",
-  "types": "./lib/index.js"
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "devDependencies": {
+    "@types/pg": "6.1.41"
+  },
+  "dependencies": {
+    "pg": "6.1.0"
+  }
 }

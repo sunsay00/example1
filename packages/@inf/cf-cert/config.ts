@@ -11,6 +11,7 @@ export type Outputs = {
 export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation',
   name: 'cf-cert',
+  cfpath: './cf.yaml',
   inputs,
   outputs: ['CertificateArn'] as (keyof Outputs)[]
 });

@@ -18,6 +18,7 @@ export type Outputs = {
 export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation',
   name: 'cf-cognito',
+  cfpath: './cf.yaml',
   inputs,
   outputs: ['IdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId'] as (keyof Outputs)[]
 });

@@ -16,6 +16,7 @@ const verifyRegEx = (value: unknown, errMessage: string) => {
 const CFRecord = RT.Record({
   type: RT.Literal('cloudformation'),
   name: RT.String.withConstraint(s => verifyKey(s)),
+  cfpath: RT.String,
 }).And(RT.Partial({
   inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
   outputs: RT.Array(RT.String),
@@ -369,12 +370,17 @@ const main = async (cmd: string, verbose: boolean) => {
       const ret = await Record.match(
 
         async cloudformation => {
-          const { name, inputs, outputs } = cloudformation;
+          const { name, inputs, outputs, cfpath: cfpath2 } = cloudformation;
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
 
           const inputDirty = isInputDirty(key, inputs);
-          const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/cf.yaml`;
+          const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/${cfpath2}`;
+          if (!fs.existsSync(cfpath)) {
+            console.error(`invalid cf module ${name} - ${cfpath} not found`);
+            throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
+          }
+
           const ot = lastmod(`${__dirname}/.cache/${key}`);
           const cfDirty = lastmod(cfpath) > ot;
           if (!cfDirty && !inputDirty) {
@@ -386,8 +392,6 @@ const main = async (cmd: string, verbose: boolean) => {
             }
           }
 
-          if (!fs.existsSync(cfpath))
-            throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
           const prev = await up(getStackname(name), cfpath, inputs, outputs);
           writeCache(key, prev);
           writeInput(key, inputs);
@@ -396,6 +400,8 @@ const main = async (cmd: string, verbose: boolean) => {
           const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
           if (!fs.existsSync(tsdir))
             fs.mkdirSync(tsdir);
+          if (!fs.existsSync(`${tsdir}/src`))
+            fs.mkdirSync(`${tsdir}/src`);
           writeTs(`${tsdir}/src/vars.ts`, key, prev);
           writeTs(`${tsdir}/src/vars.js`, key, prev);
           writeIgnore(`${tsdir}/.gitignore`);

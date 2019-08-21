@@ -1,5 +1,6 @@
 import { apiWrapper } from '@inf/core';
 import { verifyVars } from '@inf/common';
+import { main } from './legacy/main';
 
 const params = verifyVars({
   stage: process.env.STAGE,
@@ -7,10 +8,4 @@ const params = verifyVars({
   corsAllowOrigin: '*',
 });
 
-export const handler = apiWrapper(params, async (headers: { [_: string]: string }, query: string, variables: string, user: {}) => {
-  console.log('Main Main');
-  return {
-    errors: [] as Error[],
-    data: { no: 'wae' }
-  }
-});
+export const handler = apiWrapper(params)(main);

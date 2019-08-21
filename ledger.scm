@@ -57,7 +57,7 @@
     (type-add-field PendingSeller name String)
 
     (create-service System systems)
-    (service-add-api-set-method System (__postconfirm__) PostConfirm Boolean ((locale String) (region String)))
+    ;(service-add-api-set-method System (__postconfirm__) PostConfirm Boolean ((locale String) (region String)))
     (service-add-get-method System #f GetChatToken String ((identity String) (pushChannel (Optional String) "none")))
     (service-add-set-method System (dealership) InviteUser Boolean ((newUsername String) (email String) (locale String) (dealershipId String)))
     (service-add-get-method System #f RateSeller (Optional Float) ((sellerId String) (rating Int)))
