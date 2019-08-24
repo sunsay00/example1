@@ -106,7 +106,7 @@
 
           (define configs '(
                             ;("../back/api/src/api/config.ts" api)
-                            ("../back/api/src/auth/config.ts" auth)
+                            ;("../back/api/src/auth/config.ts" auth)
                             ;("../back/resize/src/config.ts" resize)
                             ;("../back/postconfirm/src/config.ts" postconfirm)
                             ;("../back/usersync/src/config.ts" usersync)

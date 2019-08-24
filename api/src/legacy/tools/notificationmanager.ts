@@ -1,7 +1,7 @@
 import AWSClient from './awsclient';
 import { INotificationManager, IStore, ICacheClient } from '@inf/cf-gen';
 import * as M from '@inf/cf-gen/model';
-import { UserContext } from '../types';
+import { UserContext } from '@inf/core/src/serverless/apiwrapper';
 
 export default class NotificationManager implements INotificationManager<UserContext> {
   private _aws: AWSClient;

@@ -2,7 +2,7 @@ import { GraphQLError, ExecutionResult } from 'graphql';
 import { domainWrapper } from './domainwrapper';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
-type UserContext = {
+export type UserContext = {
   sub: string,
   groups?: string[],
   username?: string,

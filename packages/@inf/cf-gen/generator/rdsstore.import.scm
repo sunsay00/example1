@@ -5,7 +5,7 @@
   (define (set-update-element model method query sql-params)
     (list
       "\n    const query = " query ";"
-      "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+      "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
       "\n    const result = await this._client.query(query, " sql-params ");"
       "\n    if (!result.rows) {"
       "\n      throw new Error('failed to find " (model->name model) " for " (first-down (method->name method)) "');"
@@ -24,7 +24,7 @@
   (define (get-select-one model ind query params)
     (list
       "\n    const query = " query ";"
-      "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+      "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
       "\n    const result = await this._client.query(query, " params ");"
       "\n    if (!result.rows) {"
       "\n      throw new Error('failed to find " (model->name model) "');"
@@ -44,7 +44,7 @@
       "\n      return [];"
       "\n    } else {"
       "\n      const query = " query ";"
-      "\n      if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+      "\n      if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
       "\n      const result = await this._client.query(query, " params ");"
       "\n      if (!result.rows) {"
       "\n        throw new Error('failed to find " (model->name model) " for " (first-down (method->name method)) "');"
@@ -64,7 +64,7 @@
       (if (not (array? ret-type)) (error "get-select expects an array return type")
         (list
           "\n    const query = " query ";"
-          "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+          "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
           "\n    const result = await this._client.query(query, " params ");"
           "\n    if (!result.rows) {"
           "\n      throw new Error('failed to find " (model->name model) " for " (first-down (method->name method)) "');"
@@ -105,7 +105,7 @@
                      (`(command (update . ,ss) (where ,w) (return . ,rs))
                        (list
                          "\n    const query = " query ";"
-                         "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+                         "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
                          "\n    const result = await this._client.query(query, " params ");"
                          "\n    if (result.rows.length != 1) {"
                          "\n      return undefined;"
@@ -119,7 +119,7 @@
                      (`(command (delete) . ,rest)
                        (list
                          "\n    const query = " query ";"
-                         "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+                         "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
                          "\n    const result = await this._client.query(query, " params ");"
                          "\n    if (result.rows.length != 1) {"
                          "\n      return undefined;"
@@ -135,7 +135,7 @@
                          "\n    // @ts-ignore"
                          "\n    const $now = this.now();"
                          "\n    const query = " query ";"
-                         "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+                         "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
                          "\n    const result = await this._client.query(query, " params ");"
                          "\n    if (result.rows.length != 1) {"
                          "\n      throw new Error('failed to create " model-name "');"
@@ -151,7 +151,7 @@
                          "\n    // @ts-ignore"
                          "\n    const $now = this.now();"
                          "\n    const query = " query ";"
-                         "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+                         "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
                          "\n    const result = await this._client.query(query, " params ");"
                          "\n    if (result.rows.length != 1) {"
                          "\n      throw new Error('failed to create " model-name "');"
@@ -167,7 +167,7 @@
                          "\n    // @ts-ignore"
                          "\n    const $now = this.now();"
                          "\n    const query = " query ";"
-                         "\n    if (process.env.NODE_ENV != 'test' && process.env.NODE_ENV != 'production') console.log(`${query}`);"
+                         "\n    if (this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
                          "\n    const result = await this._client.query(query, " params ");"
                          "\n    if (result.rows.length != 1) {"
                          "\n      throw new Error('failed to create " model-name "');"
@@ -502,13 +502,14 @@
              "\n"
              "\n"
              "\nexport default class RDSDBStore<C extends IUserContext> implements IStore<C> {"
+             "\n  private _stage: string;"
              "\n  private _client: IDBClient;"
              "\n"
              "\n  now() { return new Date(Date.now()); }"
              "\n"
              "\n  S = (value: unknown) => this._client.prepareString(value);"
              "\n"
-             "\n  constructor(client: IDBClient) { this._client = client; }"
+             "\n  constructor(stage: string, client: IDBClient) { this._stage = stage; this._client = client; }"
              "\n"
              "\n  runSmokeTests = () => SmokeTester.runRDSDBStoreSmokeTests(this._client);"
              "\n"
