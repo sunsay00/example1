@@ -10,7 +10,8 @@
     "prisma": "prisma",
     "sls": "serverless",
     "tsc": "../node_modules/typescript/bin/tsc",
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "test": "jest"
   },
   "dependencies": {
     "@inf/cf-gen": "*",
@@ -24,6 +25,8 @@
     "@types/aws-lambda": "^8.10.31",
     "@types/graphql": "^14.2.3",
     "@types/node": "^12.6.8",
+    "babel-jest": "^24.8.0",
+    "jest": "^24.8.0",
     "jwk-to-pem": "^2.0.1",
     "serverless": "^1.48.4",
     "serverless-offline": "^5.8.0",
