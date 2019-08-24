@@ -87,7 +87,7 @@ export default class RDSDBClient implements IRDSDBClient {
     );
   }
 
-  uninit = async () => {
+  deinit = async () => {
     if (this._client != undefined) {
       const client = this._client;
       await new Promise<void>((resolve, reject) => client.end(err => err ? reject(err) : resolve()));

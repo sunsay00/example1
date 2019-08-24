@@ -3,9 +3,11 @@ import CacheStore from './back/api/src/api/stores/cachestore';
 import { IUserContext, INotificationManager, IDBClient, ICacheClient } from './types';
 import { createServiceMapper, MappedServices } from './back/api/src/api/mapper';
 import { Resolver } from './tools/resolver';
+import * as fix from './back/api/src/api/__tests__/fixtures';
 
 export * from './types';
 export * from './back/api/src/types/serviceinterfaces';
+export const fixtures = fix;
 
 export const createCachedResolver = <C extends IUserContext>(
   stage: string,
