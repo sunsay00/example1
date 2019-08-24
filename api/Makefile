@@ -12,7 +12,7 @@ vars:
 invoke:
 	yarn vars curl -H 'Authorization: Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
 invoke.guest:
-	yarn vars curl -H 'Authorization: Guest' -H 'Content-Type: application/json' -d "{ \"query\": \"world\" }" {{CF_API_GraphQLEndpoint}}
+	yarn vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{CF_API_GraphQLEndpoint}}
 
 logs.auth:
 	yarn vars sls logs -s {{STAGE}} -f auth -t -r {{AWS_REGION}}
