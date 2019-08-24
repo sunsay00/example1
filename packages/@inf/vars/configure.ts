@@ -197,6 +197,14 @@ const writeInput = (key: string, inputs: { [_: string]: string | number | boolea
   fs.writeFileSync(`${__dirname}/.inputs/${key}`, getHash(inputs), { encoding: 'utf8' });
 }
 
+const writeJs = (outPath: string, key: string, data: { [k: string]: string }) => {
+  let out = '';
+  Object.entries(data).map(([k, v]) => {
+    out += `  ${k}: ${JSON.stringify(v)},\n`;
+  });
+  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexports.vars = {\n${out}};`);
+};
+
 const writeTs = (outPath: string, key: string, data: { [k: string]: string }) => {
   let out = '';
   Object.entries(data).map(([k, v]) => {
@@ -211,12 +219,12 @@ const writeIgnore = (outPath: string) => {
     fs.writeFileSync(outPath, ents.join('\n'), { encoding: 'utf8' });
   } else {
     const data = fs.readFileSync(outPath, { encoding: 'utf8' });
-    const pents = data.split('\n');
+    const pents = data.split('\n').filter(e => !!e);
     ents.forEach((e, i) => {
       if (pents.includes(e))
         ents[i] = undefined;
     });
-    const nents = [...pents, ents.filter(e => e != undefined)];
+    const nents = [...pents, ents.filter(e => !!e)];
     fs.writeFileSync(outPath, nents.join('\n'), { encoding: 'utf8' });
   }
 };
@@ -403,7 +411,7 @@ const main = async (cmd: string, verbose: boolean) => {
           if (!fs.existsSync(`${tsdir}/src`))
             fs.mkdirSync(`${tsdir}/src`);
           writeTs(`${tsdir}/src/vars.ts`, key, prev);
-          writeTs(`${tsdir}/src/vars.js`, key, prev);
+          writeJs(`${tsdir}/src/vars.js`, key, prev);
           writeIgnore(`${tsdir}/.gitignore`);
 
           console.log('(updated)');

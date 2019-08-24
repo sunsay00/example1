@@ -7,6 +7,14 @@ const path = require('path');
 const fs = require('fs');
 const { vars } = require('@inf/vars');
 
+const writeJs = (outPath, data) => {
+  let out = '';
+  Object.entries(data).map(([k, v]) => {
+    out += `  ${k}: ${JSON.stringify(v)},\n`;
+  });
+  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexports.vars = {\n${out}};`);
+};
+
 const writeTs = (outPath, data) => {
   let out = '';
   Object.entries(data).map(([k, v]) => {
@@ -72,7 +80,7 @@ if (process.argv.length < 2) {
       fs.mkdirSync(tsdir);
     const outvars = { AWS_REGION: vars.AWS_ACCESS_KEY_ID }
     writeTs(`${tsdir}/vars.ts`, outvars);
-    writeTs(`${tsdir}/vars.js`, outvars);
+    writeJs(`${tsdir}/vars.js`, outvars);
   }).catch(err => {
     if (outpath)
       fs.existsSync(outpath) && fs.unlinkSync(outpath);

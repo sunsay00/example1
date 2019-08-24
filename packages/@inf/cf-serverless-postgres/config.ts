@@ -13,5 +13,6 @@ export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'cloudformation',
   name: 'cf-serverless-postgres',
   cfpath: './cf.yaml',
-  inputs
+  inputs,
+  outputs: ['RDSClusterEndpointAddress']
 });

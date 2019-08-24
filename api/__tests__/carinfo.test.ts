@@ -1,12 +1,23 @@
+import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import RDSDBClient from '@inf/cf-serverless-postgres';
+import { vars } from '@inf/cf-serverless-postgres/src/vars';
 import { fixtures as fix } from '@inf/cf-gen';
 
-const db = new RDSDBClient('');
+const config = verifyVars({
+  MASTER_USERNAME: process.env.MASTER_USERNAME,
+  MASTER_USER_PASSWORD: process.env.MASTER_USER_PASSWORD,
+  STAGE: process.env.STAGE,
+  AWS_REGION: process.env.AWS_REGION
+});
+
+const rdsDbEndpoint = `postgres://${config.MASTER_USERNAME}:${config.MASTER_USER_PASSWORD}@${vars.RDSClusterEndpointAddress}:5433/postgres`;
+
+const db = new RDSDBClient(rdsDbEndpoint);
 
 const resolver = createDefaultResolver({
-  stage: 'dev',
-  region: 'us-east-1',
+  stage: config.STAGE,
+  region: config.AWS_REGION,
   locale: 'en',
   platformApplicationArn: '',
   db,
@@ -16,10 +27,6 @@ const resolver = createDefaultResolver({
 describe('carinfos', () => {
   beforeAll(async () => await db.init());
   afterAll(async () => await db.deinit());
-
-  it('should succeed', () => {
-    expect(true).toBe(true);
-  });
 
   it('should get a unique list of colors', async () => {
     const ctx = { sub: 'searcher', username: 'searcher', groups: [] };

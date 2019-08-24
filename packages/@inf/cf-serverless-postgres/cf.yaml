@@ -28,3 +28,7 @@ Resources:
         MinCapacity: !Sub ${MinCapacity}
         MaxCapacity: !Sub ${MaxCapacity}
         SecondsUntilAutoPause: 300
+
+Outputs:
+  RDSClusterEndpointAddress:
+    Value: !GetAtt RDSCluster.Endpoint.Address

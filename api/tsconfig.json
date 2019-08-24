@@ -3,7 +3,10 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./build",
-    "rootDir": "./src",
+    "rootDirs": [
+      "./src",
+      "./__tests__"
+    ],
     "noEmit": false,
     "inlineSourceMap": true,
     "inlineSources": true,
@@ -24,7 +27,8 @@
       "./src/api/@types"
     ],
     "types": [
-      "node"
+      "node",
+      "jest"
     ]
   },
   "include": [

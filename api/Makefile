@@ -1,5 +1,5 @@
 test:
-	yarn test
+	yarn vars yarn test
 
 invoke:
 	yarn vars curl -H 'Authorization: Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}

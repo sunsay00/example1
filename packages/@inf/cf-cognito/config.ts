@@ -20,5 +20,5 @@ export const Config = (inputs: Inputs): ConfigRecord => ({
   name: 'cf-cognito',
   cfpath: './cf.yaml',
   inputs,
-  outputs: ['IdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId'] as (keyof Outputs)[]
+  outputs: ['CognitoIdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId'] as (keyof Outputs)[]
 });
