@@ -1,5 +1,4 @@
-import RDSDBClient from '@inf/cf-serverless-postgres';
-import { IStore, IUserContext, ICacheClient } from '../types';
+import { IStore, IUserContext, ICacheClient, IDBClient } from '../types';
 
 export const runCacheStoreSmokeTests = async <C extends IUserContext>(store: IStore<C>, client: ICacheClient) => {
   await client.del(['check:test-key']);
@@ -11,7 +10,7 @@ export const runCacheStoreSmokeTests = async <C extends IUserContext>(store: ISt
   return await store.runSmokeTests();
 };
 
-export const runRDSDBStoreSmokeTests = async (client: RDSDBClient) => {
+export const runRDSDBStoreSmokeTests = async (client: IDBClient) => {
   const ret = await client.query('select 1 + 1 as sum;', []);
   if (ret.rowCount != 1 && ret.rows[0]['sum'] != 2) throw new Error('rds smoketest failed');
   return 'success';

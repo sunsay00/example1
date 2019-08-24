@@ -37,6 +37,23 @@ export type Paginated<T> = {
   items: T[],
 };
 
+export type QueryResult = {
+  command: string;
+  rowCount: number;
+  oid: number;
+  rows: any[];
+}
+
+export type QueryParam = object | number | string | undefined;
+
+export type IDBClient = {
+  query(query: string, params: QueryParam[]): Promise<QueryResult>;
+  beginTransaction(): Promise<QueryResult>,
+  rollbackTransaction(): Promise<QueryResult>,
+  commitTransaction(): Promise<QueryResult>,
+  prepareString(value: unknown): string,
+}
+
 export type IMultiCacheClient = {
   set(key: string, value: string): void;
   get(key: string): void;

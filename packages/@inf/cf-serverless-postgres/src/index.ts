@@ -109,7 +109,7 @@ export default class RDSDBClient implements IRDSDBClient {
     const client = this._client;
     return client.query('COMMIT');
   }
-  static prepareString = (value: any): string => {
+  prepareString = (value: unknown): string => {
     if (typeof value == 'number') {
       return utils.prepareValue(value);
     } else {
