@@ -61,6 +61,9 @@ const main = async () => {
   if (!props['HostedZoneId'])
     throw new Error(`failed to determine hostedzone for '${vars.DOMAIN}'`);
 
+  const sgs = await ec2.describeSecurityGroups({}).promise();
+  sgs.SecurityGroups.map(sg => props[`SecurityGroup_${sg.GroupName}`] = sg.GroupId);
+
   return props;
 };
 

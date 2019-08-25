@@ -6,8 +6,8 @@ const webpack = require('webpack');
 module.exports = {
   mode: 'production',
   entry: {
-    api: path.resolve('./build/api.js'),
-    auth: path.resolve('./build/auth.js'),
+    api: path.resolve('./build/src/api.js'),
+    auth: path.resolve('./build/src/auth.js'),
   },
   target: 'node',
   output: {

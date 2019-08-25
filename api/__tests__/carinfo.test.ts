@@ -11,9 +11,11 @@ const config = verifyVars({
   AWS_REGION: process.env.AWS_REGION
 });
 
-const rdsDbEndpoint = `postgres://${config.MASTER_USERNAME}:${config.MASTER_USER_PASSWORD}@${vars.RDSClusterEndpointAddress}:5433/postgres`;
-
+const rdsDbEndpoint = `postgres://${config.MASTER_USERNAME}:${config.MASTER_USER_PASSWORD}@${vars.RDSClusterEndpointAddress}:5432/main${config.STAGE}`;
+console.log('>>', rdsDbEndpoint);
 const db = new RDSDBClient(rdsDbEndpoint);
+
+const cache = undefined; // new CacheClient(config.redisUrl),
 
 const resolver = createDefaultResolver({
   stage: config.STAGE,
@@ -21,7 +23,7 @@ const resolver = createDefaultResolver({
   locale: 'en',
   platformApplicationArn: '',
   db,
-  cache: undefined, // new CacheClient(config.redisUrl),
+  cache,
 });
 
 describe('carinfos', () => {

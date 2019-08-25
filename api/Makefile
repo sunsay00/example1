@@ -12,5 +12,5 @@ logs.api:
 	yarn vars sls logs -s {{STAGE}} -f api -t -r {{AWS_REGION}}
 
 configure:
-	rm -f tsconfig.tsbuildinfo && tsc && yarn webpack && cp build/_api.js build/api.js && cp build/_auth.js build/auth.js && \
+	rm -f build/tsconfig.tsbuildinfo && tsc && yarn webpack && cp build/_api.js build/api.js && cp build/_auth.js build/auth.js && \
 		yarn vars yarn sls deploy --no-confirm

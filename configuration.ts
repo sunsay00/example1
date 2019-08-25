@@ -41,7 +41,7 @@ const configuration: Configuration = {
       name: 'cf-api',
       command: './api/make',
       args: ['configure'],
-      dependsOn: ['./api/src/**/*.ts'],
+      dependsOn: ['./api/src/**/*.ts', './api/serverless.yml'],
       outputMatchers: {
         GraphQLEndpoint: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm,
       }

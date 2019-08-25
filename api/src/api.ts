@@ -11,8 +11,8 @@ const config = verifyVars({
   corsAllowOrigin: '*',
   region: 'us-east-1',
   locale: 'en',
-  platformApplicationArn: '',
-  rdsDbEndpoint: '',
+  platformApplicationArn: 'NYI',
+  rdsDbEndpoint: 'NYI',
 });
 
 const resolver = createDefaultResolver({
@@ -24,4 +24,5 @@ const resolver = createDefaultResolver({
   cache: undefined, // new CacheClient(config.redisUrl),
 });
 
+//export const handler = apiWrapper(config)(async () => ({ data: { data: { hello: 'world' } } }));
 export const handler = apiWrapper(config)(resolver.resolve);

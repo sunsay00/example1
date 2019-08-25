@@ -7,6 +7,13 @@ provider:
   stage: ${env:STAGE}
   region: ${env:AWS_REGION}
 
+  vpc:
+    securityGroupIds:
+      - ${env:CF_AWSINFO_SecurityGroup_default}
+    subnetIds:
+      - ${env:CF_AWSINFO_Subnet1}
+      - ${env:CF_AWSINFO_Subnet2}
+
   iamRoleStatements:
     - Effect: Allow
       Resource:
