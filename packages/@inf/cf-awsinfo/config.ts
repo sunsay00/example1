@@ -1,9 +1,9 @@
 import { ConfigRecord } from '@inf/vars/configure';
 
-export const Config = (inputs: { dependsOn?: string[] }): ConfigRecord => ({
+export const Config = (params: { rootEnv: string }): ConfigRecord => ({
   type: 'shell',
   name: 'cf-awsinfo',
   command: `${__dirname}/make`,
-  dependsOn: inputs.dependsOn,
+  dependsOn: [params.rootEnv],
   args: ['configure'],
 });

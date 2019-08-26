@@ -17,9 +17,7 @@ const configuration: Configuration = {
   region: vars.AWS_REGION,
   stage: vars.STAGE,
   modules: [
-    AwsInfo.Config({
-      dependsOn: ['.env'],
-    }),
+    AwsInfo.Config({ rootEnv: '.env' }),
     ServerlessPostgress.Config({
       Stage: vars.STAGE,
       DatabaseName: 'main',
@@ -49,7 +47,7 @@ const configuration: Configuration = {
       type: 'shell',
       name: 'cf-api',
       command: './api/make',
-      args: ['configure'],
+      args: [vars.STAGE == 'local' ? 'build' : 'deploy'],
       dependsOn: ['./api/src/**/*.ts', './api/serverless.yml'],
       outputMatchers: {
         GraphQLEndpoint: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm,
