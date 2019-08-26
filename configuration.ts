@@ -9,6 +9,10 @@ import * as Cert from '@inf/cf-cert/config';
 import * as Gen from '@inf/cf-gen/config';
 import * as CDN from '@inf/cf-cdn/config';
 
+enum ServiceIds {
+  RDS = 1,
+};
+
 const configuration: Configuration = {
   region: vars.AWS_REGION,
   stage: vars.STAGE,
@@ -33,7 +37,12 @@ const configuration: Configuration = {
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
       FromEmail: `verification@${vars.NICE_NAME}`
     }),
-    Gen.Config({
+    outputs => Gen.Config({
+      Stage: vars.STAGE,
+      MasterUsername: vars.MASTER_USERNAME,
+      MasterUserPassword: vars.MASTER_USER_PASSWORD,
+      RDSServiceId: ServiceIds.RDS,
+      RDSClusterEndpointAddress: outputs('CF_SERVERLESS_POSTGRES_RDSClusterEndpointAddress'),
       ledgerPath: 'ledger.scm'
     }),
     {
