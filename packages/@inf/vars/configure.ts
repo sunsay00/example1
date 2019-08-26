@@ -198,6 +198,14 @@ const writeInput = (key: string, inputs: { [_: string]: string | number | boolea
   fs.writeFileSync(`${__dirname}/.inputs/${key}`, getHash(inputs), { encoding: 'utf8' });
 }
 
+const writeEnvs = (outPath: string, key: string, data: { [k: string]: string }) => {
+  let out = '';
+  Object.entries(data).map(([k, v]) => {
+    out += `${k}=${v}\n`;
+  });
+  fs.writeFileSync(outPath, `# this file has been automatically generated\n\n${out}`);
+};
+
 const writeJs = (outPath: string, key: string, data: { [k: string]: string }) => {
   let out = '';
   Object.entries(data).map(([k, v]) => {
@@ -484,6 +492,7 @@ const main = async (cmd: string, verbose: boolean) => {
           }
 
           const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
+          if (fs.existsSync(`${tsdir}/vars`)) fs.unlinkSync(`${tsdir}/vars`);
           if (fs.existsSync(`${tsdir}/vars.ts`)) fs.unlinkSync(`${tsdir}/vars.ts`);
           if (fs.existsSync(`${tsdir}/vars.js`)) fs.unlinkSync(`${tsdir}/vars.js`);
 
@@ -535,9 +544,10 @@ const main = async (cmd: string, verbose: boolean) => {
                   });
                   if (!fs.existsSync(tsdir))
                     fs.mkdirSync(tsdir);
+                  writeEnvs(`${tsdir}/vars`, key, json2);
                   writeTs(`${tsdir}/vars.ts`, key, json2);
                   writeJs(`${tsdir}/vars.js`, key, json2);
-                  writeIgnore(`${tsdir}/.gitignore`, ['vars.ts', 'vars.js', 'lib']);
+                  writeIgnore(`${tsdir}/.gitignore`, ['vars', 'vars.ts', 'vars.js', 'lib']);
                 }
 
                 buffer = '';

@@ -7,16 +7,16 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 function printusage {
   echo "usage: gen <command>"
   echo "  commands:"
-  echo "    - generate                    # generates orm code"
+  #echo "    - generate                    # generates ORM code"
+  #echo "    - seed <db-url> <service-id>  # seeds the database"
   echo "    - wipetest                    # wipes out test database"
-  echo "    - seed <db-url> <service-id>  # seeds the database"
-  echo "    - up <db-url>                 # transitions the database to the lastest migration"
-  echo "    - down <db-url>               # transitions the database to its previous migration"
+  echo "    - up                          # transitions the database to the lastest migration"
+  echo "    - down                        # transitions the database to its previous migration"
 }
 
 if [[ -z ${1} ]]; then
   printusage
-  exit 1
+  exit 0
 fi
 
 CMD="$1"
@@ -49,27 +49,44 @@ elif [[ $CMD == "seed" ]]; then
 
   ${DIR}/seed ${DB_URL} ${SERVICE_ID}
 
+elif [[ $CMD == "wipetest" ]]; then
+
+  VARSDIR=${DIR}/../../packages/@inf/cf-gen
+  if [ ! -f "$VARSDIR/vars" ]; then
+    echo "invalid vars file - (looked in ${VARSDIR})";
+  fi
+  source ${VARSDIR}/vars
+  if [[ -z "$DB_TEST_URL" ]]; then
+    echo "undefined db test url"
+  fi
+
+  echo $DB_TEST_URL
+
 elif [[ $CMD == "up" ]]; then
 
-  if [[ -z "${2}" ]]; then
-    echo "invalid arguments to 'up subcommand"
-    printusage
-    exit 1
+  VARSDIR=${DIR}/../../packages/@inf/cf-gen
+  if [ ! -f "$VARSDIR/vars" ]; then
+    echo "invalid vars file - (looked in ${VARSDIR})";
+  fi
+  source ${VARSDIR}/vars
+  if [[ -z "$DB_URL" ]]; then
+    echo "undefined db test url"
   fi
   
-  DB_URL="${2}"
-
-  DB=${DB_URL} yarn db-migrate up --migrations-dir ${DIR}/infra/postgres/migrations --config ${DIR}/database.json
+  DB=${DB_URL} yarn db-migrate up --migrations-dir ${VARSDIR}/infra/postgres/migrations --config ${VARSDIR}/database.json
 
 elif [[ $CMD == "down" ]]; then
 
-  if [[ -z "${2}" ]]; then
-    echo "invalid arguments to 'down subcommand"
-    printusage
-    exit 1
+  VARSDIR=${DIR}/../../packages/@inf/cf-gen
+  if [ ! -f "$VARSDIR/vars" ]; then
+    echo "invalid vars file - (looked in ${VARSDIR})";
   fi
-
-  DB_URL="${2}"
+  source ${VARSDIR}/vars
+  if [[ -z "$DB_URL" ]]; then
+    echo "undefined db test url"
+  fi
+  
+  DB=${DB_URL} yarn db-migrate down --migrations-dir ${VARSDIR}/infra/postgres/migrations --config ${VARSDIR}/database.json
 
 else
   echo "unknown command: ${CMD}"

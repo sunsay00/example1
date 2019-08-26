@@ -6,5 +6,5 @@ export const Config = (inputs: Inputs): ConfigRecord => ({
   type: 'shell',
   name: 'cf-redis',
   command: 'echo',
-  args: ['123'],
+  args: ['-n', 'NYI'],
 });
