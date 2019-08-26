@@ -8,5 +8,8 @@ open.gql.gatsby:
 
 build:
 	gatsby build --prefix-paths
-deploy:
+
+deploy: build
 	yarn vars serverless client deploy --stage {{STAGE}} --region {{AWS_REGION}} --no-confirm
+
+.PHONY: build deploy

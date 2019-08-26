@@ -55,19 +55,15 @@ const configuration: Configuration = {
     },
     {
       type: 'shell',
-      name: 'cf-site-build',
-      cwd: './site',
-      command: 'gatsby',
-      args: ['build', '--prefix-path'],
-      dependsOn: ['./site/src/**/*', './site/serverless.yml', './site/*.js']
-    },
-    {
-      type: 'shell',
       name: 'cf-site',
-      cwd: './site',
-      command: 'yarn',
-      args: ['vars', 'serverless', 'client', 'deploy', '--stage', '{{STAGE}}', '--region', '{{AWS_REGION}}', '--no-confirm'],
-      dependsOn: ['./site/public/**/*'],
+      command: './site/make',
+      args: [vars.STAGE == 'local' ? 'build' : 'deploy'],
+      dependsOn: [
+        './site/src/**/*.(ts|tsx|css)',
+        './site/serverless.yml',
+        './site/*.js',
+        './site/static/**/*'
+      ],
       outputMatchers: {
         SiteURL: /Serverless: Success! Your site should be available at (.*)/
       }
