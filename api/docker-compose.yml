@@ -15,4 +15,4 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=for-development-only
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=mainlocal

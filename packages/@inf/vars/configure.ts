@@ -19,7 +19,7 @@ const CFRecord = RT.Record({
   cfpath: RT.String,
 }).And(RT.Partial({
   inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
-  outputs: RT.Array(RT.String),
+  outputs: RT.Array(RT.Union(RT.Record({ name: RT.String, localValue: RT.String }), RT.String)),
 }));
 
 const ShellRecord = RT.Record({
@@ -404,7 +404,7 @@ const main = async (cmd: string, verbose: boolean) => {
               fs.mkdirSync(`${tsdir}/src`);
 
             const prev = {};
-            outputs && outputs.forEach(o => prev[o] = 'LOCAL_UNUSED');
+            outputs && outputs.forEach(o => typeof o == 'string' ? prev[o] = 'LOCAL_UNUSED' : prev[o.name] = o.localValue);
             previous = appendPrev(previous, key, prev);
             writeTs(`${tsdir}/src/vars.ts`, key, prev);
             writeJs(`${tsdir}/src/vars.js`, key, prev);
@@ -430,7 +430,8 @@ const main = async (cmd: string, verbose: boolean) => {
               }
             }
 
-            const prev = await up(getStackname(name), cfpath, inputs, outputs);
+            const outs = outputs.map(o => typeof o == 'string' ? o : o.name);
+            const prev = await up(getStackname(name), cfpath, inputs, outs);
             writeCache(key, prev);
             writeInput(key, inputs);
             previous = appendPrev(previous, key, prev);

@@ -12,7 +12,8 @@ const config = verifyVars({
 });
 
 const rdsDbEndpoint = `postgres://${config.MASTER_USERNAME}:${config.MASTER_USER_PASSWORD}@${vars.RDSClusterEndpointAddress}:5432/main${config.STAGE}`;
-console.log('>>', rdsDbEndpoint);
+//const rdsDbEndpoint = `postgres://${config.MASTER_USERNAME}:${config.MASTER_USER_PASSWORD}@localhost:5432/main${config.STAGE}`;
+console.log('->', rdsDbEndpoint);
 const db = new RDSDBClient(rdsDbEndpoint);
 
 const cache = undefined; // new CacheClient(config.redisUrl),

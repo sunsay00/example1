@@ -14,5 +14,5 @@ export const Config = (inputs: Inputs): ConfigRecord => ({
   name: 'cf-serverless-postgres',
   cfpath: './cf.yaml',
   inputs,
-  outputs: ['RDSClusterEndpointAddress']
+  outputs: [{ name: 'RDSClusterEndpointAddress', localValue: 'localhost' }]
 });

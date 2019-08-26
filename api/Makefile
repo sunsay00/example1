@@ -1,11 +1,13 @@
 test:
 	yarn vars yarn test
 
-start:
-	docker-compose start
+up:
+	docker-compose up -d
+	#docker-compose start
 
-stop:
-	docker-compose stop
+down:
+	docker-compose down
+	#docker-compose stop
 
 invoke:
 	yarn vars curl -H 'Authorization: Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
