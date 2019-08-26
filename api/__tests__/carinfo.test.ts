@@ -1,18 +1,15 @@
 import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import RDSDBClient from '@inf/cf-serverless-postgres';
-import { vars } from '@inf/cf-serverless-postgres/src/vars';
 import { fixtures as fix } from '@inf/cf-gen';
+import { vars } from '@inf/cf-gen/vars';
 
 const config = verifyVars({
-  MASTER_USERNAME: process.env.MASTER_USERNAME,
-  MASTER_USER_PASSWORD: process.env.MASTER_USER_PASSWORD,
   STAGE: process.env.STAGE,
   AWS_REGION: process.env.AWS_REGION
 });
 
-const rdsDbEndpoint = `postgres://${config.MASTER_USERNAME}:${config.MASTER_USER_PASSWORD}@${vars.RDSClusterEndpointAddress}:5432/main${config.STAGE}`;
-const db = new RDSDBClient(rdsDbEndpoint);
+const db = new RDSDBClient(vars.DB_TEST_URL);
 
 const cache = undefined; // new CacheClient(config.redisUrl),
 
@@ -36,7 +33,7 @@ describe('carinfos', () => {
     const c3 = await fix.carInfosCreate(resolver, ctx, '1902', 'make3', 'model3', 'color2');
     const colors = await fix.carInfosUniqueColors(resolver, ctx, []);
     expect(colors.items).toHaveLength(2);
-    const sorted = colors.items.map(c => c).sort((a, b) => a.localeCompare(b));
+    const sorted = colors.items.sort((a, b) => a.localeCompare(b));
     expect(sorted[0]).toEqual('color1');
     expect(sorted[1]).toEqual('color2');
     await fix.carInfosRemove(resolver, ctx, c1.id);

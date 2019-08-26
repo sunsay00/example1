@@ -1,3 +1,6 @@
 back
 front
 infra
+vars.ts
+vars.js
+lib

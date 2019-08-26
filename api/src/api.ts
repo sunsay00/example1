@@ -1,9 +1,9 @@
 import { apiWrapper } from '@inf/core';
 import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from './legacy/tools/resolver';
-
 //import CacheClient from '@inf/cf-redis';
 import RDSDBClient from '@inf/cf-serverless-postgres';
+import { vars } from '@inf/cf-gen/vars';
 
 const config = verifyVars({
   stage: process.env.STAGE,
@@ -12,7 +12,6 @@ const config = verifyVars({
   region: 'us-east-1',
   locale: 'en',
   platformApplicationArn: 'NYI',
-  rdsDbEndpoint: 'NYI',
 });
 
 const resolver = createDefaultResolver({
@@ -20,7 +19,7 @@ const resolver = createDefaultResolver({
   region: config.region,
   locale: config.locale,
   platformApplicationArn: config.platformApplicationArn,
-  db: new RDSDBClient(config.rdsDbEndpoint),
+  db: new RDSDBClient(vars.DB_URL),
   cache: undefined, // new CacheClient(config.redisUrl),
 });
 

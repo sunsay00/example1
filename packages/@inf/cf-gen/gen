@@ -4,15 +4,75 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if [ -L $DIR/gen ]; then
-  GENDIR=`dirname $DIR/$(readlink $DIR/gen)`
-else
-  GENDIR="$DIR"
-fi
+function printusage {
+  echo "usage: gen <command>"
+  echo "  commands:"
+  echo "    - generate                    # generates orm code"
+  echo "    - wipetest                    # wipes out test database"
+  echo "    - seed <db-url> <service-id>  # seeds the database"
+  echo "    - up <db-url>                 # transitions the database to the lastest migration"
+  echo "    - down <db-url>               # transitions the database to its previous migration"
+}
 
-if [ ! -f $GENDIR/../../../ledger.scm ]; then
-  echo "ledger.scm file not found";
+if [[ -z ${1} ]]; then
+  printusage
   exit 1
 fi
 
-cd $GENDIR/generator/ && LEDGER_PATH=$GENDIR/../../../ledger.scm make configure
+CMD="$1"
+
+if [[ $CMD == "generate" ]]; then
+
+  if [ -L $DIR/gen ]; then
+    GENDIR=`dirname $DIR/$(readlink $DIR/gen)`
+  else
+    GENDIR="$DIR"
+  fi
+
+  if [ ! -f $GENDIR/../../../ledger.scm ]; then
+    echo "ledger.scm file not found";
+    exit 1
+  fi
+
+  cd $GENDIR/generator/ && LEDGER_PATH=$GENDIR/../../../ledger.scm make configure
+
+elif [[ $CMD == "seed" ]]; then
+
+  if [[ -z "${2}" ]] || [[ -z "${3}" ]]; then
+    echo "invalid arguments to 'seed subcommand"
+    printusage
+    exit 1
+  fi
+
+  DB_URL="${2}"
+  SERVICE_ID="${3}"
+
+  ${DIR}/seed ${DB_URL} ${SERVICE_ID}
+
+elif [[ $CMD == "up" ]]; then
+
+  if [[ -z "${2}" ]]; then
+    echo "invalid arguments to 'up subcommand"
+    printusage
+    exit 1
+  fi
+  
+  DB_URL="${2}"
+
+  DB=${DB_URL} yarn db-migrate up --migrations-dir ${DIR}/infra/postgres/migrations --config ${DIR}/database.json
+
+elif [[ $CMD == "down" ]]; then
+
+  if [[ -z "${2}" ]]; then
+    echo "invalid arguments to 'down subcommand"
+    printusage
+    exit 1
+  fi
+
+  DB_URL="${2}"
+
+else
+  echo "unknown command: ${CMD}"
+  printusage
+  exit 1
+fi

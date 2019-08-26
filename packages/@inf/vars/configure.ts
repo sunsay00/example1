@@ -31,7 +31,8 @@ const ShellRecord = RT.Record({
   cwd: RT.String,
   dependsOn: RT.Array(RT.String),
   env: RT.Dictionary(RT.String),
-  outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions')))
+  outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions'))),
+  outputs: RT.Array(RT.Record({ name: RT.String, value: RT.String }))
 }));
 
 const Record = RT.Union(CFRecord, ShellRecord);
@@ -213,8 +214,9 @@ const writeTs = (outPath: string, key: string, data: { [k: string]: string }) =>
   fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const vars = {\n${out}};`);
 };
 
-const writeIgnore = (outPath: string) => {
-  const ents = ['src/vars.ts', 'src/vars.js', 'lib'];
+const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
+  if (filesToIgnore.length == 0) return;
+  const ents = [...filesToIgnore];
   if (!fs.existsSync(outPath)) {
     fs.writeFileSync(outPath, ents.join('\n'), { encoding: 'utf8' });
   } else {
@@ -224,7 +226,7 @@ const writeIgnore = (outPath: string) => {
       if (pents.includes(e))
         ents[i] = undefined;
     });
-    const nents = [...pents, ents.filter(e => !!e)];
+    const nents = [...pents, ...ents.filter(e => !!e)];
     fs.writeFileSync(outPath, nents.join('\n'), { encoding: 'utf8' });
   }
 };
@@ -443,7 +445,7 @@ const main = async (cmd: string, verbose: boolean) => {
               fs.mkdirSync(`${tsdir}/src`);
             writeTs(`${tsdir}/src/vars.ts`, key, prev);
             writeJs(`${tsdir}/src/vars.js`, key, prev);
-            writeIgnore(`${tsdir}/.gitignore`);
+            writeIgnore(`${tsdir}/.gitignore`, ['src/vars.ts', 'src/vars.js', 'lib']);
 
             console.log('(updated)');
             return true;
@@ -451,7 +453,8 @@ const main = async (cmd: string, verbose: boolean) => {
         },
 
         shell => new Promise((resolve, reject) => {
-          const { name, command, args, env, dependsOn, outputMatchers, cwd } = shell;
+          const { name, command, args, env, dependsOn, outputMatchers, cwd, outputs } = shell;
+
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
 
@@ -479,6 +482,10 @@ const main = async (cmd: string, verbose: boolean) => {
               return;
             }
           }
+
+          const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
+          if (fs.existsSync(`${tsdir}/vars.ts`)) fs.unlinkSync(`${tsdir}/vars.ts`);
+          if (fs.existsSync(`${tsdir}/vars.js`)) fs.unlinkSync(`${tsdir}/vars.js`);
 
           const cwdEnabled = !command.startsWith('.') && !command.startsWith('/') && cwd;
           const cwd2 = cwdEnabled ? cwd : path.dirname(command);
@@ -518,8 +525,21 @@ const main = async (cmd: string, verbose: boolean) => {
                       json[k] = match[1];
                     }
                   });
-
                 }
+
+                if (outputs) {
+                  let json2 = undefined;
+                  outputs.forEach(o => {
+                    if (!json2) json2 = {};
+                    json2[o.name] = o.value;
+                  });
+                  if (!fs.existsSync(tsdir))
+                    fs.mkdirSync(tsdir);
+                  writeTs(`${tsdir}/vars.ts`, key, json2);
+                  writeJs(`${tsdir}/vars.js`, key, json2);
+                  writeIgnore(`${tsdir}/.gitignore`, ['vars.ts', 'vars.js', 'lib']);
+                }
+
                 buffer = '';
                 if (json) {
                   printOutputs(key, json);

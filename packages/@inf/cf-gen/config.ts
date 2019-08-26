@@ -14,9 +14,16 @@ export const Config = (opts: Inputs): ConfigRecord => ({
   name: 'cf-gen',
   command: 'make',
   env: {
-    SERVICEID: `${opts.RDSServiceId}`,
-    DBCONNSTR: `postgres://${opts.MasterUsername}:${opts.MasterUserPassword}@${opts.RDSClusterEndpointAddress}:5432/main${opts.Stage}`
+    SERVICE_ID: `${opts.RDSServiceId}`,
+    DB_URL: `postgres://${opts.MasterUsername}:${opts.MasterUserPassword}@${opts.RDSClusterEndpointAddress}:5432/main${opts.Stage}`
   },
   args: ['-f', `${__dirname}/Makefile`, 'configure'],
-  dependsOn: [`${__dirname}/generator/**/*.scm`, opts.ledgerPath]
+  dependsOn: [`${__dirname}/generator/**/*.scm`, opts.ledgerPath],
+  outputs: [{
+    name: 'DB_URL',
+    value: `postgres://${opts.MasterUsername}:${opts.MasterUserPassword}@${opts.RDSClusterEndpointAddress}:5432/main${opts.Stage}`
+  }, {
+    name: 'DB_TEST_URL',
+    value: `postgres://${opts.MasterUsername}:${opts.MasterUserPassword}@${opts.RDSClusterEndpointAddress}:5432/test${opts.Stage}`
+  }]
 });

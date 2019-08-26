@@ -1,4 +1,5 @@
 test:
+	yarn gen wipetest
 	yarn vars yarn test
 
 up:
