@@ -24,47 +24,53 @@ const writeTs = (outPath, data) => {
 };
 
 const main = async () => {
-  AWS.config = new AWS.Config({
-    region: vars.AWS_REGION,
-    accessKeyId: vars.AWS_ACCESS_KEY_ID,
-    secretAccessKey: vars.AWS_SECRET_ACCESS_KEY,
-  });
-  const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
-  const route53 = new AWS.Route53({ apiVersion: '2013-04-01' });
+  if (vars.STAGE == 'local') {
+    return {
+      HostedZoneId: 'LOCAL_UNUSED',
+    };
+  } else {
+    AWS.config = new AWS.Config({
+      region: vars.AWS_REGION,
+      accessKeyId: vars.AWS_ACCESS_KEY_ID,
+      secretAccessKey: vars.AWS_SECRET_ACCESS_KEY,
+    });
+    const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
+    const route53 = new AWS.Route53({ apiVersion: '2013-04-01' });
 
-  const ret = await ec2.describeVpcs({}).promise();
-  console.assert(ret.Vpcs.length != 0);
-  const VPC_ID = ret.Vpcs[0].VpcId;
+    const ret = await ec2.describeVpcs({}).promise();
+    console.assert(ret.Vpcs.length != 0);
+    const VPC_ID = ret.Vpcs[0].VpcId;
 
-  const data = await ec2.describeSubnets({
-    Filters: [{ Name: 'vpc-id', Values: [VPC_ID] }]
-  }).promise();
+    const data = await ec2.describeSubnets({
+      Filters: [{ Name: 'vpc-id', Values: [VPC_ID] }]
+    }).promise();
 
-  const props = {};
+    const props = {};
 
-  props['AWS_REGION'] = vars.AWS_REGION;
+    props['AWS_REGION'] = vars.AWS_REGION;
 
-  props['VPC_ID'] = VPC_ID;
+    props['VPC_ID'] = VPC_ID;
 
-  const subnets = data.Subnets.sort((a, b) => a.AvailabilityZone.localeCompare(b.AvailabilityZone));
-  subnets.forEach((s, i) => props[`Subnet${i + 1}`] = s.SubnetId);
-  subnets.forEach((s, i) => props[`AvailabilityZone${i + 1}`] = s.AvailabilityZone);
+    const subnets = data.Subnets.sort((a, b) => a.AvailabilityZone.localeCompare(b.AvailabilityZone));
+    subnets.forEach((s, i) => props[`Subnet${i + 1}`] = s.SubnetId);
+    subnets.forEach((s, i) => props[`AvailabilityZone${i + 1}`] = s.AvailabilityZone);
 
-  const zones = await route53.listHostedZonesByName().promise();
-  const zone = zones.HostedZones.find(z => z.Name == `${vars.DOMAIN}.`);
-  if (zone) {
-    const split = zone.Id.split('/');
-    if (split.length == 3) {
-      props['HostedZoneId'] = split[split.length - 1];
+    const zones = await route53.listHostedZonesByName().promise();
+    const zone = zones.HostedZones.find(z => z.Name == `${vars.DOMAIN}.`);
+    if (zone) {
+      const split = zone.Id.split('/');
+      if (split.length == 3) {
+        props['HostedZoneId'] = split[split.length - 1];
+      }
     }
+    if (!props['HostedZoneId'])
+      throw new Error(`failed to determine hostedzone for '${vars.DOMAIN}'`);
+
+    const sgs = await ec2.describeSecurityGroups({}).promise();
+    sgs.SecurityGroups.map(sg => props[`SecurityGroup_${sg.GroupName}`] = sg.GroupId);
+
+    return props;
   }
-  if (!props['HostedZoneId'])
-    throw new Error(`failed to determine hostedzone for '${vars.DOMAIN}'`);
-
-  const sgs = await ec2.describeSecurityGroups({}).promise();
-  sgs.SecurityGroups.map(sg => props[`SecurityGroup_${sg.GroupName}`] = sg.GroupId);
-
-  return props;
 };
 
 if (process.argv.length < 2) {

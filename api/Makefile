@@ -1,6 +1,12 @@
 test:
 	yarn vars yarn test
 
+start:
+	docker-compose start
+
+stop:
+	docker-compose stop
+
 invoke:
 	yarn vars curl -H 'Authorization: Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
 invoke.guest:

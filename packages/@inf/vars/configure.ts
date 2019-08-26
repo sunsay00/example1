@@ -10,7 +10,7 @@ import * as colors from 'colors/safe';
 const verifyRegEx = (value: unknown, errMessage: string) => {
   if (Object.prototype.toString.call(value) == '[object RegExp]')
     return true;
-  console.error(colors.red(errMessage));
+  error(colors.red(errMessage));
   throw new Error(errMessage);
 }
 const CFRecord = RT.Record({
@@ -41,10 +41,10 @@ export type ConfigRecord = RT.Static<typeof Record>;
 export type Configuration = {
   region: string,
   stage: string,
-  modules: (((outputs: { [_: string]: string }) => ConfigRecord) | ConfigRecord)[],
+  modules: (((outputs: (k: string) => string) => ConfigRecord) | ConfigRecord)[],
 };
 
-const error = (msg: string) => process.stderr.write(`[CONF] error: ${msg}`);
+const error = (msg: string) => console.error(colors.red(`[CONF] error: ${msg}`));
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
 
 const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean) => {
@@ -109,11 +109,11 @@ const printOutputs = (key: string, json?: { [_: string]: string }) => {
 const _keys = {};
 const verifyKey = (key: string) => {
   if (!/^[a-zA-Z0-9-_]+$/.exec(key)) {
-    console.error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
+    error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
     throw new Error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
   }
   if (_keys[key]) {
-    console.error(`duplicate key '${key}' detected`);
+    error(`duplicate key '${key}' detected`);
     throw new Error(`duplicate key '${key}' detected`);
   }
   _keys[key] = true;
@@ -247,8 +247,8 @@ const main = async (cmd: string, verbose: boolean) => {
     error('stage not set');
     process.exit(1);
   }
-  if (!['dev', 'beta', 'production'].includes(configuration.stage)) {
-    error('invalid stage value - must be one of <dev|beta|production>');
+  if (!['local', 'dev', 'beta', 'production'].includes(configuration.stage)) {
+    error('invalid stage value - must be one of <local|dev|beta|production>');
     process.exit(1);
   }
 
@@ -271,10 +271,14 @@ const main = async (cmd: string, verbose: boolean) => {
       if (stacks.Stacks.length != 1) return false;
       const s = stacks.Stacks[0];
       if (['CREATE_IN_PROGRESS', 'ROLLBACK_IN_PROGRESS', 'DELETE_IN_PROGRESS', 'DELETE_FAILED', 'UPDATE_IN_PROGRESS', 'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-        'UPDATE_ROLLBACK_IN_PROGRESS', 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS', 'REVIEW_IN_PROGRESS'].includes(s.StackStatus))
+        'UPDATE_ROLLBACK_IN_PROGRESS', 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS', 'REVIEW_IN_PROGRESS'].includes(s.StackStatus)) {
+        error(`Stack busy: ${s.StackStatus}`);
         throw new Error(`Stack busy: ${s.StackStatus}`);
-      if (s.StackStatus == 'ROLLBACK_COMPLETE')
+      }
+      if (s.StackStatus == 'ROLLBACK_COMPLETE') {
+        error(`Stack '${StackName}' must be deleted manually`);
         throw new Error(`Stack '${StackName}' must be deleted manually`);
+      }
       const ret = ['CREATE_COMPLETE', 'UPDATE_ROLLBACK_COMPLETE', 'UPDATE_COMPLETE', 'CREATE_COMPLETE', 'CREATE_FAILED'].includes(s.StackStatus);
       return ret;
     } catch (err) {
@@ -296,8 +300,10 @@ const main = async (cmd: string, verbose: boolean) => {
     for (let m in inputs)
       if (!inputs[m])
         missinginputs.push(m);
-    if (missinginputs.length > 0)
+    if (missinginputs.length > 0) {
+      error(`missing inputs (${missinginputs.join(', ')}) for ${StackName}`);
       throw new Error(`missing inputs (${missinginputs.join(', ')}) for ${StackName}`);
+    }
 
     const Parameters = Object.entries(inputs).map(([k, v]) => ({ ParameterKey: k, ParameterValue: `${v}` }));
     const TemplateBody = fs.readFileSync(cfPath, 'utf8');
@@ -326,22 +332,26 @@ const main = async (cmd: string, verbose: boolean) => {
       }
     } catch (err) {
       if (!err.message.includes('No updates are to be performed')) {
-        console.log('');
-        console.error(colors.red(err.message));
+        error(err.message);
         throw err;
       }
     }
 
     const desc = await cf.describeStacks({ StackName }).promise();
-    if (desc.Stacks.length != 1) throw new Error('failed to describe stacks');
+    if (desc.Stacks.length != 1) {
+      error('failed to describe stacks');
+      throw new Error('failed to describe stacks');
+    }
 
     const outputs = desc.Stacks[0].Outputs;
     const missing = [];
     for (let eo in expectedOutputs)
       if (!outputs[eo])
         missing.push(eo);
-    if (missing.length > 0)
+    if (missing.length > 0) {
+      error(`missing outputs (${missing.join(', ')})`);
       throw new Error(`missing outputs (${missing.join(', ')})`);
+    }
     const unused = [];
     for (let o in outputs)
       if (!expectedOutputs)
@@ -373,7 +383,11 @@ const main = async (cmd: string, verbose: boolean) => {
   if (cmd == 'up') {
     let previous = {};
     for (let f of configuration.modules) {
-      const rec = typeof f == 'function' ? f(previous) : f;
+      const rec = typeof f == 'function' ? f(k => {
+        const ret = previous[k];
+        if (!ret) throw new Error(`invalid output variable '${k}'`);
+        return ret;
+      }) : f;
 
       const ret = await Record.match(
 
@@ -382,40 +396,57 @@ const main = async (cmd: string, verbose: boolean) => {
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
 
-          const inputDirty = isInputDirty(key, inputs);
-          const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/${cfpath2}`;
-          if (!fs.existsSync(cfpath)) {
-            console.error(`invalid cf module ${name} - ${cfpath} not found`);
-            throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
-          }
+          if (configuration.stage == 'local') {
+            const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
+            if (!fs.existsSync(tsdir))
+              fs.mkdirSync(tsdir);
+            if (!fs.existsSync(`${tsdir}/src`))
+              fs.mkdirSync(`${tsdir}/src`);
 
-          const ot = lastmod(`${__dirname}/.cache/${key}`);
-          const cfDirty = lastmod(cfpath) > ot;
-          if (!cfDirty && !inputDirty) {
+            const prev = {};
+            outputs && outputs.forEach(o => prev[o] = 'LOCAL_UNUSED');
+            previous = appendPrev(previous, key, prev);
+            writeTs(`${tsdir}/src/vars.ts`, key, prev);
+            writeJs(`${tsdir}/src/vars.js`, key, prev);
+
             console.log('');
-            const prev = readCache(key);
-            if (prev) {
-              previous = appendPrev(previous, key, prev);
-              return true;
+            return true;
+          } else {
+            const inputDirty = isInputDirty(key, inputs);
+            const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/${cfpath2}`;
+            if (!fs.existsSync(cfpath)) {
+              error(`invalid cf module ${name} - ${cfpath} not found`);
+              throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
             }
+
+            const ot = lastmod(`${__dirname}/.cache/${key}`);
+            const cfDirty = lastmod(cfpath) > ot;
+            if (!cfDirty && !inputDirty) {
+              console.log('');
+              const prev = readCache(key);
+              if (prev) {
+                previous = appendPrev(previous, key, prev);
+                return true;
+              }
+            }
+
+            const prev = await up(getStackname(name), cfpath, inputs, outputs);
+            writeCache(key, prev);
+            writeInput(key, inputs);
+            previous = appendPrev(previous, key, prev);
+
+            const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
+            if (!fs.existsSync(tsdir))
+              fs.mkdirSync(tsdir);
+            if (!fs.existsSync(`${tsdir}/src`))
+              fs.mkdirSync(`${tsdir}/src`);
+            writeTs(`${tsdir}/src/vars.ts`, key, prev);
+            writeJs(`${tsdir}/src/vars.js`, key, prev);
+            writeIgnore(`${tsdir}/.gitignore`);
+
+            console.log('(updated)');
+            return true;
           }
-
-          const prev = await up(getStackname(name), cfpath, inputs, outputs);
-          writeCache(key, prev);
-          writeInput(key, inputs);
-          previous = appendPrev(previous, key, prev);
-
-          const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
-          if (!fs.existsSync(tsdir))
-            fs.mkdirSync(tsdir);
-          if (!fs.existsSync(`${tsdir}/src`))
-            fs.mkdirSync(`${tsdir}/src`);
-          writeTs(`${tsdir}/src/vars.ts`, key, prev);
-          writeJs(`${tsdir}/src/vars.js`, key, prev);
-          writeIgnore(`${tsdir}/.gitignore`);
-
-          console.log('(updated)');
-          return true;
         },
 
         shell => new Promise((resolve, reject) => {
@@ -511,7 +542,7 @@ const main = async (cmd: string, verbose: boolean) => {
       )(rec);
 
       if (ret == undefined) {
-        console.error(colors.red(`record match failed: ${JSON.stringify(rec, null, 2)}`));
+        error(colors.red(`record match failed: ${JSON.stringify(rec, null, 2)}`));
         process.exit(1);
       }
 
@@ -520,7 +551,7 @@ const main = async (cmd: string, verbose: boolean) => {
   } else if (cmd == 'down') {
     let previous = {};
     const ms = configuration.modules.map(f => {
-      const n = typeof f == 'function' ? f({}) : f;
+      const n = typeof f == 'function' ? f(() => '') : f;
       const ret = parseModule(f, previous);
       const p = {};
       //if (n.outputs && Array.isArray(n.outputs))
@@ -533,6 +564,7 @@ const main = async (cmd: string, verbose: boolean) => {
       if (m) await down(getStackname(m.name));
     }
   } else {
+    error(`unknown configure command '${cmd}'`);
     throw new Error(`unknown configure command '${cmd}'`);
   }
 };

@@ -65,11 +65,11 @@ const configuration: Configuration = {
         SiteURL: /Serverless: Success! Your site should be available at (.*)/
       }
     },
-    o => CDN.Config({
-      SiteCertificateArn: o.CF_CERT_CertificateArn,
+    outputs => CDN.Config({
+      SiteCertificateArn: outputs('CF_CERT_CertificateArn'),
       Domain: vars.DOMAIN,
       Stage: vars.STAGE,
-      HostedZoneId: o.CF_AWSINFO_HostedZoneId,
+      HostedZoneId: outputs('CF_AWSINFO_HostedZoneId'),
     })
   ]
 }

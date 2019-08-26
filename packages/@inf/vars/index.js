@@ -22,9 +22,13 @@ const makeSafe = env => {
   Object.entries(env).map(([k, v]) => {
     ret = {
       ...ret, get [k]() {
-        const v = env[k];
-        if (!v) throw new Error(`Undefined envvar detected ${k}`);
-        return v;
+        if (env.STAGE == 'local' && ['AWS_ACCOUNT_ID', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'].includes(k)) {
+          return 'LOCAL_UNUSED';
+        } else {
+          const v = env[k];
+          if (!v) throw new Error(`Undefined envvar detected ${k}`);
+          return v;
+        }
       }
     };
   });
