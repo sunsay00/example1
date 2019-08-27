@@ -5,7 +5,6 @@ SEED = $(MAKEFILE_DIR)/seed
 
 configure:
 	@$(GEN) generate && \
-		$(GEN) seed $(DB_URL) $(SERVICE_ID) && \
-		$(GEN) up $(DB_URL)
+		$(GEN) seed $(DB_URL) $(SERVICE_ID)
 
 .PHONY: configure

@@ -4,6 +4,14 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+if [ -L $DIR/gen ]; then
+  GENDIR=`dirname $DIR/$(readlink $DIR/gen)`
+else
+  GENDIR="$DIR"
+fi
+
+function runsql { echo "$2" | psql "$1"; }
+
 function printusage {
   echo "usage: gen <command>"
   echo "  commands:"
@@ -12,6 +20,7 @@ function printusage {
   echo "    - wipetest                    # wipes out test database"
   echo "    - up                          # transitions the database to the lastest migration"
   echo "    - down                        # transitions the database to its previous migration"
+  echo "    - shell                       # connects to localdb"
 }
 
 if [[ -z ${1} ]]; then
@@ -22,12 +31,6 @@ fi
 CMD="$1"
 
 if [[ $CMD == "generate" ]]; then
-
-  if [ -L $DIR/gen ]; then
-    GENDIR=`dirname $DIR/$(readlink $DIR/gen)`
-  else
-    GENDIR="$DIR"
-  fi
 
   if [ ! -f $GENDIR/../../../ledger.scm ]; then
     echo "ledger.scm file not found";
@@ -49,44 +52,60 @@ elif [[ $CMD == "seed" ]]; then
 
   ${DIR}/seed ${DB_URL} ${SERVICE_ID}
 
+  DB=${DB_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+
 elif [[ $CMD == "wipetest" ]]; then
 
-  VARSDIR=${DIR}/../../packages/@inf/cf-gen
-  if [ ! -f "$VARSDIR/vars" ]; then
-    echo "invalid vars file - (looked in ${VARSDIR})";
+  if [ ! -f "$GENDIR/vars.env" ]; then
+    echo "invalid vars.env file - (looked in ${GENDIR})";
   fi
-  source ${VARSDIR}/vars
-  if [[ -z "$DB_TEST_URL" ]]; then
-    echo "undefined db test url"
+  source ${GENDIR}/vars.env
+  if [[ -z "$DB_TEST_URL" ]] || [[ -z "$DB_URL" ]]; then
+    echo "undefined db urls"
   fi
 
-  echo $DB_TEST_URL
+  runsql "${DB_URL}" "DROP DATABASE IF EXISTS testlocal"
+  runsql "${DB_URL}" "CREATE DATABASE testlocal"
+
+  ${GENDIR}/seed ${DB_TEST_URL} 0
+
+  cd "$GENDIR" && DB=${DB_TEST_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
 
 elif [[ $CMD == "up" ]]; then
 
-  VARSDIR=${DIR}/../../packages/@inf/cf-gen
-  if [ ! -f "$VARSDIR/vars" ]; then
-    echo "invalid vars file - (looked in ${VARSDIR})";
+  if [ ! -f "$GENDIR/vars.env" ]; then
+    echo "invalid vars.env file - (looked in ${GENDIR})";
   fi
-  source ${VARSDIR}/vars
+  source ${GENDIR}/vars.env
   if [[ -z "$DB_URL" ]]; then
-    echo "undefined db test url"
+    echo "undefined db url"
   fi
   
-  DB=${DB_URL} yarn db-migrate up --migrations-dir ${VARSDIR}/infra/postgres/migrations --config ${VARSDIR}/database.json
+  DB=${DB_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
 
 elif [[ $CMD == "down" ]]; then
 
-  VARSDIR=${DIR}/../../packages/@inf/cf-gen
-  if [ ! -f "$VARSDIR/vars" ]; then
-    echo "invalid vars file - (looked in ${VARSDIR})";
+  if [ ! -f "$GENDIR/vars.env" ]; then
+    echo "invalid vars.env file - (looked in ${GENDIR})";
   fi
-  source ${VARSDIR}/vars
+  source ${GENDIR}/vars.env
+  if [[ -z "$DB_URL" ]]; then
+    echo "undefined db url"
+  fi
+  
+  DB=${DB_URL} yarn db-migrate down --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+
+elif [[ $CMD == "shell" ]]; then
+
+  if [ ! -f "$GENDIR/vars.env" ]; then
+    echo "invalid vars.env file - (looked in ${GENDIR})";
+  fi
+  source ${GENDIR}/vars.env
   if [[ -z "$DB_URL" ]]; then
     echo "undefined db test url"
   fi
-  
-  DB=${DB_URL} yarn db-migrate down --migrations-dir ${VARSDIR}/infra/postgres/migrations --config ${VARSDIR}/database.json
+
+  pgcli "$DB_URL"
 
 else
   echo "unknown command: ${CMD}"

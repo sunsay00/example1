@@ -2,11 +2,11 @@ test:
 	yarn gen wipetest
 	yarn vars yarn test
 
-up:
+start:
 	docker-compose up -d
 	#docker-compose start
 
-down:
+stop:
 	docker-compose down
 	#docker-compose stop
 

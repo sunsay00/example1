@@ -4,4 +4,4 @@ infra
 vars.ts
 vars.js
 lib
-vars
+vars.env

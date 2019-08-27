@@ -492,7 +492,7 @@ const main = async (cmd: string, verbose: boolean) => {
           }
 
           const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
-          if (fs.existsSync(`${tsdir}/vars`)) fs.unlinkSync(`${tsdir}/vars`);
+          if (fs.existsSync(`${tsdir}/vars.env`)) fs.unlinkSync(`${tsdir}/vars.env`);
           if (fs.existsSync(`${tsdir}/vars.ts`)) fs.unlinkSync(`${tsdir}/vars.ts`);
           if (fs.existsSync(`${tsdir}/vars.js`)) fs.unlinkSync(`${tsdir}/vars.js`);
 
@@ -544,10 +544,10 @@ const main = async (cmd: string, verbose: boolean) => {
                   });
                   if (!fs.existsSync(tsdir))
                     fs.mkdirSync(tsdir);
-                  writeEnvs(`${tsdir}/vars`, key, json2);
+                  writeEnvs(`${tsdir}/vars.env`, key, json2);
                   writeTs(`${tsdir}/vars.ts`, key, json2);
                   writeJs(`${tsdir}/vars.js`, key, json2);
-                  writeIgnore(`${tsdir}/.gitignore`, ['vars', 'vars.ts', 'vars.js', 'lib']);
+                  writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'lib']);
                 }
 
                 buffer = '';

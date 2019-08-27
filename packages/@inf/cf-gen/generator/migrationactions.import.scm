@@ -7,7 +7,14 @@
     `((user 
         ,(lambda ()
            (list
-             "\nCREATE USER api WITH PASSWORD 'changeme'; ALTER USER api VALID UNTIL 'infinity';"
+             "\nDO"
+             "\n$do$"
+             "\nBEGIN"
+             "\n  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='api') THEN"
+             "\n    CREATE USER api WITH PASSWORD 'changeme'; ALTER USER api VALID UNTIL 'infinity';"
+             "\n  END IF;"
+             "\nEND"
+             "\n$do$;"
              "\nGRANT ALL ON schema public TO api;"
              "\nGRANT CONNECT ON DATABASE postgres TO api;"
              "\nGRANT SELECT ON TABLE serviceId TO api;"
