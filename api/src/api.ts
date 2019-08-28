@@ -24,7 +24,7 @@ const resolver = createDefaultResolver({
   platformApplicationArn: '',
   db,
   cache,
-  onInit: async () => {
+  onPreResolve: async () => {
     await db.init();
   }
 });

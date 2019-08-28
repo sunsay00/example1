@@ -30,20 +30,24 @@ export class Resolver<C extends IUserContext> {
   private _stage: string;
   private _mapper: Mapper<C>;
   private _schema: GraphQLSchema;
-  private _onInit?: () => Promise<void>;
+  private _onPre?: () => Promise<void>;
+  private _onPost?: () => Promise<void>;
 
-  constructor(stage: string, mapper: Mapper<C>, onInit?: () => Promise<void>) {
+  constructor(stage: string, mapper: Mapper<C>, onPreResolve?: () => Promise<void>, onPostResolve?: () => Promise<void>) {
     this._stage = stage;
     this._mapper = mapper;
     this._schema = makeExecutableSchema({
       typeDefs,
       resolvers: resolvers(this._stage, this._mapper, new TestingService())
     });
-    this._onInit = onInit;
+    this._onPre = onPreResolve;
+    this._onPost = onPostResolve;
   }
 
   resolve = async <C extends IUserContext>(headers: { [_: string]: string }, query: string, variables: Variables, user: C) => {
-    this._onInit && await this._onInit();
-    return graphql(this._schema, query, undefined, user, variables);
+    this._onPre && await this._onPre();
+    const ret = await graphql(this._schema, query, undefined, user, variables);
+    this._onPost && await this._onPost();
+    return ret;
   }
 }

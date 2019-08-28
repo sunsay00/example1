@@ -14,7 +14,8 @@ export const createDefaultResolver = (params: {
   platformApplicationArn: string,
   db: IDBClient,
   cache?: ICacheClient,
-  onInit?: () => Promise<void>,
+  onPreResolve?: () => Promise<void>,
+  onPostResolve?: () => Promise<void>,
 }) => {
   const notifications = new NotificationManager({
     stage: params.stage,
@@ -26,7 +27,8 @@ export const createDefaultResolver = (params: {
     stage: params.stage,
     notifications,
     db: params.db,
-    onInit: params.onInit,
+    onPreResolve: params.onPreResolve,
+    onPostResolve: params.onPostResolve,
     services: {
       users: store => new UsersService(notifications, store, params.locale, params.region),
       systems: store => new SystemService(notifications, store),

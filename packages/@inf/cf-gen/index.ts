@@ -15,9 +15,14 @@ export const createCachedResolver = <C extends IUserContext>(
   cache: ICacheClient,
   db: IDBClient,
   services: MappedServices<C>,
-  onInit?: () => Promise<void>,
+  onPreResolve?: () => Promise<void>,
+  onPostResolve?: () => Promise<void>,
 ) => {
-  return new Resolver(stage, createServiceMapper(notifications, new CacheStore(new RDSStore(stage, db), cache), services), onInit);
+  return new Resolver(
+    stage,
+    createServiceMapper(notifications, new CacheStore(new RDSStore(stage, db), cache), services),
+    onPreResolve,
+    onPostResolve);
 };
 
 export const createResolver = <C extends IUserContext>(params: {
@@ -25,7 +30,12 @@ export const createResolver = <C extends IUserContext>(params: {
   notifications: INotificationManager<C>,
   db: IDBClient,
   services: MappedServices<C>,
-  onInit?: () => Promise<void>,
+  onPreResolve?: () => Promise<void>,
+  onPostResolve?: () => Promise<void>,
 }) => {
-  return new Resolver(params.stage, createServiceMapper(params.notifications, new RDSStore(params.stage, params.db), params.services), params.onInit);
+  return new Resolver(
+    params.stage,
+    createServiceMapper(params.notifications, new RDSStore(params.stage, params.db), params.services),
+    params.onPreResolve,
+    params.onPostResolve);
 }
