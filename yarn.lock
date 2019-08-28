@@ -727,33 +727,39 @@
     yargs "^9.0.0"
 
 "@hapi/accept@3.x.x":
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-3.2.2.tgz#3a033af67be8196c23f8f51aa8756687b972c7cb"
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-3.2.3.tgz#6947259928ed28df2736c7daffbfc739b72adfcc"
   dependencies:
     "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/address@2.x.x":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.0.0.tgz#9f05469c88cb2fd3dcd624776b54ee95c312126a"
 
 "@hapi/ammo@3.x.x":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/ammo/-/ammo-3.1.0.tgz#a3281ecb68bf7af2ffa6d0f7656536a7d23700ed"
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/ammo/-/ammo-3.1.1.tgz#ab700dac10f0b7fc5b7168c550c6be45ec3b981b"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/b64@4.x.x":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@hapi/b64/-/b64-4.2.0.tgz#76de0c7ed76e55bfa42709a4facfe894dd41d741"
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@hapi/b64/-/b64-4.2.1.tgz#bf8418d7907c5e73463f2e3b5c6fca7e9f2a1357"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
-"@hapi/boom@7.4.2", "@hapi/boom@7.x.x", "@hapi/boom@^7.4.2":
+"@hapi/boom@7.4.2":
   version "7.4.2"
   resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.2.tgz#c16957cd09796f6c1bfb4031bdc39d66d6d750c3"
   dependencies:
     "@hapi/hoek" "6.x.x"
+
+"@hapi/boom@7.x.x", "@hapi/boom@^7.4.2":
+  version "7.4.3"
+  resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.3.tgz#79ffed6ef8c625046a3bd069abed5a9d35fc50c1"
+  dependencies:
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/bounce@1.x.x":
   version "1.3.1"
@@ -767,25 +773,25 @@
   resolved "https://registry.yarnpkg.com/@hapi/bourne/-/bourne-1.3.2.tgz#0a7095adea067243ce3283e1b56b8a8f453b242a"
 
 "@hapi/call@5.x.x":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/call/-/call-5.1.0.tgz#91e4c434318003173d96d211d90d35736a33945e"
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/call/-/call-5.1.1.tgz#e0d090483486099589d6a7cd1d08ca0e0e6edb99"
   dependencies:
     "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/catbox-memory@4.x.x":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/catbox-memory/-/catbox-memory-4.1.0.tgz#cb5fbaf45c52beb44766dae018a2aee7b43e9c88"
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/catbox-memory/-/catbox-memory-4.1.1.tgz#263a6f3361f7a200552c5772c98a8e80a1da712f"
   dependencies:
     "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/catbox@10.x.x":
-  version "10.2.1"
-  resolved "https://registry.yarnpkg.com/@hapi/catbox/-/catbox-10.2.1.tgz#ae21fbcdd16e4dff802b6969ee2d6bc51b7e1128"
+  version "10.2.2"
+  resolved "https://registry.yarnpkg.com/@hapi/catbox/-/catbox-10.2.2.tgz#e5c7da6718f5ab5f3a0beefbf352983a3b988626"
   dependencies:
     "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/joi" "15.x.x"
     "@hapi/podium" "3.x.x"
 
@@ -806,17 +812,17 @@
   resolved "https://registry.yarnpkg.com/@hapi/file/-/file-1.0.0.tgz#c91c39fd04db8bed5af82d2e032e7a4e65555b38"
 
 "@hapi/h2o2@^8.3.0":
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-8.3.0.tgz#9783fb54005cc8e05fb75a1eba975035ad469127"
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-8.3.1.tgz#0f2be041e0e7fcce4fde674b3a8b2dfc0cc16d5c"
   dependencies:
     "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/joi" "15.x.x"
     "@hapi/wreck" "15.x.x"
 
 "@hapi/hapi@^18.3.1":
-  version "18.3.1"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-18.3.1.tgz#936d1e24551b11486eabd6a4974bea4ec2127669"
+  version "18.3.2"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-18.3.2.tgz#c625cf6473e51cea54cd50163112c4aaa547169b"
   dependencies:
     "@hapi/accept" "3.x.x"
     "@hapi/ammo" "3.x.x"
@@ -826,7 +832,7 @@
     "@hapi/catbox" "10.x.x"
     "@hapi/catbox-memory" "4.x.x"
     "@hapi/heavy" "6.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/joi" "15.x.x"
     "@hapi/mimos" "4.x.x"
     "@hapi/podium" "3.x.x"
@@ -838,11 +844,11 @@
     "@hapi/topo" "3.x.x"
 
 "@hapi/heavy@6.x.x":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@hapi/heavy/-/heavy-6.2.0.tgz#b6c30578e1f30ab6ca17a818772f11b1116ba8cc"
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/@hapi/heavy/-/heavy-6.2.1.tgz#4f10877707b6c8a6ad1e9dbb6a3d13c24b3a3a29"
   dependencies:
     "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/joi" "15.x.x"
 
 "@hapi/hoek@6.x.x":
@@ -858,15 +864,24 @@
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-8.2.0.tgz#079a133be240ff866ad8532eaa46a691bdd91117"
 
 "@hapi/iron@5.x.x":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/iron/-/iron-5.1.0.tgz#c3b34783cd19b7b8aabe11b72b0ce3781fcee08d"
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/iron/-/iron-5.1.1.tgz#0e819729f26ee76dea68e4c4e4b5c996fd0513a5"
   dependencies:
     "@hapi/b64" "4.x.x"
     "@hapi/boom" "7.x.x"
     "@hapi/cryptiles" "4.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
-"@hapi/joi@15.x.x", "@hapi/joi@^15.0.0", "@hapi/joi@^15.1.0":
+"@hapi/joi@15.x.x":
+  version "15.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/joi/-/joi-15.1.1.tgz#c675b8a71296f02833f8d6d243b34c57b8ce19d7"
+  dependencies:
+    "@hapi/address" "2.x.x"
+    "@hapi/bourne" "1.x.x"
+    "@hapi/hoek" "8.x.x"
+    "@hapi/topo" "3.x.x"
+
+"@hapi/joi@^15.0.0", "@hapi/joi@^15.1.0":
   version "15.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/joi/-/joi-15.1.0.tgz#940cb749b5c55c26ab3b34ce362e82b6162c8e7a"
   dependencies:
@@ -880,59 +895,59 @@
   resolved "https://registry.yarnpkg.com/@hapi/marker/-/marker-1.0.0.tgz#65b0b2b01d1be06304886ce9b4b77b1bfb21a769"
 
 "@hapi/mimos@4.x.x":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/mimos/-/mimos-4.1.0.tgz#8c3345ca3b70c0e10e7e9e35f0e01d314c2d4e32"
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/mimos/-/mimos-4.1.1.tgz#4dab8ed5c64df0603c204c725963a5faa4687e8a"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     mime-db "1.x.x"
 
 "@hapi/nigel@3.x.x":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/nigel/-/nigel-3.1.0.tgz#88f78220f4f022a5bd1d61b59505367861425595"
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/nigel/-/nigel-3.1.1.tgz#84794021c9ee6e48e854fea9fb76e9f7e78c99ad"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/vise" "3.x.x"
 
 "@hapi/pez@4.x.x":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/pez/-/pez-4.1.0.tgz#97a88e5d19e756efbd24e5f583d59fa8db1d6cba"
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/pez/-/pez-4.1.1.tgz#d515ed75bc082cb6da3ab8d7804a3b41a4d63be6"
   dependencies:
     "@hapi/b64" "4.x.x"
     "@hapi/boom" "7.x.x"
     "@hapi/content" "4.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/nigel" "3.x.x"
 
 "@hapi/podium@3.x.x":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-3.4.0.tgz#350b2a93eb13b8b7e297e5bcd8b1fea26e359607"
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-3.4.1.tgz#05ae4cba21ddc78bd4d026c720ed05d8b4e9474e"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/joi" "15.x.x"
 
 "@hapi/shot@4.x.x":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/shot/-/shot-4.1.0.tgz#e564bf5474d932e947bc48ab35ff565d4e1bf57b"
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/shot/-/shot-4.1.1.tgz#7b5ca71f63a159a0b28a487cd293f35b04164439"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/joi" "15.x.x"
 
 "@hapi/somever@2.x.x":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/somever/-/somever-2.1.0.tgz#46ccf2a85ab77635982af15aa4a28c847717bdbf"
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/somever/-/somever-2.1.1.tgz#142bddf7cc4d829f678ed4e60618630a9a7ae845"
   dependencies:
     "@hapi/bounce" "1.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/statehood@6.x.x":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-6.1.0.tgz#2681c738d816281d6a590286054c8b9e779116fc"
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-6.1.1.tgz#64e9787163c57201c120b2381ba1982722ad0d8a"
   dependencies:
     "@hapi/boom" "7.x.x"
     "@hapi/bounce" "1.x.x"
     "@hapi/bourne" "1.x.x"
     "@hapi/cryptiles" "4.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
     "@hapi/iron" "5.x.x"
     "@hapi/joi" "15.x.x"
 
@@ -959,18 +974,18 @@
     "@hapi/hoek" "8.x.x"
 
 "@hapi/vise@3.x.x":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/vise/-/vise-3.1.0.tgz#4fa71b9e752f35e5519115c73a47479a7375b445"
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/vise/-/vise-3.1.1.tgz#dfc88f2ac90682f48bdc1b3f9b8f1eab4eabe0c8"
   dependencies:
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/wreck@15.x.x":
-  version "15.0.1"
-  resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-15.0.1.tgz#b9f881965a7e649a8fffe6de25ba41973ed28415"
+  version "15.0.2"
+  resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-15.0.2.tgz#e3e1b2830237792f8f6a372caee7866a77d8718d"
   dependencies:
     "@hapi/boom" "7.x.x"
     "@hapi/bourne" "1.x.x"
-    "@hapi/hoek" "6.x.x"
+    "@hapi/hoek" "8.x.x"
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
@@ -12485,7 +12500,7 @@ serverless-finch@^2.4.2:
     minimatch "^3.0.4"
     prompt-confirm "^1.2.0"
 
-serverless-offline@^5.8.0:
+serverless-offline@^5.10.1:
   version "5.10.1"
   resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-5.10.1.tgz#983c517acd078a4dc7374dcad4463c6cc89d563f"
   dependencies:
@@ -14147,8 +14162,8 @@ vary@^1, vary@~1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
 
 velocityjs@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/velocityjs/-/velocityjs-1.1.3.tgz#28c69ee90ed288749d95ac001c09bf4ffecc1c8a"
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/velocityjs/-/velocityjs-1.1.4.tgz#d8122e61d583e0421f8e40d50bdb0eaf39e160f5"
 
 vendors@^1.0.0:
   version "1.0.3"

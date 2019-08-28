@@ -40,8 +40,8 @@ provider:
         - s3:ListMultipartUploadParts
         - s3:AbortMultipartUpload
       Resource:
-        - !Sub arn:aws:s3:::uploads-${env:STAGE}-${env:AWS_REGION}
-        - !Sub arn:aws:s3:::uploads-${env:STAGE}-${env:AWS_REGION}/*
+        - arn:aws:s3:::uploads-${env:STAGE}-${env:AWS_REGION}
+        - arn:aws:s3:::uploads-${env:STAGE}-${env:AWS_REGION}/*
 
 package:
   include:

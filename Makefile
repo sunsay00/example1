@@ -6,6 +6,9 @@ vars:
 configure:
 	@yarn vars yarn configure up -v
 
+clean:
+	yarn configure clean
+
 sync:
 	tsc -b && cd ./mobile && \
 		cp -r ../packages/@inf/common/lib/ node_modules/@inf/common/lib/ && \

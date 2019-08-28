@@ -26,7 +26,12 @@ const writeTs = (outPath, data) => {
 const main = async () => {
   if (vars.STAGE == 'local') {
     return {
+      AWS_REGION: vars.AWS_REGION,
+      VPC_ID: 'LOCAL_UNUSED',
       HostedZoneId: 'LOCAL_UNUSED',
+      Subnet1: 'LOCAL_UNUSED',
+      Subnet2: 'LOCAL_UNUSED',
+      SecurityGroup_default: 'LOCAL_UNUSED',
     };
   } else {
     AWS.config = new AWS.Config({

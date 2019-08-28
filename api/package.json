@@ -30,7 +30,7 @@
     "jest": "^24.8.0",
     "jwk-to-pem": "^2.0.1",
     "serverless": "^1.48.4",
-    "serverless-offline": "^5.8.0",
+    "serverless-offline": "^5.10.1",
     "ts-jest": "^24.0.2",
     "webpack": "4.28.4",
     "webpack-cli": "3.3.6"

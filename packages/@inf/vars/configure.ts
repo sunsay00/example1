@@ -1,6 +1,6 @@
 import * as AWS from 'aws-sdk';
 import * as fs from 'fs';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import * as RT from 'runtypes';
 import * as crypto from 'crypto';
 import * as mm from 'micromatch';
@@ -390,7 +390,15 @@ const main = async (cmd: string, verbose: boolean) => {
 
   const getStackname = (name: string) => `${configuration.stage}-${name}`;
 
-  if (cmd == 'up') {
+  if (cmd == 'clean') {
+    const tmpinputsdir = `${__dirname}/.inputs`;
+    const tmpcachedir = `${__dirname}/.cache`;
+    if (fs.existsSync(tmpinputsdir))
+      execSync(`rm -rf ${tmpinputsdir}`);
+    if (fs.existsSync(tmpcachedir))
+      execSync(`rm -rf ${tmpcachedir}`);
+
+  } else if (cmd == 'up') {
     let previous = {};
     for (let f of configuration.modules) {
       const rec = typeof f == 'function' ? f(k => {
@@ -415,9 +423,10 @@ const main = async (cmd: string, verbose: boolean) => {
 
             const prev = {};
             outputs && outputs.forEach(o => typeof o == 'string' ? prev[o] = 'LOCAL_UNUSED' : prev[o.name] = o.localValue);
-            previous = appendPrev(previous, key, prev);
+            writeCache(key, prev);
             writeTs(`${tsdir}/src/vars.ts`, key, prev);
             writeJs(`${tsdir}/src/vars.js`, key, prev);
+            previous = appendPrev(previous, key, prev);
 
             console.log('');
             return true;
@@ -548,6 +557,7 @@ const main = async (cmd: string, verbose: boolean) => {
                   writeTs(`${tsdir}/vars.ts`, key, json2);
                   writeJs(`${tsdir}/vars.js`, key, json2);
                   writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'lib']);
+                  previous = appendPrev(previous, key, json2);
                 }
 
                 buffer = '';
