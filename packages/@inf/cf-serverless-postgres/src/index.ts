@@ -59,6 +59,7 @@ export default class RDSDBClient implements IRDSDBClient {
   }
 
   init = async () => {
+    if (this._client) return;
     const matches = /postgres:\/\/([^:]+):([^@]+)@([^:^\/]+):?([0-9]+)?\/(.+$)/.exec(this._rdsDbEndpoint);
     if (!matches) throw new Error('failed to parse AWS_RDS_DB_ENDPOINT');
     if (matches[4] !== undefined && isNaN(parseInt(matches[4]))) throw new Error(`invalid RDS port of '${matches[4]}'`);
@@ -88,10 +89,9 @@ export default class RDSDBClient implements IRDSDBClient {
   }
 
   deinit = async () => {
-    if (this._client != undefined) {
-      const client = this._client;
-      await new Promise<void>((resolve, reject) => client.end(err => err ? reject(err) : resolve()));
-    }
+    if (this._client == undefined) return;
+    const client = this._client;
+    await new Promise<void>((resolve, reject) => client.end(err => err ? reject(err) : resolve()));
   };
 
   async beginTransaction() {

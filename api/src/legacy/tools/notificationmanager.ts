@@ -6,9 +6,9 @@ import { UserContext } from '../types';
 export default class NotificationManager implements INotificationManager<UserContext> {
   private _aws: AWSClient;
   private _cache: ICacheClient | undefined;
-  constructor(stage: string, region: string, platformApplicationArn: string, cache?: ICacheClient) {
-    this._aws = new AWSClient(stage, region, platformApplicationArn, cache);
-    this._cache = cache;
+  constructor(params: { stage: string, region: string, platformApplicationArn: string, cache?: ICacheClient }) {
+    this._aws = new AWSClient(params.stage, params.region, params.platformApplicationArn, params.cache);
+    this._cache = params.cache;
   }
 
   async dispatchDeckFactories(store: IStore<UserContext>, sub: string, action: string, obj: M.DeckFactory) { }

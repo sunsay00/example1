@@ -1,7 +1,7 @@
 back
 front
 infra
+lib
 vars.ts
 vars.js
-lib
 vars.env

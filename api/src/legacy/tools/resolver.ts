@@ -14,16 +14,23 @@ export const createDefaultResolver = (params: {
   platformApplicationArn: string,
   db: IDBClient,
   cache?: ICacheClient,
+  onInit?: () => Promise<void>,
 }) => {
   const notifications = new NotificationManager(
     params.stage,
     params.region,
     params.platformApplicationArn,
     params.cache);
-  return createResolver(params.stage, notifications, params.db, {
-    users: store => new UsersService(notifications, store, params.locale, params.region),
-    systems: store => new SystemService(notifications, store),
-    deviceLists: store => new DeviceListsService(notifications, store),
-    sellers: store => new SellersService(notifications, store),
+  return createResolver({
+    stage: params.stage,
+    notifications,
+    db: params.db,
+    onInit: params.onInit,
+    services: {
+      users: store => new UsersService(notifications, store, params.locale, params.region),
+      systems: store => new SystemService(notifications, store),
+      deviceLists: store => new DeviceListsService(notifications, store),
+      sellers: store => new SellersService(notifications, store),
+    },
   });
 };

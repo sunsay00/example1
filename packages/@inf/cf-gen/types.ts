@@ -1,6 +1,8 @@
 import * as M from './back/api/src/types/serviceinterfaces';
 import { IStore } from './back/api/src/types/storeinterfaces';
+
 export { IStore } from './back/api/src/types/storeinterfaces';
+export { ITestingService } from './tools/testingservice';
 
 export type JSONValue = string | number | boolean | JSONObject | JSONArray;
 export type JSONObject = { [_: string]: JSONValue; }

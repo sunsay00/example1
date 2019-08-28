@@ -1,15 +1,8 @@
-import { grant } from './grant';
 import { IUserContext } from '../types';
+import Mapper from '../back/api/src/api/mapper';
 
-class TestingService {
-
-  @grant(['admins'])
-  privateUpperCase(user: IUserContext, arg: string): string { return arg.toUpperCase(); }
-
-  @grant([])
-  protectedUpperCase(user: IUserContext, arg: string): string { return arg.toUpperCase(); }
-
-  publicUpperCase(user: IUserContext, arg: string): string { return arg.toUpperCase(); }
+export type ITestingService<C extends IUserContext> = {
+  adminAuthorized(user: IUserContext, fields: string[], mapper: Mapper<C>, arg: string): Promise<string>;
+  authorized(user: IUserContext, fields: string[], mapper: Mapper<C>, arg: string): Promise<string>;
+  unauthorized(user: IUserContext, fields: string[], mapper: Mapper<C>, arg: string): Promise<string>;
 };
-
-export default TestingService;
