@@ -5,3 +5,6 @@ lib
 vars.ts
 vars.js
 vars.env
+src/vars.env
+src/vars.ts
+src/vars.js

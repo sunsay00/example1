@@ -1,4 +1,4 @@
-import { ConfigRecord } from '@inf/vars/configure';
+import { createConfigRecord } from '@inf/vars/configure';
 
 type Inputs = {
   Stage: string,
@@ -9,7 +9,7 @@ type Inputs = {
   ledgerPath: string,
 }
 
-export const Config = (opts: Inputs): ConfigRecord => ({
+export const Config = (opts: Inputs) => createConfigRecord({
   type: 'shell',
   name: 'cf-gen',
   command: 'make',

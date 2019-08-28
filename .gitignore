@@ -4,8 +4,7 @@ site/public
 packages/*/lib
 .DS_Store
 .env
-.envs
-.envs.*
+.env.*
 site/.env.*
 tsconfig.tsbuildinfo
 .git-credentials

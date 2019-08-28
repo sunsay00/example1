@@ -29,7 +29,6 @@
     ]
   },
   "include": [
-    "./__tests__/**/*",
     "./src/**/*",
     "./api.ts",
     "./auth.ts"

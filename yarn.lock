@@ -1710,6 +1710,10 @@
   version "0.0.32"
   resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.0.32.tgz#0d3cb31022f8427ea58c008af32b80da126ca4e3"
 
+"@types/yamljs@^0.2.30":
+  version "0.2.30"
+  resolved "https://registry.yarnpkg.com/@types/yamljs/-/yamljs-0.2.30.tgz#d034e1d329e46e8d0f737c9a8db97f68f81b5382"
+
 "@types/yargs-parser@*":
   version "13.0.0"
   resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-13.0.0.tgz#453743c5bbf9f1bed61d959baab5b06be029b2d0"
@@ -6815,9 +6819,9 @@ graphql-import@^0.7.1:
     lodash "^4.17.4"
     resolve-from "^4.0.0"
 
-"graphql-list-fields@git+https://github.com/kyunghoon/graphql-list-fields.git#khk2":
+"graphql-list-fields@git+https://github.com/kyunghoon/graphql-list-fields.git#khk3":
   version "1.1.0"
-  resolved "git+https://github.com/kyunghoon/graphql-list-fields.git#1fd2900d11f07591a43177e198e848ac4e86763a"
+  resolved "git+https://github.com/kyunghoon/graphql-list-fields.git#ea87e3b2f15adc4adaf36c37916dfef40ff0cc63"
 
 graphql-playground-html@1.6.12:
   version "1.6.12"

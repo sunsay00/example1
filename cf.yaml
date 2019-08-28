@@ -1,0 +1,57 @@
+---
+Parameters:
+  Stage:
+    Type: String
+  SecurityGroupIds:
+    Type: CommaDelimitedList
+  SubnetIds:
+    Type: CommaDelimitedList
+
+Resources:
+  GenLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub gen-${Stage}
+      Handler: index.handler
+      Role: !GetAtt GenLambdaRole.Arn
+      Runtime: nodejs8.10
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIds
+      #Environment:
+      #  Stage: !Sub ${Stage}
+      Code:
+        ZipFile: >
+          const handler (e, c) => {
+            console.log('WAKKA');
+          }
+
+  GenLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${Stage}GenLambdaPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:*
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DescribeInstances
+                  - ec2:AttachNetworkInterface
+                Resource: "*"

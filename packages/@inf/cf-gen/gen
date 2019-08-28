@@ -50,9 +50,9 @@ elif [[ $CMD == "seed" ]]; then
   DB_URL="${2}"
   SERVICE_ID="${3}"
 
-  ${DIR}/seed ${DB_URL} ${SERVICE_ID}
+  #${DIR}/seed ${DB_URL} ${SERVICE_ID}
 
-  DB=${DB_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+  #DB=${DB_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
 
 elif [[ $CMD == "wipetest" ]]; then
 

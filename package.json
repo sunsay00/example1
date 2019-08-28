@@ -6,7 +6,8 @@
     "packages/*",
     "api",
     "site",
-    "packages/@inf/*"
+    "packages/@inf/*",
+    "packages/@inf/cf-sls/tmp/*"
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",

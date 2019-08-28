@@ -19,7 +19,7 @@ const CFRecord = RT.Record({
   name: RT.String.withConstraint(s => verifyKey(s)),
   cfpath: RT.String,
 }).And(RT.Partial({
-  inputs: RT.Dictionary(RT.Union(RT.String, RT.Number)),
+  inputs: RT.Dictionary(RT.Union(RT.String, RT.Number, RT.Array(RT.String))),
   outputs: RT.Array(RT.Union(RT.Record({ name: RT.String, localValue: RT.String }), RT.String)),
 }));
 
@@ -42,15 +42,24 @@ const ShellRecord = RT.Record({
 
 const Record = RT.Union(CFRecord, ShellRecord);
 
-export type ConfigRecord = RT.Static<typeof Record>;
+type CFRecord = RT.Static<typeof Record>;
+type CFParams = {
+  configurationDir: string
+};
+type ConfigRecord = { record: (params: CFParams) => CFRecord };
+export const createConfigRecord = (rc: CFRecord | ((params: CFParams) => CFRecord)): ConfigRecord => ({
+  record: params => typeof rc == 'function' ? rc(params) : rc
+})
+type ConfigRecordFn = (outputs: (k: string) => string) => ConfigRecord;
+type ModuleRecord = ConfigRecordFn | ConfigRecord;
 
 export type Configuration = {
   region: string,
   stage: string,
-  modules: (((outputs: (k: string) => string) => ConfigRecord) | ConfigRecord)[],
+  modules: (ModuleRecord | ModuleRecord[])[],
 };
 
-const error = (msg: string) => console.error(colors.red(`[CONF] error: ${msg}`));
+const error = (msg: string, id?: number) => console.error(colors.red(`[CONF] error: ${msg}${id ? ` (${id})` : ''}`));
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
 
 const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean) => {
@@ -77,9 +86,9 @@ const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, cont
   return done;
 }
 
-const getHash = (data: { [_: string]: string | number | boolean }) => {
+const getHash = (data: { [_: string]: string | number | boolean | string[] }) => {
   const shasum = crypto.createHash('sha1');
-  const sorted = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
+  const sorted = entries(data).sort((a, b) => a[0].localeCompare(b[0]));
   shasum.update(JSON.stringify(sorted));
   return shasum.digest('hex');
 }
@@ -115,11 +124,11 @@ const printOutputs = (key: string, json?: { [_: string]: string }) => {
 const _keys = {};
 const verifyKey = (key: string) => {
   if (!/^[a-zA-Z0-9-_]+$/.exec(key)) {
-    error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
+    error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`, 1);
     throw new Error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
   }
   if (_keys[key]) {
-    error(`duplicate key '${key}' detected`);
+    error(`duplicate key '${key}' detected`, 2);
     throw new Error(`duplicate key '${key}' detected`);
   }
   _keys[key] = true;
@@ -159,16 +168,6 @@ const isAnyNewerThanCache = (key: string, dependsOn: string[]) => {
   return ret;
 }
 
-const isAnyNewerThanCache2 = (key: string, dependsOn: string[]) => {
-  const t1 = lastmod(`${__dirname}/.cache/${key}`);
-  for (let f of dependsOn) {
-    const t2 = lastmod(`${__dirname}/../../../${f}`)
-    if (t2 > t1)
-      return true;
-  }
-  return false;
-}
-
 const cacheExists = (key: string) =>
   fs.existsSync(`${__dirname}/.cache/${key}`);
 
@@ -190,14 +189,14 @@ const readCache = (key: string): { [_: string]: string } | undefined => {
   return undefined;
 }
 
-const isInputDirty = (key: string, inputs: { [_: string]: string | number | boolean }) => {
+const isInputDirty = (key: string, inputs: { [_: string]: string | number | boolean | string[] }) => {
   if (!fs.existsSync(`${__dirname}/.inputs/${key}`)) return true;
   const h1 = getHash(inputs);
   const h2 = fs.readFileSync(`${__dirname}/.inputs/${key}`, { encoding: 'utf8' });
   return h1 != h2;
 }
 
-const writeInput = (key: string, inputs: { [_: string]: string | number | boolean }) => {
+const writeInput = (key: string, inputs: { [_: string]: string | number | boolean | string[] }) => {
   if (!fs.existsSync(`${__dirname}/.inputs`))
     fs.mkdirSync(`${__dirname}/.inputs`);
   fs.writeFileSync(`${__dirname}/.inputs/${key}`, getHash(inputs), { encoding: 'utf8' });
@@ -246,6 +245,7 @@ const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
 
 const main = async (cmd: string, verbose: boolean) => {
   const configPath = 'configuration.ts';
+  const configurationDir = path.dirname(path.resolve(configPath));
   if (!fs.existsSync(configPath)) {
     console.log('no configuration.ts found, exiting...');
     process.exit(1);
@@ -254,16 +254,16 @@ const main = async (cmd: string, verbose: boolean) => {
   const { default: configuration } = await import('../../../configuration');
 
   if (!configuration.region) {
-    error('region not set');
+    error('region not set', 3);
     process.exit(1);
   }
 
   if (!configuration.stage) {
-    error('stage not set');
+    error('stage not set', 4);
     process.exit(1);
   }
   if (!['local', 'dev', 'beta', 'production'].includes(configuration.stage)) {
-    error('invalid stage value - must be one of <local|dev|beta|production>');
+    error('invalid stage value - must be one of <local|dev|beta|production>', 5);
     process.exit(1);
   }
 
@@ -272,7 +272,7 @@ const main = async (cmd: string, verbose: boolean) => {
   });
 
   if (configuration.modules && !Array.isArray(configuration.modules)) {
-    error('invalid modules value');
+    error('invalid modules value', 6);
     process.exit(1);
   }
 
@@ -287,11 +287,11 @@ const main = async (cmd: string, verbose: boolean) => {
       const s = stacks.Stacks[0];
       if (['CREATE_IN_PROGRESS', 'ROLLBACK_IN_PROGRESS', 'DELETE_IN_PROGRESS', 'DELETE_FAILED', 'UPDATE_IN_PROGRESS', 'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
         'UPDATE_ROLLBACK_IN_PROGRESS', 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS', 'REVIEW_IN_PROGRESS'].includes(s.StackStatus)) {
-        error(`Stack busy: ${s.StackStatus}`);
+        error(`Stack busy: ${s.StackStatus}`, 7);
         throw new Error(`Stack busy: ${s.StackStatus}`);
       }
       if (s.StackStatus == 'ROLLBACK_COMPLETE') {
-        error(`Stack '${StackName}' must be deleted manually`);
+        error(`Stack '${StackName}' must be deleted manually`, 8);
         throw new Error(`Stack '${StackName}' must be deleted manually`);
       }
       const ret = ['CREATE_COMPLETE', 'UPDATE_ROLLBACK_COMPLETE', 'UPDATE_COMPLETE', 'CREATE_COMPLETE', 'CREATE_FAILED'].includes(s.StackStatus);
@@ -310,17 +310,20 @@ const main = async (cmd: string, verbose: boolean) => {
     await cf.waitFor('stackDeleteComplete', { StackName }).promise();
   }
 
-  const up = async (StackName: string, cfPath: string, inputs: { [k: string]: string | number }, expectedOutputs: string[]) => {
+  const up = async (StackName: string, cfPath: string, inputs: { [k: string]: string | number | string[] }, expectedOutputs: string[]) => {
     const missinginputs = [];
     for (let m in inputs)
       if (!inputs[m])
         missinginputs.push(m);
     if (missinginputs.length > 0) {
-      error(`missing inputs (${missinginputs.join(', ')}) for ${StackName}`);
+      error(`missing inputs (${missinginputs.join(', ')}) for ${StackName}`, 9);
       throw new Error(`missing inputs (${missinginputs.join(', ')}) for ${StackName}`);
     }
 
-    const Parameters = Object.entries(inputs).map(([k, v]) => ({ ParameterKey: k, ParameterValue: `${v}` }));
+    const Parameters = entries(inputs).map<AWS.CloudFormation.Parameter>(([k, v]) => ({
+      ParameterKey: k,
+      ParameterValue: Array.isArray(v) ? `${v.map(i => `${i}`).join(',')}` : `${v}`
+    }));
     const TemplateBody = fs.readFileSync(cfPath, 'utf8');
     const exists = await stackExists(StackName);
     try {
@@ -347,14 +350,14 @@ const main = async (cmd: string, verbose: boolean) => {
       }
     } catch (err) {
       if (!err.message.includes('No updates are to be performed')) {
-        error(err.message);
+        error(err.message, 10);
         throw err;
       }
     }
 
     const desc = await cf.describeStacks({ StackName }).promise();
     if (desc.Stacks.length != 1) {
-      error('failed to describe stacks');
+      error('failed to describe stacks', 11);
       throw new Error('failed to describe stacks');
     }
 
@@ -364,7 +367,7 @@ const main = async (cmd: string, verbose: boolean) => {
       if (!outputs[eo])
         missing.push(eo);
     if (missing.length > 0) {
-      error(`missing outputs (${missing.join(', ')})`);
+      error(`missing outputs (${missing.join(', ')})`, 12);
       throw new Error(`missing outputs (${missing.join(', ')})`);
     }
     const unused = [];
@@ -405,10 +408,21 @@ const main = async (cmd: string, verbose: boolean) => {
 
   } else if (cmd == 'up') {
     let previous = {};
-    for (let f of configuration.modules) {
+    const modules: ModuleRecord[] = [];
+    for (let m of configuration.modules) {
+      if (Array.isArray(m)) {
+        m.forEach(i => modules.push(i));
+      } else {
+        modules.push(m);
+      }
+    }
+    for (let f of modules) {
       const rec = typeof f == 'function' ? f(k => {
         const ret = previous[k];
-        if (!ret) throw new Error(`invalid output variable '${k}'`);
+        if (!ret) {
+          error(`invalid output variable '${k}'`, 13);
+          throw new Error(`invalid output variable '${k}'`);
+        }
         return ret;
       }) : f;
 
@@ -437,9 +451,9 @@ const main = async (cmd: string, verbose: boolean) => {
             return true;
           } else {
             const inputDirty = isInputDirty(key, inputs);
-            const cfpath = `${__dirname}/../../../node_modules/@inf/${name}/${cfpath2}`;
+            const cfpath = cfpath2.startsWith('/') ? cfpath2 : `${__dirname}/../../../node_modules/@inf/${name}/${cfpath2}`;
             if (!fs.existsSync(cfpath)) {
-              error(`invalid cf module ${name} - ${cfpath} not found`);
+              error(`invalid cf module ${name} - ${cfpath} not found`, 14);
               throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
             }
 
@@ -454,7 +468,7 @@ const main = async (cmd: string, verbose: boolean) => {
               }
             }
 
-            const outs = outputs.map(o => typeof o == 'string' ? o : o.name);
+            const outs = (outputs || []).map(o => typeof o == 'string' ? o : o.name);
             const prev = await up(getStackname(name), cfpath, inputs, outs);
             writeCache(key, prev);
             writeInput(key, inputs);
@@ -467,7 +481,7 @@ const main = async (cmd: string, verbose: boolean) => {
               fs.mkdirSync(`${tsdir}/src`);
             writeTs(`${tsdir}/src/vars.ts`, key, prev);
             writeJs(`${tsdir}/src/vars.js`, key, prev);
-            writeIgnore(`${tsdir}/.gitignore`, ['src/vars.ts', 'src/vars.js', 'lib']);
+            writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'src/vars.env', 'src/vars.ts', 'src/vars.js', 'lib']);
 
             console.log('(updated)');
             return true;
@@ -561,7 +575,7 @@ const main = async (cmd: string, verbose: boolean) => {
                   writeTs(`${tsdir}/vars.ts`, key, json);
                   writeJs(`${tsdir}/vars.js`, key, json);
 
-                  writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'lib']);
+                  writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'src/vars.env', 'src/vars.ts', 'src/vars.js', 'lib']);
                   printOutputs(key, json);
                   writeCache(key, json);
                   previous = appendPrev(previous, key, json);
@@ -580,23 +594,19 @@ const main = async (cmd: string, verbose: boolean) => {
             }
           });
         }),
-      )(rec);
+      )(rec.record({ configurationDir }));
 
       if (ret == undefined) {
-        error(colors.red(`record match failed: ${JSON.stringify(rec, null, 2)}`));
+        error(`record match failed: ${JSON.stringify(rec, null, 2)}`, 15);
         process.exit(1);
       }
 
-      //console.logLn('PREV', previous);
     }
   } else if (cmd == 'down') {
     let previous = {};
     const ms = configuration.modules.map(f => {
       const n = typeof f == 'function' ? f(() => '') : f;
       const ret = parseModule(f, previous);
-      const p = {};
-      //if (n.outputs && Array.isArray(n.outputs))
-      //n.outputs.forEach(o => p[o] = true);
       previous = {};
       return ret;
     });
@@ -605,7 +615,7 @@ const main = async (cmd: string, verbose: boolean) => {
       if (m) await down(getStackname(m.name));
     }
   } else {
-    error(`unknown configure command '${cmd}'`);
+    error(`unknown configure command '${cmd}'`, 16);
     throw new Error(`unknown configure command '${cmd}'`);
   }
 };
@@ -630,6 +640,7 @@ if (cmdargs.length == 0) {
 
 const cmd = cmdargs[0];
 main(cmd, verbose).catch(err => {
-  error(err && err.message || err);
+  console.error(err);
+  error(err && err.message || err, 17);
   process.exit(1);
 });
