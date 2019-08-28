@@ -7,7 +7,6 @@ import { vars } from '@inf/cf-gen/vars';
 
 const config = verifyVars({
   stage: process.env.STAGE,
-  nodeEnv: process.env.NODE_ENV,
   corsAllowOrigin: '*',
   region: 'us-east-1',
   locale: 'en',
@@ -23,5 +22,4 @@ const resolver = createDefaultResolver({
   cache: undefined, // new CacheClient(config.redisUrl),
 });
 
-//export const handler = apiWrapper(config)(async () => ({ data: { data: { hello: 'world' } } }));
 export const handler = apiWrapper(config)(resolver.resolve);

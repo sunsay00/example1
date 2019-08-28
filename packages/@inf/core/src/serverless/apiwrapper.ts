@@ -10,7 +10,6 @@ export type UserContext = {
 
 export const apiWrapper = (params: {
   stage: string,
-  nodeEnv: string,
   corsAllowOrigin: string,
 }) => (onMain: (
   headers: { [_: string]: string },
@@ -130,10 +129,8 @@ export const apiWrapper = (params: {
       };
     }
   } catch (err) {
-    if (params.nodeEnv !== 'test' && params.nodeEnv !== 'production') {
-      //if (process.env.NODE_ENV !== 'production') {
+    if (params.stage != 'local' && params.stage != 'production')
       console.log(err.stack);
-    }
     return {
       statusCode: 400,
       headers: {

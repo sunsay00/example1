@@ -50,7 +50,7 @@ const sendPolicy = (event: CustomAuthorizerEvent, payload: { sub: string, ['cogn
   next(null, generatePolicy(payload.sub, event.methodArn, payload));
 };
 
-const processAuthRequest = (nodeEnv: string, event: CustomAuthorizerEvent, tokenIssuer: string, awsAccountId: string, apiOptions: ApiOptions, next: (err: any, result?: object) => void) => {
+const processAuthRequest = (stage: string, event: CustomAuthorizerEvent, tokenIssuer: string, awsAccountId: string, apiOptions: ApiOptions, next: (err: any, result?: object) => void) => {
   if (!event.authorizationToken) {
     console.log('missing authorization token');
     next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
@@ -76,7 +76,7 @@ const processAuthRequest = (nodeEnv: string, event: CustomAuthorizerEvent, token
 
   // fail if token is not from your User Pool
   if (decodedJwt.payload['iss'] != tokenIssuer) {
-    console.log('provided token not from userpool, expected:', tokenIssuer, 'got:', decodedJwt.payload['iss'], `NODE_ENV=${nodeEnv}`);
+    console.log('provided token not from userpool, expected:', tokenIssuer, 'got:', decodedJwt.payload['iss'], `STAGE=${stage}`);
     next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
     return;
   }
@@ -88,7 +88,7 @@ const processAuthRequest = (nodeEnv: string, event: CustomAuthorizerEvent, token
   }
 
   // verify the signature of the JWT token to ensure it's really coming from your user pool
-  if (nodeEnv === 'local') {
+  if (stage === 'local') {
     const payload = jwt.decode(token);
     if (!payload || typeof payload == 'string') {
       console.log('failed to decode token');
@@ -98,7 +98,7 @@ const processAuthRequest = (nodeEnv: string, event: CustomAuthorizerEvent, token
     sendPolicy(event, payload as any, apiOptions, next);
   } else {
     // get the kid from the token and retrieve corresponding PEM
-    const kid = nodeEnv === 'test' ? '' : (decodedJwt.header.kid || '');
+    const kid = stage === 'test' ? '' : (decodedJwt.header.kid || '');
     if (PEMS === null) {
       console.log('PEM not found');
       next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
@@ -138,7 +138,7 @@ const toPem = (keyDictionary: PemKey): string => {
 
 export const authWrapper = (params: {
   awsRegion: string,
-  nodeEnv: string,
+  stage: string,
   userPoolId: string,
 }) => domainWrapper((event: CustomAuthorizerEvent, context: Context) =>
   new Promise<any>(async (resolve, reject) => {
@@ -161,15 +161,15 @@ export const authWrapper = (params: {
 
         const userPoolURI = `https://cognito-idp.${params.awsRegion}.amazonaws.com/${params.userPoolId}`;
         if (PEMS === null) {
-          if (params.nodeEnv == 'local') {
-            processAuthRequest(params.nodeEnv, event, userPoolURI, awsAccountId, apiOptions, next);
-          } else if (params.nodeEnv === 'test') {
+          if (params.stage == 'local') {
+            processAuthRequest(params.stage, event, userPoolURI, awsAccountId, apiOptions, next);
+          } else if (params.stage == 'test') {
             const fs = require('fs');
             const path = require('path');
             const cert = fs.readFileSync(path.join(__dirname, 'test_public.key.pem'));
-            if (!cert) throw new Error('failed to load test_public.key.pem' + params.nodeEnv);
+            if (!cert) throw new Error('failed to load test_public.key.pem' + params.stage);
             PEMS = { '': cert };
-            processAuthRequest(params.nodeEnv, event, userPoolURI, awsAccountId, apiOptions, next);
+            processAuthRequest(params.stage, event, userPoolURI, awsAccountId, apiOptions, next);
           } else {
             try {
               //const path = require('path');
@@ -180,14 +180,14 @@ export const authWrapper = (params: {
               });
               const data = await res.json();
               PEMS = data['keys'].reduce((r: { [key: string]: string }, key: PemKey) => ({ ...r, [`${key.kid}`]: toPem(key) }), {});
-              processAuthRequest(params.nodeEnv, event, userPoolURI, awsAccountId, apiOptions, next);
+              processAuthRequest(params.stage, event, userPoolURI, awsAccountId, apiOptions, next);
             } catch (err) {
               console.log(`failed to retrieve the keys from the well known user-pool URI - ${err}`);
               next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
             }
           }
         } else {
-          processAuthRequest(params.nodeEnv, event, userPoolURI, awsAccountId, apiOptions, next);
+          processAuthRequest(params.stage, event, userPoolURI, awsAccountId, apiOptions, next);
         }
       } else if (token.toLowerCase() === 'guest') {
         next(null, generateGuestPolicy(event.methodArn));

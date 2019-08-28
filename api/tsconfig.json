@@ -3,10 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./build",
-    "rootDirs": [
-      "./src",
-      "./__tests__"
-    ],
+    "rootDir": ".",
     "noEmit": false,
     "inlineSourceMap": true,
     "inlineSources": true,
@@ -32,9 +29,13 @@
     ]
   },
   "include": [
-    "./src/**/*"
+    "./__tests__/**/*",
+    "./src/**/*",
+    "./api.ts",
+    "./auth.ts"
   ],
   "exclude": [
+    "build",
     "node_modules"
   ]
 }

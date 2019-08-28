@@ -3,11 +3,11 @@ test:
 	yarn vars yarn test
 
 start:
-	docker-compose up -d
-	yarn vars yarn serverless offline --host 0.0.0.0 --stage local --skipCacheInvalidation true
+	docker-compose up -d && \
+		yarn vars yarn serverless offline --host 0.0.0.0 --stage {{STAGE}} --skipCacheInvalidation true
 
 invoke:
-	yarn vars curl -H 'Authorization: Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
+	yarn vars curl -H 'Authorization: Bearer Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
 invoke.guest:
 	yarn vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{CF_API_GraphQLEndpoint}}
 
