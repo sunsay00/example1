@@ -28,7 +28,7 @@
 						(intersperse (remove (lambda (name) (member name `(__fields $ctx))) param-names) ", ") "}: any, $ctx: C, info: any) => {"
             "\n" (indent (+ ind 1)) "try {"
             (if mut? ""
-              (list "\n" (indent (+ ind 1)) "  const __fields = getFieldNames(info);"))
+              (list "\n" (indent (+ ind 1)) "  const __fields = getFieldList(info);"))
             (let ((null-checked-param-strs (map param->null-checked-str params)))
               (if (array? rettype)
                 (let ((child-type (array->type rettype)))
@@ -59,7 +59,7 @@
 					 "\n"
            ;"\nimport { grant } from '../../../../../../tools/grant';"
 					 "\nimport { GraphQLDateTime, GraphQLEmail, GraphQLPoint } from '../../../../../../tools/customtypes';"
-           "\nimport { getFieldNames } from 'graphql-list-fields';"
+           "\nimport { getFieldList } from 'graphql-list-fields';"
            "\nimport Mapper from '../../mapper';"
 					 "\nimport TestingService from '../../../../../../tools/testingservice';"
            "\nimport { IUserContext } from '../../../../../../types';"

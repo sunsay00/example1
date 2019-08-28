@@ -8,7 +8,7 @@ import { vars } from '@inf/cf-gen/vars';
 const config = verifyVars({
   stage: process.env.STAGE,
   corsAllowOrigin: '*',
-  region: 'us-east-1',
+  region: process.env.AWS_REGION,
   locale: 'en',
   platformApplicationArn: 'NYI',
 });
