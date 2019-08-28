@@ -4,7 +4,7 @@ test:
 
 start:
 	docker-compose up -d
-	yarn vars yarn serverless offline --host 0.0.0.0 --stage local --skipCacheInvalidation true --location build/_api.js
+	yarn vars yarn serverless offline --host 0.0.0.0 --stage local --skipCacheInvalidation true
 
 invoke:
 	yarn vars curl -H 'Authorization: Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}

@@ -49,8 +49,8 @@ const configuration: Configuration = {
       command: './api/make',
       args: [vars.STAGE == 'local' ? 'build' : 'deploy'],
       dependsOn: ['./api/src/**/*.ts', './api/serverless.yml'],
-      outputMatchers: {
-        GraphQLEndpoint: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm,
+      outputs: {
+        GraphQLEndpoint: vars.STAGE == 'local' ? 'http://0.0.0.0:3000/graphql' : { outputMatcher: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm }
       }
     },
     {
@@ -64,8 +64,8 @@ const configuration: Configuration = {
         './site/*.js',
         './site/static/**/*'
       ],
-      outputMatchers: {
-        SiteURL: /Serverless: Success! Your site should be available at (.*)/
+      outputs: {
+        SiteURL: { outputMatcher: /Serverless: Success! Your site should be available at (.*)/ }
       }
     },
     outputs => CDN.Config({

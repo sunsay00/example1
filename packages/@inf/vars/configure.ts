@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import * as mm from 'micromatch';
 import * as path from 'path';
 import * as colors from 'colors/safe';
+import { entries } from '@inf/common';
 
 const verifyRegEx = (value: unknown, errMessage: string) => {
   if (Object.prototype.toString.call(value) == '[object RegExp]')
@@ -31,8 +32,12 @@ const ShellRecord = RT.Record({
   cwd: RT.String,
   dependsOn: RT.Array(RT.String),
   env: RT.Dictionary(RT.String),
-  outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions'))),
-  outputs: RT.Array(RT.Record({ name: RT.String, value: RT.String }))
+  outputs: RT.Dictionary(
+    RT.Union(
+      RT.String,
+      RT.Record({
+        outputMatcher: RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions'))
+      })))
 }));
 
 const Record = RT.Union(CFRecord, ShellRecord);
@@ -470,7 +475,7 @@ const main = async (cmd: string, verbose: boolean) => {
         },
 
         shell => new Promise((resolve, reject) => {
-          const { name, command, args, env, dependsOn, outputMatchers, cwd, outputs } = shell;
+          const { name, command, args, env, dependsOn, cwd, outputs } = shell;
 
           const key = name.replace(/-/g, '_').toUpperCase();
           log(`${name} `);
@@ -533,40 +538,35 @@ const main = async (cmd: string, verbose: boolean) => {
                 writeCache(key, json);
                 previous = appendPrev(previous, key, json);
               } else {
-                let json = undefined;
-                if (outputMatchers) {
-                  const matchers = Object.entries(outputMatchers);
-                  matchers.forEach(([k, m]) => {
-                    const match = (m as RegExp).exec(buffer);
-                    if (match && match.length > 1) {
+                if (outputs) {
+                  entries(outputs).forEach(([k, v]) => {
+                    if (typeof v == 'string') {
                       if (!json) json = {};
-                      json[k] = match[1];
+                      json[k] = v;
+                    } else {
+                      const match = (v.outputMatcher as RegExp).exec(buffer);
+                      if (match && match.length > 1) {
+                        if (!json) json = {};
+                        json[k] = match[1];
+                      }
                     }
                   });
                 }
 
-                if (outputs) {
-                  let json2 = undefined;
-                  outputs.forEach(o => {
-                    if (!json2) json2 = {};
-                    json2[o.name] = o.value;
-                  });
-                  if (!fs.existsSync(tsdir))
-                    fs.mkdirSync(tsdir);
-                  writeEnvs(`${tsdir}/vars.env`, key, json2);
-                  writeTs(`${tsdir}/vars.ts`, key, json2);
-                  writeJs(`${tsdir}/vars.js`, key, json2);
-                  writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'lib']);
-                  previous = appendPrev(previous, key, json2);
-                }
-
                 buffer = '';
                 if (json) {
+                  if (!fs.existsSync(tsdir))
+                    fs.mkdirSync(tsdir);
+                  writeEnvs(`${tsdir}/vars.env`, key, json);
+                  writeTs(`${tsdir}/vars.ts`, key, json);
+                  writeJs(`${tsdir}/vars.js`, key, json);
+
+                  writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'lib']);
                   printOutputs(key, json);
                   writeCache(key, json);
                   previous = appendPrev(previous, key, json);
                 } else {
-                  printOutputs(key, json);
+                  printOutputs(key, undefined);
                   writeCache(key, prev);
                   previous = appendPrev(previous, key, prev);
                 }
