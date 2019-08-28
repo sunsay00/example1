@@ -16,11 +16,12 @@ export const createDefaultResolver = (params: {
   cache?: ICacheClient,
   onInit?: () => Promise<void>,
 }) => {
-  const notifications = new NotificationManager(
-    params.stage,
-    params.region,
-    params.platformApplicationArn,
-    params.cache);
+  const notifications = new NotificationManager({
+    stage: params.stage,
+    region: params.region,
+    platformApplicationArn: params.platformApplicationArn,
+    cache: params.cache
+  });
   return createResolver({
     stage: params.stage,
     notifications,
