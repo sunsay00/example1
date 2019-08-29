@@ -1,0 +1,13 @@
+{
+  "name": "@inf/cf-sls",
+  "version": "0.0.1",
+  "bin": {
+    "ss": "./ss"
+  },
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/yamljs": "0.2.30",
+    "yamljs": "0.3.0"
+  }
+}

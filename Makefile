@@ -1,5 +1,8 @@
 all: configure
 
+start:
+	@yarn ss api start
+
 vars:
 	@yarn vars -V
 

@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 import * as mm from 'micromatch';
 import * as path from 'path';
 import * as colors from 'colors/safe';
-import { entries } from '@inf/common';
+import { entries, Diff } from '@inf/common';
 
 const verifyRegEx = (value: unknown, errMessage: string) => {
   if (Object.prototype.toString.call(value) == '[object RegExp]')
@@ -14,7 +14,7 @@ const verifyRegEx = (value: unknown, errMessage: string) => {
   error(colors.red(errMessage));
   throw new Error(errMessage);
 }
-const CFRecord = RT.Record({
+const CloudFormationRecord = RT.Record({
   type: RT.Literal('cloudformation'),
   name: RT.String.withConstraint(s => verifyKey(s)),
   cfpath: RT.String,
@@ -40,18 +40,26 @@ const ShellRecord = RT.Record({
       })))
 }));
 
-const Record = RT.Union(CFRecord, ShellRecord);
+const Record = RT.Union(CloudFormationRecord, ShellRecord);
 
 type CFRecord = RT.Static<typeof Record>;
-type CFParams = {
+export type CFParams = {
   configurationDir: string
 };
-type ConfigRecord = { record: (params: CFParams) => CFRecord };
-export const createConfigRecord = (rc: CFRecord | ((params: CFParams) => CFRecord)): ConfigRecord => ({
-  record: params => typeof rc == 'function' ? rc(params) : rc
-})
+export type ConfigRecord = { record: (params: CFParams) => CFRecord };
+export const createConfig = (rc: ConfigRecord | ((params: CFParams) => ConfigRecord)) => ({
+  record: (params: CFParams) => typeof rc == 'function' ? rc(params).record(params) : rc.record(params)
+});
+export const createRecord = (rc: CFRecord | ((params: CFParams) => CFRecord)) => ({
+  record: typeof rc == 'function' ? rc : () => rc
+});
+export const createConfigRecord = (rc: CFRecord | ((params: CFParams) => CFRecord)) => createConfig(createRecord(rc));
+
 type ConfigRecordFn = (outputs: (k: string) => string) => ConfigRecord;
 type ModuleRecord = ConfigRecordFn | ConfigRecord;
+
+export type ShellOutput = Diff<RT.Static<typeof ShellRecord>['outputs'], undefined>;
+export type CFOutput = Diff<RT.Static<typeof CloudFormationRecord>['outputs'], undefined>;
 
 export type Configuration = {
   region: string,
@@ -62,7 +70,7 @@ export type Configuration = {
 const error = (msg: string, id?: number) => console.error(colors.red(`[CONF] error: ${msg}${id ? ` (${id})` : ''}`));
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
 
-const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean) => {
+const forEachFile = (dir: string, opts: { glob: string, recurse: boolean }, continueFn: (name: string) => boolean): boolean => {
   const d = path.resolve(dir);
   const nodes = fs.readdirSync(d);
   let done = false;
@@ -121,7 +129,7 @@ const printOutputs = (key: string, json?: { [_: string]: string }) => {
   }
 }
 
-const _keys = {};
+const _keys: { [_: string]: boolean } = {};
 const verifyKey = (key: string) => {
   if (!/^[a-zA-Z0-9-_]+$/.exec(key)) {
     error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`, 1);
@@ -135,7 +143,7 @@ const verifyKey = (key: string) => {
   return true;
 }
 
-const cleanJson = (data: unknown) => {
+const cleanJson = (data: {}) => {
   const jprev: { [_: string]: string } = {};
   Object.entries(data).forEach(([k, v]) => {
     if (typeof v == 'string')
@@ -189,17 +197,22 @@ const readCache = (key: string): { [_: string]: string } | undefined => {
   return undefined;
 }
 
-const isInputDirty = (key: string, inputs: { [_: string]: string | number | boolean | string[] }) => {
-  if (!fs.existsSync(`${__dirname}/.inputs/${key}`)) return true;
+const isInputDirty = (key: string, inputs?: { [_: string]: string | number | boolean | string[] }) => {
+  if (!inputs || !fs.existsSync(`${__dirname}/.inputs/${key}`)) return true;
   const h1 = getHash(inputs);
   const h2 = fs.readFileSync(`${__dirname}/.inputs/${key}`, { encoding: 'utf8' });
   return h1 != h2;
 }
 
-const writeInput = (key: string, inputs: { [_: string]: string | number | boolean | string[] }) => {
+const writeInput = (key: string, inputs?: { [_: string]: string | number | boolean | string[] }) => {
   if (!fs.existsSync(`${__dirname}/.inputs`))
     fs.mkdirSync(`${__dirname}/.inputs`);
-  fs.writeFileSync(`${__dirname}/.inputs/${key}`, getHash(inputs), { encoding: 'utf8' });
+  if (!inputs) {
+    if (fs.existsSync(`${__dirname}/.inputs/${key}`))
+      fs.unlinkSync(`${__dirname}/.inputs/${key}`);
+  } else {
+    fs.writeFileSync(`${__dirname}/.inputs/${key}`, getHash(inputs), { encoding: 'utf8' });
+  }
 }
 
 const writeEnvs = (outPath: string, key: string, data: { [k: string]: string }) => {
@@ -228,7 +241,7 @@ const writeTs = (outPath: string, key: string, data: { [k: string]: string }) =>
 
 const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
   if (filesToIgnore.length == 0) return;
-  const ents = [...filesToIgnore];
+  const ents = [...filesToIgnore].sort((a, b) => a.localeCompare(b));
   if (!fs.existsSync(outPath)) {
     fs.writeFileSync(outPath, ents.join('\n'), { encoding: 'utf8' });
   } else {
@@ -236,9 +249,9 @@ const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
     const pents = data.split('\n').filter(e => !!e);
     ents.forEach((e, i) => {
       if (pents.includes(e))
-        ents[i] = undefined;
+        ents[i] = '';
     });
-    const nents = [...pents, ...ents.filter(e => !!e)];
+    const nents = [...pents, ...ents.filter(e => !!e)].sort((a, b) => a.localeCompare(b));
     fs.writeFileSync(outPath, nents.join('\n'), { encoding: 'utf8' });
   }
 };
@@ -283,7 +296,7 @@ const main = async (cmd: string, verbose: boolean) => {
       const stacks = await cf.describeStacks({
         StackName
       }).promise();
-      if (stacks.Stacks.length != 1) return false;
+      if (!stacks.Stacks || stacks.Stacks.length != 1) return false;
       const s = stacks.Stacks[0];
       if (['CREATE_IN_PROGRESS', 'ROLLBACK_IN_PROGRESS', 'DELETE_IN_PROGRESS', 'DELETE_FAILED', 'UPDATE_IN_PROGRESS', 'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
         'UPDATE_ROLLBACK_IN_PROGRESS', 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS', 'REVIEW_IN_PROGRESS'].includes(s.StackStatus)) {
@@ -310,7 +323,7 @@ const main = async (cmd: string, verbose: boolean) => {
     await cf.waitFor('stackDeleteComplete', { StackName }).promise();
   }
 
-  const up = async (StackName: string, cfPath: string, inputs: { [k: string]: string | number | string[] }, expectedOutputs: string[]) => {
+  const up = async (StackName: string, cfPath: string, inputs: { [k: string]: string | number | string[] } | undefined, expectedOutputs: string[]) => {
     const missinginputs = [];
     for (let m in inputs)
       if (!inputs[m])
@@ -320,7 +333,7 @@ const main = async (cmd: string, verbose: boolean) => {
       throw new Error(`missing inputs (${missinginputs.join(', ')}) for ${StackName}`);
     }
 
-    const Parameters = entries(inputs).map<AWS.CloudFormation.Parameter>(([k, v]) => ({
+    const Parameters = inputs && entries(inputs).map<AWS.CloudFormation.Parameter>(([k, v]) => ({
       ParameterKey: k,
       ParameterValue: Array.isArray(v) ? `${v.map(i => `${i}`).join(',')}` : `${v}`
     }));
@@ -356,12 +369,12 @@ const main = async (cmd: string, verbose: boolean) => {
     }
 
     const desc = await cf.describeStacks({ StackName }).promise();
-    if (desc.Stacks.length != 1) {
+    if (!desc.Stacks || desc.Stacks.length != 1) {
       error('failed to describe stacks', 11);
       throw new Error('failed to describe stacks');
     }
 
-    const outputs = desc.Stacks[0].Outputs;
+    const outputs = desc.Stacks[0].Outputs || [];
     const missing = [];
     for (let eo in expectedOutputs)
       if (!outputs[eo])
@@ -376,22 +389,13 @@ const main = async (cmd: string, verbose: boolean) => {
         unused.push(o);
     if (unused.length > 0)
       console.log(`unused outputs (${unused.join(', ')})`);
-    const ret = {};
-    outputs.forEach(o => ret[o.OutputKey] = o.OutputValue);
+    const ret: { [_: string]: string } = {};
+    outputs.forEach(o => { if (o.OutputKey && o.OutputValue) ret[o.OutputKey] = o.OutputValue; });
     return ret;
   };
 
-  const parseModule = (m, prev) => {
-    const ret = typeof m == 'function' ? m(prev) : m;
-    return ret &&
-      ret.type && typeof ret.type == 'string' &&
-      ret.key && typeof ret.key == 'string' &&
-      (ret.inputs && typeof ret.inputs == 'object' || true) &&
-      (ret.outputs && typeof ret.outputs == 'object' || true) && ret || undefined;
-  }
-
   const appendPrev = (previous: { [_: string]: string }, key: string, prev: { [_: string]: string }) => {
-    const p = {};
+    const p: { [_: string]: string } = {};
     Object.entries(prev).map(([k, v]) => p[`${key}_${k}`] = v);
     return { ...previous, ...p };
   }
@@ -407,7 +411,7 @@ const main = async (cmd: string, verbose: boolean) => {
       execSync(`rm -rf ${tmpcachedir}`);
 
   } else if (cmd == 'up') {
-    let previous = {};
+    let previous: { [_: string]: string } = {};
     const modules: ModuleRecord[] = [];
     for (let m of configuration.modules) {
       if (Array.isArray(m)) {
@@ -440,7 +444,7 @@ const main = async (cmd: string, verbose: boolean) => {
             if (!fs.existsSync(`${tsdir}/src`))
               fs.mkdirSync(`${tsdir}/src`);
 
-            const prev = {};
+            const prev: { [_: string]: string } = {};
             outputs && outputs.forEach(o => typeof o == 'string' ? prev[o] = 'LOCAL_UNUSED' : prev[o.name] = o.localValue);
             writeCache(key, prev);
             writeTs(`${tsdir}/src/vars.ts`, key, prev);
@@ -544,7 +548,7 @@ const main = async (cmd: string, verbose: boolean) => {
               if (verbose && buffer.length > 0)
                 console.log('');
 
-              let json = undefined;
+              let json: { [_: string]: string } | undefined = undefined;
               try { json = cleanJson(JSON.parse(buffer.trim())); } catch (ex) { }
               if (json) {
                 buffer = '';
@@ -603,6 +607,8 @@ const main = async (cmd: string, verbose: boolean) => {
 
     }
   } else if (cmd == 'down') {
+    error('down not yet implemented');
+    /*
     let previous = {};
     const ms = configuration.modules.map(f => {
       const n = typeof f == 'function' ? f(() => '') : f;
@@ -614,6 +620,7 @@ const main = async (cmd: string, verbose: boolean) => {
       const m = ms[i - 1];
       if (m) await down(getStackname(m.name));
     }
+    */
   } else {
     error(`unknown configure command '${cmd}'`, 16);
     throw new Error(`unknown configure command '${cmd}'`);

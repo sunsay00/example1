@@ -5,25 +5,25 @@
   "main": "./index.ts",
   "license": "MIT",
   "devDependencies": {
-    "@types/debounce": "^1.2.0",
-    "@types/react-dom": "^16.8.5",
-    "babel-plugin-react-native-web": "^0.11.5",
-    "gatsby": "^2.13.39",
-    "gatsby-plugin-google-fonts": "^1.0.0",
-    "gatsby-plugin-page-creator": "^2.1.5",
-    "gatsby-plugin-react-native-web": "^2.0.0-beta.0",
-    "gatsby-plugin-typescript": "^2.0.15",
-    "gatsby-source-filesystem": "^2.1.6",
+    "@types/debounce": "1.2.0",
+    "@types/react-dom": "16.8.5",
+    "babel-plugin-react-native-web": "0.11.5",
+    "gatsby": "2.13.39",
+    "gatsby-plugin-google-fonts": "1.0.0",
+    "gatsby-plugin-page-creator": "2.1.5",
+    "gatsby-plugin-react-native-web": "2.0.0-beta.0",
+    "gatsby-plugin-typescript": "2.0.15",
+    "gatsby-source-filesystem": "2.1.6",
     "react": "16.9.0",
     "react-dom": "16.9.0"
   },
   "dependencies": {
     "@inf/core-ui": "*",
-    "debounce": "^1.2.0",
-    "gatsby-background-image": "^0.8.2",
-    "gatsby-image": "^2.2.7",
-    "prism-react-renderer": "^0.1.6",
-    "react-live": "^2.1.2",
-    "react-native-web": "^0.11.4"
+    "debounce": "1.2.0",
+    "gatsby-background-image": "0.8.2",
+    "gatsby-image": "2.2.7",
+    "prism-react-renderer": "0.1.6",
+    "react-live": "2.1.2",
+    "react-native-web": "0.11.4"
   }
 }

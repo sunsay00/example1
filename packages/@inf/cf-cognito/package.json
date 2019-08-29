@@ -8,9 +8,9 @@
     "@types/sjcl": "1.0.27"
   },
   "dependencies": {
-    "amazon-cognito-identity-js": "^3.0.15",
+    "amazon-cognito-identity-js": "3.0.15",
     "aws-sdk": "2.507.0",
     "sjcl": "git+https://github.com/kyunghoon/react-native-sjcl.git",
-    "runtypes": "^4.0.0"
+    "runtypes": "4.0.0"
   }
 }

@@ -18,10 +18,9 @@
       "es2017",
       "esnext.asynciterable"
     ],
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "typeRoots": [
-      "./node_modules/@types",
-      "./src/api/@types"
+      "./node_modules/@types"
     ],
     "types": [
       "node",
@@ -29,7 +28,7 @@
     ]
   },
   "include": [
-    "./src/**/*"
+    "./index.ts"
   ],
   "exclude": [
     "node_modules"

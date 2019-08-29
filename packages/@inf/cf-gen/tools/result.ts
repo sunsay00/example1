@@ -13,7 +13,7 @@ export const fn = <R>(f: () => void | Promise<R>): Promise<Result<R>> => new Pro
 export function to<T, U = never>(promise: Promise<T>): Promise<Result<T>>;
 export function to<T>(promise: T | Promise<T>): Result<T> | Promise<Result<T>> {
   if (promise && (promise as any).then != undefined) {
-    return (promise as Promise<T>).then(k => ok(k)).catch(err => er(err));
+    return (promise as Promise<T>).then(k => ok(k)).catch(err => er<T>(err));
   } else {
     try {
       return ok(promise as T);

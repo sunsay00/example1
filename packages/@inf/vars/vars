@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+// @ts-check
 
 const { vars } = require('./index');
 const { spawn } = require('child_process');
+const path = require('path');
 
 const substitute = (arg, envs) => {
   const re = /{{([^}]+)}}/gm;
@@ -18,6 +20,8 @@ const substitute = (arg, envs) => {
     return a.replace(`{{${b}}}`, v);
   }, arg);
 }
+
+let g_verbose = false;
 
 const argv = [];
 process.argv.forEach(v => {

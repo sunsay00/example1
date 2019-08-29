@@ -6,12 +6,13 @@
     "packages/*",
     "api",
     "site",
+    "test",
     "packages/@inf/*",
     "packages/@inf/cf-sls/tmp/*"
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",
     "react-native-cli": "^2.0.1",
-    "typescript": "3.5.3"
+    "typescript": "3.6.2"
   }
 }

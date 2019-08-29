@@ -2,9 +2,9 @@ back
 front
 infra
 lib
-vars.ts
-vars.js
-vars.env
 src/vars.env
-src/vars.ts
 src/vars.js
+src/vars.ts
+vars.env
+vars.js
+vars.ts
