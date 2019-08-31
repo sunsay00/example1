@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`users should create and remove a user using only backend 1`] = `
+Object {
+  "fields": Object {
+    "avatarUri": "http://http://placehold.it/24x24",
+    "name": "testname",
+  },
+  "locale": "en",
+  "region": "us-east-1",
+  "sub": "mysub1",
+}
+`;
+
+exports[`users should create and remove a user using only backend 2`] = `
+Object {
+  "fields": Object {
+    "avatarUri": "http://http://placehold.it/24x24",
+    "name": "testname",
+  },
+  "sub": "mysub1",
+}
+`;

@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`customtypes datetime should succeed with good inline arguments 1`] = `
+Object {
+  "data": Object {
+    "testDateTimeType": Object {
+      "dateTime": "1970-01-01T00:00:00.000Z",
+    },
+  },
+}
+`;
+
+exports[`customtypes datetime should succeed with good input 1`] = `
+Object {
+  "data": Object {
+    "testDateTimeType": Object {
+      "dateTime": "1970-01-01T00:00:00.000Z",
+    },
+  },
+}
+`;
+
+exports[`customtypes email should fail when invoked with bad input 1`] = `
+Object {
+  "errors": Array [
+    [GraphQLError: Variable "$email" got invalid value "w38957fgj"; Expected type Email. invalid email],
+  ],
+}
+`;
+
+exports[`customtypes email should succeed with good input 1`] = `
+Object {
+  "data": Object {
+    "testEmailType": Object {
+      "email": "a@b.co",
+    },
+  },
+}
+`;

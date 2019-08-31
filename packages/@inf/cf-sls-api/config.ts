@@ -1,30 +1,48 @@
 import * as Sls from '@inf/cf-sls/config';
 
 type Inputs = {
-  packageJsonPath: string,
-  tsconfigJsonPath: string,
-
-  handlers: { [_: string]: Sls.Handler },
-
   stage: string,
   region: string,
   accountId: string,
+  dependsOn?: string[],
   cognitoUserPoolId: string,
   securityGroupIds: string[],
   subnetIds: string[],
+  apiHandler: {
+    packageJsonPath: string,
+    filepath: string,
+    entrypoint: string,
+  }
 }
 
 export const Config = (inputs: Inputs) => {
   const name = 'cf-sls-api';
-
   return Sls.Config({
     name,
     alias: 'api',
 
-    packageJsonPath: inputs.packageJsonPath,
-    tsconfigJsonPath: inputs.tsconfigJsonPath,
+    dependsOn: inputs.dependsOn,
 
-    handlers: inputs.handlers,
+    handlers: {
+      auth: {
+        packageJsonPath: `${__dirname}/package.json`,
+        filepath: `src/auth.ts`, entrypoint: 'handler'
+      },
+      api: {
+        packageJsonPath: inputs.apiHandler.packageJsonPath,
+        filepath: inputs.apiHandler.filepath,
+        entrypoint: inputs.apiHandler.entrypoint,
+        environment: { STAGE: inputs.stage },
+        events: [{
+          http: {
+            authorizer: 'auth',
+            path: 'graphql',
+            method: 'post',
+            cors: true
+          }
+        }]
+      },
+    },
 
     stage: inputs.stage,
     region: inputs.region,
@@ -65,7 +83,7 @@ export const Config = (inputs: Inputs) => {
       ]
     }],
     webpackIgnore: /^pg-native$/,
-    dockerServices: {
+    dockerServices: inputs.stage != 'local' ? undefined : {
       [`redis_${name}`]: {
         container_name: `redis_${name}`,
         ports: ['6379:6379'],
@@ -90,4 +108,4 @@ export const Config = (inputs: Inputs) => {
       { command: 'yarn', args: ['-s', 'serverless', 'offline', '--host', '0.0.0.0', '--stage', '{{STAGE}}', '--skipCacheInvalidation', 'true'] }
     ]
   });
-}
+};

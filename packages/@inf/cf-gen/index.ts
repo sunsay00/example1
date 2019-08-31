@@ -18,9 +18,11 @@ export const createCachedResolver = <C extends IUserContext>(
   onPreResolve?: () => Promise<void>,
   onPostResolve?: () => Promise<void>,
 ) => {
+  const store = new RDSStore(stage, db);
   return new Resolver(
     stage,
-    createServiceMapper(notifications, new CacheStore(new RDSStore(stage, db), cache), services),
+    store,
+    createServiceMapper(notifications, new CacheStore(store, cache), services),
     onPreResolve,
     onPostResolve);
 };
@@ -33,9 +35,11 @@ export const createResolver = <C extends IUserContext>(params: {
   onPreResolve?: () => Promise<void>,
   onPostResolve?: () => Promise<void>,
 }) => {
+  const store = new RDSStore(params.stage, params.db);
   return new Resolver(
     params.stage,
-    createServiceMapper(params.notifications, new RDSStore(params.stage, params.db), params.services),
+    store,
+    createServiceMapper(params.notifications, store, params.services),
     params.onPreResolve,
     params.onPostResolve);
 }

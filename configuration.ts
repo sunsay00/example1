@@ -47,16 +47,6 @@ const configuration: Configuration = {
     }),
     createConfigRecord({
       type: 'shell',
-      name: 'cf-api',
-      command: './api/make',
-      args: [vars.STAGE == 'local' ? 'build' : 'deploy'],
-      dependsOn: ['./api/src/**/*.ts', './api/serverless.yml'],
-      outputs: {
-        GraphQLEndpoint: vars.STAGE == 'local' ? 'http://0.0.0.0:3000/graphql' : { outputMatcher: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm }
-      }
-    }),
-    createConfigRecord({
-      type: 'shell',
       name: 'cf-site',
       command: './site/make',
       args: [vars.STAGE == 'local' ? 'build' : 'deploy'],
@@ -77,18 +67,27 @@ const configuration: Configuration = {
       HostedZoneId: outputs('CF_AWSINFO_HostedZoneId'),
     }),
     outputs => SlsApi.Config({
-      packageJsonPath: './api/package.json',
-      tsconfigJsonPath: './api/tsconfig.json',
-      handlers: {
-        api: { filename: 'api.ts', entrypoint: 'handler' },
-        auth: { filename: 'auth.ts', entrypoint: 'handler' }
-      },
       stage: vars.STAGE,
       region: vars.AWS_REGION,
       accountId: vars.AWS_ACCOUNT_ID,
       cognitoUserPoolId: outputs('CF_COGNITO_UserPoolId'),
       securityGroupIds: [outputs('CF_AWSINFO_SecurityGroup_default')],
       subnetIds: [outputs('CF_AWSINFO_Subnet1'), outputs('CF_AWSINFO_Subnet2')],
+      apiHandler: {
+        packageJsonPath: './api/package.json',
+        filepath: 'src/api.ts',
+        entrypoint: 'handler',
+      },
+    }),
+    outputs => Sls.Config({
+      name: 'cf-sls-test',
+      handlers: { test: { packageJsonPath: './test/package.json', filepath: 'index.ts', entrypoint: 'handler' } },
+      stage: vars.STAGE,
+      region: vars.AWS_REGION,
+      slsVpc: {
+        securityGroupIds: [outputs('CF_AWSINFO_SecurityGroup_default')],
+        subnetIds: [outputs('CF_AWSINFO_Subnet1'), outputs('CF_AWSINFO_Subnet2')],
+      }
     })
   ]
 }
@@ -106,36 +105,21 @@ const _configuration: Configuration = {
       FromEmail: `verification@${vars.NICE_NAME}`
     }),
     outputs => SlsApi.Config({
-      packageJsonPath: './api/package.json',
-      tsconfigJsonPath: './api/tsconfig.json',
-      handlers: {
-        auth: { filename: 'src/auth.ts', entrypoint: 'handler' },
-        api: {
-          filename: 'src/api.ts',
-          entrypoint: 'handler',
-          environment: { STAGE: vars.STAGE },
-          events: [{
-            http: {
-              authorizer: 'auth',
-              path: 'graphql',
-              method: 'post',
-              cors: true
-            }
-          }]
-        },
-      },
       stage: vars.STAGE,
       region: vars.AWS_REGION,
       accountId: vars.AWS_ACCOUNT_ID,
       cognitoUserPoolId: outputs('CF_COGNITO_UserPoolId'),
       securityGroupIds: [outputs('CF_AWSINFO_SecurityGroup_default')],
       subnetIds: [outputs('CF_AWSINFO_Subnet1'), outputs('CF_AWSINFO_Subnet2')],
+      apiHandler: {
+        packageJsonPath: './api/package.json',
+        filepath: 'src/api.ts',
+        entrypoint: 'handler',
+      },
     }),
     outputs => Sls.Config({
-      packageJsonPath: './test/package.json',
-      tsconfigJsonPath: './test/tsconfig.json',
       name: 'cf-sls-test',
-      handlers: { test: { filename: 'index.ts', entrypoint: 'handler' } },
+      handlers: { test: { packageJsonPath: './test/package.json', filepath: 'index.ts', entrypoint: 'handler' } },
       stage: vars.STAGE,
       region: vars.AWS_REGION,
       slsVpc: {
@@ -146,4 +130,4 @@ const _configuration: Configuration = {
   ]
 }
 
-export default _configuration;
+export default configuration;

@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`decks should create a default deck 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "name": "card1",
+      "value": 1,
+    },
+  ],
+  "description": null,
+  "factory": null,
+  "sub": "1",
+  "title": null,
+  "user": null,
+}
+`;
+
+exports[`decks should deny getting someone else's single deck 1`] = `
+Object {
+  "data": Object {
+    "decksFindById": null,
+  },
+}
+`;
+
+exports[`decks should fail to remove a deck belonging to another user 1`] = `
+Object {
+  "data": Object {
+    "decksRemove": null,
+  },
+}
+`;
+
+exports[`decks should find factories by location 1`] = `
+Object {
+  "description": "mandesc1",
+  "location": Object {
+    "lat": 0.1,
+    "lon": 0.1,
+  },
+  "name": "man1",
+}
+`;
+
+exports[`decks should find factories by location 2`] = `
+Object {
+  "description": "mandesc2",
+  "location": Object {
+    "lat": 0.2,
+    "lon": 0.1,
+  },
+  "name": "man2",
+}
+`;
+
+exports[`decks should find factories by location 3`] = `
+Object {
+  "description": "mandesc3",
+  "location": Object {
+    "lat": 0.3,
+    "lon": 0.1,
+  },
+  "name": "man3",
+}
+`;
+
+exports[`decks should get a single deck 1`] = `
+Object {
+  "data": Object {
+    "decksFindById": Object {
+      "sub": "9",
+      "user": null,
+    },
+  },
+}
+`;
+
+exports[`decks should remove a deck 1`] = `
+Object {
+  "cards": Array [],
+  "description": "mydescription",
+  "expiresAt": null,
+  "factory": null,
+  "sub": "mysub",
+  "title": "mytitle",
+  "user": null,
+}
+`;
+
+exports[`decks should update a deck 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "name": "name2",
+      "value": 2,
+    },
+  ],
+  "description": "a different description",
+  "expiresAt": "1970-01-01T00:01:17.777Z",
+  "factory": null,
+  "sub": "2",
+  "title": "a different title",
+  "user": null,
+}
+`;

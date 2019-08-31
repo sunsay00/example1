@@ -3,7 +3,7 @@ import { makeExecutableSchema } from 'graphql-tools';
 import typeDefs from '../back/api/src/api/resolver/v1/typedefs';
 import resolvers from '../back/api/src/api/resolver/v1/resolvers';
 import Mapper from '../back/api/src/api/mapper';
-import { IUserContext, Variables, ITestingService } from '../types';
+import { IUserContext, Variables, ITestingService, IStore } from '../types';
 import { grant } from '../tools/grant';
 
 class TestingService implements ITestingService<IUserContext> {
@@ -28,13 +28,15 @@ class TestingService implements ITestingService<IUserContext> {
 
 export class Resolver<C extends IUserContext> {
   private _stage: string;
+  private _store: IStore<C>;
   private _mapper: Mapper<C>;
   private _schema: GraphQLSchema;
   private _onPre?: () => Promise<void>;
   private _onPost?: () => Promise<void>;
 
-  constructor(stage: string, mapper: Mapper<C>, onPreResolve?: () => Promise<void>, onPostResolve?: () => Promise<void>) {
+  constructor(stage: string, store: IStore<C>, mapper: Mapper<C>, onPreResolve?: () => Promise<void>, onPostResolve?: () => Promise<void>) {
     this._stage = stage;
+    this._store = store;
     this._mapper = mapper;
     this._schema = makeExecutableSchema({
       typeDefs,
@@ -43,6 +45,8 @@ export class Resolver<C extends IUserContext> {
     this._onPre = onPreResolve;
     this._onPost = onPostResolve;
   }
+
+  store = () => this._store;
 
   resolve = async <C extends IUserContext>(headers: { [_: string]: string }, query: string, variables: Variables, user: C) => {
     this._onPre && await this._onPre();

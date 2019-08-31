@@ -1,25 +1,15 @@
 test:
-	yarn gen wipetest
-	yarn vars yarn test
+	yarn ss api test
 
 start:
-	docker-compose up -d && \
-		yarn vars yarn serverless offline --host 0.0.0.0 --stage {{STAGE}} --skipCacheInvalidation true
+	yarn ss api start
 
 invoke:
-	@yarn vars curl -H 'Authorization: Bearer Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
+	yarn ss api invoke.api
 invoke.guest:
-	@yarn vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{CF_API_GraphQLEndpoint}}
+	yarn ss api invoke.api.guest
 
 logs.auth:
 	yarn vars sls logs -s {{STAGE}} -f auth -t -r {{AWS_REGION}}
 logs.api:
 	yarn vars sls logs -s {{STAGE}} -f api -t -r {{AWS_REGION}}
-
-build:
-	rm -f build/tsconfig.tsbuildinfo && tsc && yarn webpack && cp build/_api.js build/api.js && cp build/_auth.js build/auth.js
-
-deploy: build
-	yarn vars yarn sls deploy --no-confirm
-
-.PHONY: build deploy

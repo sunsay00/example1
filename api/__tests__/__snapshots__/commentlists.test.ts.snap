@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`commentlists should CRUD a comment list 1`] = `
+Object {
+  "comments": Array [
+    Object {
+      "id": "0",
+      "likeCount": 0,
+      "removed": false,
+      "sub": "commenter",
+      "text": "mytext1",
+      "user": Object {
+        "avatarUri": "avataruri.jpg",
+        "name": "the user",
+      },
+    },
+    Object {
+      "id": "1",
+      "likeCount": 0,
+      "removed": false,
+      "sub": "commenter",
+      "text": "mytext1",
+      "user": Object {
+        "avatarUri": "avataruri.jpg",
+        "name": "the user",
+      },
+    },
+  ],
+  "parentId": "myparentid",
+}
+`;
+
+exports[`commentlists should append a comment to an existing list 1`] = `
+Object {
+  "id": "1",
+  "likeCount": 0,
+  "removed": false,
+  "sub": "commenter",
+  "text": "mytext22",
+  "user": Object {
+    "avatarUri": "avataruri.jpg",
+    "name": "the user",
+  },
+}
+`;
+
+exports[`commentlists should append a comment to an existing list 2`] = `
+Object {
+  "id": "1",
+  "likeCount": 0,
+  "removed": false,
+  "sub": "commenter",
+  "text": "mytext33",
+  "user": Object {
+    "avatarUri": "avataruri.jpg",
+    "name": "the user",
+  },
+}
+`;

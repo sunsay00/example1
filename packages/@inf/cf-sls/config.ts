@@ -55,25 +55,10 @@ const DockerRecord = RT.Record({
   }))),
 });
 
-const PackageJsonRecord = RT.Partial({
-  dependencies: RT.Dictionary(RT.String),
-  devDependencies: RT.Dictionary(RT.String)
-});
-
-const TSConfigRecord = RT.Record({
-  compilerOptions: RT.Partial({
-    rootDir: RT.String,
-  })
-});
-
 type SLSConfig = RT.Static<typeof SLSConfigRecord>;
-
 type SLSVpc = SLSConfig['provider']['vpc'];
-
 type SLSIamRoleStatement = Diff<SLSConfig['provider']['iamRoleStatements'], undefined>[0];
-
 type SLSFunction = Diff<SLSConfig['functions'], undefined>[''];
-
 type DockerService = RT.Static<typeof DockerRecord>['services'][''];
 
 type StartCommand = {
@@ -82,18 +67,19 @@ type StartCommand = {
 };
 
 export type Handler = {
-  filename: string,
+  packageJsonPath: string,
+  filepath: string,
   entrypoint: string
   environment?: SLSFunction['environment'],
   events?: SLSFunction['events']
 };
 
-export type InputsAux = {
+type Inputs = {
   name: string,
   alias?: string,
 
-  __dirname: string,
-  rootDir: string,
+  dependsOn?: string[],
+
   handlers: { [_: string]: Handler },
 
   stage: string,
@@ -111,18 +97,48 @@ export type InputsAux = {
   packageDependencies?: { [_: string]: string },
   packageDevDependencies?: { [_: string]: string },
 
-  outputs?: ShellOutput
-
   startCommands?: StartCommand[]
 };
 
-export const ConfigAux = (inputs: InputsAux) => createConfigRecord(({ configurationDir }) => {
+const buildOutputs = (stage: string, handlers: { [_: string]: Handler }): ShellOutput =>
+  fromEntries(entries(handlers).map<[string, string | { outputMatcher: RegExp }][]>(([k, v]) =>
+    v.events ? v.events.map(e =>
+      [`${capitalizeFirstLetter(k)}Endpoint`, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : {
+        outputMatcher: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm
+      }]) :
+      [[`${capitalizeFirstLetter(k)}Function`, {
+        outputMatcher: new RegExp(`Service Information[\\s\\S]+functions:[\\s\\S]+${k}: (.+)`, 'gm')
+      }]]
+  ).flat());
+
+const PackageJsonRecord = RT.Partial({
+  dependencies: RT.Dictionary(RT.String),
+  devDependencies: RT.Dictionary(RT.String)
+});
+
+export const Config = (inputs: Inputs) => createConfigRecord(({ configurationDir }) => {
 
   if (!fs.existsSync(`${__dirname}/tmp`))
     fs.mkdirSync(`${__dirname}/tmp`);
   const instdir = `${__dirname}/tmp/${inputs.name}`;
   if (!fs.existsSync(instdir))
     fs.mkdirSync(instdir);
+
+  const { dependencies, devDependencies } = entries(inputs.handlers).reduce((acc, [_, v]) => {
+    try {
+      const packagejson = JSON.parse(fs.readFileSync(v.packageJsonPath, { encoding: 'utf8' }));
+      if (!PackageJsonRecord.guard(packagejson)) {
+        return { dependencies: acc.dependencies, devDependencies: acc.devDependencies };
+      } else {
+        return {
+          dependencies: { ...acc.dependencies, ...(packagejson.dependencies || {}) },
+          devDependencies: { ...acc.devDependencies, ...(packagejson.devDependencies || {}) }
+        };
+      }
+    } catch (err) {
+      throw new Error('failed to parse package.json');
+    }
+  }, { dependencies: inputs.packageDependencies || {}, devDependencies: inputs.packageDevDependencies || {} });
 
   const maybePush = <T>(x: T | T[], r?: T[]): T[] =>
     Array.isArray(x) ? (r ? [...x, ...r] : x) : (r ? [x, ...r] : [x]);
@@ -139,11 +155,11 @@ export const ConfigAux = (inputs: InputsAux) => createConfigRecord(({ configurat
       iamRoleStatements: inputs.slsIamRoleStatements,
     },
     package: {
-      include: maybePush(entries(inputs.handlers).map(([_, v]) => `build/${v.filename.replace(/(.ts$)/, '.js')}`), inputs.slsIncludes),
+      include: maybePush(entries(inputs.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), inputs.slsIncludes),
       exclude: maybePush('**/*', inputs.slsExcludes)
     },
     functions: fromEntries(entries(inputs.handlers).map(([k, v]) => [k, {
-      handler: `./build/${v.filename.replace(/(.ts$)/, '')}.${v.entrypoint}`,
+      handler: `./build/${v.filepath.replace(/(.ts$)/, '')}.${v.entrypoint}`,
       environment: v.environment,
       events: v.events
     }])),
@@ -152,21 +168,52 @@ export const ConfigAux = (inputs: InputsAux) => createConfigRecord(({ configurat
   if (!SLSConfigRecord.guard(sls))
     throw new Error('invalid sls configuration');
 
-  const reldir = inputs.rootDir;//path.relative(inputs.__dirname, inputs.rootDir);
+  const dirnames = entries(inputs.handlers).map(([k, v]) => ({
+    dirname: path.dirname(v.packageJsonPath),
+    filename: v.filepath
+  }));
 
-  const ROOTDIR = `${configurationDir}/${inputs.__dirname}/${inputs.rootDir == '.' ? '' : inputs.rootDir}`;
-  const INSTDIR = `${instdir}`;
-  const invReldir = path.relative(INSTDIR, ROOTDIR);
+  const computeCommonAncestorPath = (paths: string[]) => {
+    if (paths.length == 0) return '';
+    const splits = paths.map(p => p.split('/'));
+    const n = splits.reduce((a, b) => a == 0 ? b.length : Math.min(a, b.length), 0);
+    let ret = 0;
+    for (let i = 0; i < n; ++i) {
+      for (let j = 1; j < splits.length; ++j)
+        if (splits[0][i] != splits[j][i])
+          return splits[0].slice(0, ret).join('/');
+      ++ret;
+    }
+    return splits[0].slice(0, n).join('/');
+  }
+
+  const absRoots = dirnames.map(v => ({
+    abspath: path.resolve(v.dirname.startsWith('/') ? v.dirname : `${configurationDir}/${v.dirname}`),
+    filename: v.filename.replace(/(.ts$)/, '.js'),
+  }));
+  const commonAncestor = computeCommonAncestorPath(absRoots.map(v => v.abspath));
+
+  const rootDirs = dirnames.map(v => {
+    const ROOTDIR = v.dirname.startsWith('/') ? v.dirname : `${configurationDir}/${v.dirname}/`;
+    return path.relative(instdir, ROOTDIR);
+  });
+
+  const rootDir = rootDirs.length == 1 ? rootDirs[0] : '../'.repeat(rootDirs.map(r => {
+    const m = r.match(/^(\.\.\/)+/g);
+    return !m || m.length != 1 ? 0 : m[0].length / 3;
+  }).reduce((a, b) => a == 0 ? b : Math.max(a, b), 0));;
 
   // generate webpack.config.js
   const webpackconf = `// @ts-check
 // this file has been automatically generated
 
-const path = require('path');
 const webpack = require('webpack');
 module.exports = {
   mode: 'production',
-  entry: { ${entries(inputs.handlers).map(([k, v]) => `${path.basename(v.filename.replace(/(.ts$)/, ''))}: path.resolve('./build/${reldir}/${v.filename.replace(/(.ts$)/, '.js')}')`).join(', ')} },
+  entry: { ${absRoots.map(v => {
+    const p = v.abspath.replace(new RegExp(`^${commonAncestor}`), './build');
+    return `${path.basename(v.filename.replace(/(.js$)/, ''))}: '${p}/${v.filename}'`;
+  }).join(', ')} },
   target: 'node',
   output: {
     path: '${instdir}/build',
@@ -187,7 +234,8 @@ module.exports = {
     compilerOptions: {
       composite: true,
       outDir: './build',
-      rootDir: invReldir,
+      rootDir,
+      rootDirs,
       noEmit: false,
       inlineSourceMap: true,
       inlineSources: true,
@@ -195,20 +243,22 @@ module.exports = {
       alwaysStrict: true,
       module: 'commonjs',
       target: 'es6',
-      lib: ['dom', 'es5', 'scripthost', 'es2017', 'esnext.asynciterable'],
+      lib: ['dom', 'es5', 'scripthost', 'es2017', 'es2018', 'es2019', 'esnext.asynciterable'],
       baseUrl: './src',
       typeRoots: ['./node_modules/@types'],
       types: ['node', 'jest']
     },
     include: [
-      `${invReldir}/**/*.ts`,
-      `${invReldir}/**/*.tsx`,
-      //reldir == '.' ? `./${inputs.__dirname}/**/*` : './src/**/*',
-      //...entries(inputs.handlers).map(([k, v]) => v.filename)
+      ...rootDirs.map(invReldir => [
+        `${invReldir}/**/*.ts`
+      ]).flat(),
     ],
     exclude: [
       'build',
-      'node_modules'
+      'node_modules',
+      ...rootDirs.map(invReldir => [
+        `${invReldir}/__tests__/**/*.ts`
+      ]).flat(),
     ]
   };
 
@@ -233,24 +283,22 @@ module.exports = {
       //"graphql": "14.4.2",
       //"graphql-tools": "4.0.5",
       "@inf/vars": "*",
-      ...(inputs.packageDependencies || {}),
+      ...(dependencies || {}),
     },
     "devDependencies": {
       //"@inf/cf-cognito": "*",
       //"@types/aws-lambda": "8.10.31",
       //"@types/graphql": "14.2.3",
-      //"@types/jest": "24.0.18",
+      "@types/jest": "24.0.18",
       //"@types/node": "12.6.8",
-      //"@types/yamljs": "0.2.30",
-      //"babel-jest": "24.8.0",
-      //"jest": "24.8.0",
+      "babel-jest": "24.8.0",
+      "jest": "24.8.0",
       "jwk-to-pem": "2.0.1",
       "serverless": "1.48.4",
-      //"ts-jest": "24.0.2",
+      "ts-jest": "24.0.2",
       "webpack": "4.28.4",
       "webpack-cli": "3.3.6",
-      //"yamljs": "0.3.0",
-      ...(inputs.packageDevDependencies || {}),
+      ...(devDependencies || {}),
     }
   }
 
@@ -261,7 +309,13 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
-  testPathIgnorePatterns: ["/build/"]
+  testPathIgnorePatterns: ["/build/"],
+  roots: [
+    ${dirnames.map(v => {
+    const ROOTDIR = v.dirname.startsWith('/') ? v.dirname : `${configurationDir}/${v.dirname}/`;
+    return `'<rootDir>/${path.relative(instdir, ROOTDIR)}'`;
+  }).join(',\n    ')}
+  ]
 };
 `;
   // generate makefile
@@ -270,10 +324,10 @@ module.exports = {
       v.events ? v.events.map(e =>
         `# DESC: invokes api endpoint
 invoke.${k}:
-\t@$(YARN) vars curl -H 'Authorization: Bearer Poopy' -H 'Content-Type: application/json' -d "hello world" {{CF_API_GraphQLEndpoint}}
+\t@$(YARN) vars curl -H 'Authorization: Bearer Poopy' -H 'Content-Type: application/json' -d "hello world" {{${inputs.name.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}
 # DESC: invoke guest api endpoint
 invoke.${k}.guest:
-\t@$(YARN) vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{CF_API_GraphQLEndpoint}}`) :
+\t@$(YARN) vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.name.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`) :
         [`# DESC: invokes lambda function
 invoke.${k}:
 \t@$(YARN) vars $(YARN) sls invoke --function ${k}`]
@@ -281,23 +335,24 @@ invoke.${k}:
 
   const startCmds: StartCommand[] = [];
   if (inputs.dockerServices)
-    startCmds.push({ command: 'docker-compose', args: ['up', '-d', '2>&1'] });
+    startCmds.push({ command: 'docker-compose', args: ['up', '-d'] });
   if (inputs.startCommands)
     inputs.startCommands.forEach(c => startCmds.push(c));
 
   const makefile = `YARN = yarn -s
 
+# DESC: run tests
 test:
 \t@$(YARN) gen wipetest && \\
 \t\t$(YARN) vars $(YARN) test
 
 ${inputs.dockerServices && `# DESC: start docker
 up:
-\t@docker-compose up -d 2>&1` || ''}
+\t@docker-compose up -d` || ''}
 
 ${inputs.dockerServices && `# DESC: stop docker
 down:
-\t@docker-compose down 2>&1` || ''}
+\t@docker-compose down` || ''}
 
 ${startCmds.length == 0 ? '' : `# DESC: starts server
 start:
@@ -310,13 +365,14 @@ logs.${k}:
 \t@$(YARN) vars sls logs -s {{STAGE}} -f ${k} -t -r {{AWS_REGION}}`).join('\n')}
 
 build:
-\t@cd ${INSTDIR} && \\
+\t@cd ${instdir} && \\
 \t\t$(YARN) install --prefer-offline && \\
 \t\trm -f build/tsconfig.tsbuildinfo && \\
 \t\ttsc -b tsconfig.sls.json && \\
-\t\t$(YARN) webpack --config ${INSTDIR}/webpack.config.js && \\
+\t\t$(YARN) webpack --config ${instdir}/webpack.config.js && \\
+\t\tmkdir -p build/src && \\
 ${entries(inputs.handlers).map(([k, v]) =>
-    `\t\tcp build/_${path.basename(v.filename.replace(/(.ts$)/, '.js'))} build/${v.filename.replace(/(.ts$)/, '.js')}`).join(' && \\\n')}
+    `\t\tcp build/_${path.basename(v.filepath.replace(/(.ts$)/, '.js'))} build/${v.filepath.replace(/(.ts$)/, '.js')}`).join(' && \\\n')}
 
 deploy: build
 \t@$(YARN) vars $(YARN) sls deploy --no-confirm
@@ -324,120 +380,36 @@ deploy: build
 .PHONY: build deploy
 `;
 
-  const dockerServices = inputs.dockerServices && { version: '2', services: inputs.dockerServices } || undefined;
-  if (dockerServices && !DockerRecord.guard(dockerServices))
-    throw new Error('invalid docker config');
-
   fs.writeFileSync(`${instdir}/serverless.yml`, yamljs.stringify(sls, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
   fs.writeFileSync(`${instdir}/webpack.config.js`, webpackconf, { encoding: 'utf8' });
   fs.writeFileSync(`${instdir}/tsconfig.sls.json`, JSON.stringify(tsconfig, null, 2), { encoding: 'utf8' });
   fs.writeFileSync(`${instdir}/package.json`, JSON.stringify(packagejson, null, 2), { encoding: 'utf8' });
   fs.writeFileSync(`${instdir}/jest.config.js`, jestconfig, { encoding: 'utf8' });
   fs.writeFileSync(`${instdir}/Makefile`, makefile, { encoding: 'utf8' });
-  if (!dockerServices) {
-    fs.existsSync(`${instdir}/docker-compose.yml`) && fs.unlinkSync(`${instdir}/docker-compose.yml`);
-  } else {
-    fs.writeFileSync(`${instdir}/docker-compose.yml`, yamljs.stringify(dockerServices, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
+  if (inputs.dockerServices) {
+    const dockerServices = inputs.dockerServices && { version: '2', services: inputs.dockerServices } || undefined;
+    if (dockerServices && !DockerRecord.guard(dockerServices))
+      throw new Error('invalid docker config');
+
+    if (!dockerServices) {
+      fs.existsSync(`${instdir}/docker-compose.yml`) && fs.unlinkSync(`${instdir}/docker-compose.yml`);
+    } else {
+      fs.writeFileSync(`${instdir}/docker-compose.yml`, yamljs.stringify(dockerServices, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
+    }
   }
+
+  const dependsOn = [
+    ...entries(inputs.handlers).map(([_, v]) => v.packageJsonPath),
+    ...entries(inputs.handlers).map(([_, v]) => `${path.dirname(v.packageJsonPath)}/**/*.ts`),
+    ...(inputs.dependsOn || [])];
 
   return {
     type: 'shell',
+    dependsOn,
     name: inputs.name,
     cwd: instdir,
     command: 'make',
     args: inputs.stage == 'local' ? ['build'] : ['deploy'],
-    outputs: inputs.outputs
+    outputs: buildOutputs(inputs.stage, inputs.handlers)
   };
 });
-
-const buildOutputs = (stage: string, handlers: { [_: string]: Handler }): ShellOutput =>
-  fromEntries(entries(handlers).map<[string, string | { outputMatcher: RegExp }][]>(([k, v]) =>
-    v.events ? v.events.map(e =>
-      [`${capitalizeFirstLetter(k)}Endpoint`, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : {
-        outputMatcher: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm
-      }]) :
-      [[`${capitalizeFirstLetter(k)}Function`, {
-        outputMatcher: new RegExp(`Service Information[\\s\\S]+functions:[\\s\\S]+${k}: (.+)`, 'gm')
-      }]]
-  ).flat());
-
-type Inputs = {
-  packageJsonPath: string,
-  tsconfigJsonPath: string,
-
-  name: string,
-  alias?: string,
-
-  handlers: { [_: string]: Handler },
-
-  stage: string,
-  region: string,
-  slsVpc?: SLSVpc,
-  slsIamRoleStatements?: SLSIamRoleStatement[]
-  slsIncludes?: string[],
-  slsExcludes?: string[],
-  slsPlugins?: string[],
-
-  webpackIgnore?: RegExp,
-
-  dockerServices?: { [_: string]: DockerService },
-
-  packageDependencies?: { [_: string]: string },
-  packageDevDependencies?: { [_: string]: string },
-
-  startCommands?: StartCommand[],
-};
-
-export const Config = (inputs: Inputs) => createConfig(() => {
-
-  if (!fs.existsSync(inputs.packageJsonPath))
-    throw new Error(`failed to find package.json ${inputs.packageJsonPath}`);
-  const packagejson = JSON.parse(fs.readFileSync(inputs.packageJsonPath, { encoding: 'utf8' }));
-  if (!PackageJsonRecord.guard(packagejson))
-    throw new Error('failed to parse package.json');
-
-  if (!fs.existsSync(inputs.tsconfigJsonPath))
-    throw new Error(`failed to find tsconfig.json ${inputs.tsconfigJsonPath}`);
-  const tsconfig = JSON.parse(fs.readFileSync(inputs.tsconfigJsonPath, { encoding: 'utf8' }));
-  if (!TSConfigRecord.guard(tsconfig))
-    throw new Error('failed to parse tsconfig.json');
-
-  const packageDirname = path.dirname(inputs.packageJsonPath);
-  const tsconfigDirname = path.dirname(inputs.tsconfigJsonPath);
-  if (packageDirname != tsconfigDirname)
-    throw new Error(`package.json and tsconfig.json must reside in the same directory`);
-
-  const rootDir = tsconfig.compilerOptions.rootDir || '.';
-
-  const packageDependencies = inputs.packageDependencies;// = packagejson.dependencies ? Object.keys(packagejson.dependencies) : undefined;
-  const packageDevDependencies = inputs.packageDevDependencies;// = packagejson.devDependencies ? Object.keys(packagejson.devDependencies) : undefined;
-
-  return ConfigAux({
-    name: inputs.name,
-    alias: inputs.alias,
-
-    __dirname: packageDirname,
-    rootDir,
-
-    handlers: inputs.handlers,
-
-    stage: inputs.stage,
-    region: inputs.region,
-    slsVpc: inputs.slsVpc,
-    slsIamRoleStatements: inputs.slsIamRoleStatements,
-    slsIncludes: inputs.slsIncludes,
-    slsExcludes: inputs.slsExcludes,
-    slsPlugins: inputs.slsPlugins,
-
-    webpackIgnore: inputs.webpackIgnore,
-
-    dockerServices: inputs.dockerServices,
-
-    packageDependencies,
-    packageDevDependencies,
-
-    startCommands: inputs.startCommands,
-
-    outputs: buildOutputs(inputs.stage, inputs.handlers)
-  });
-})

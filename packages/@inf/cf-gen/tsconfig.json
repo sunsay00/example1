@@ -6,6 +6,7 @@
     "rootDir": ".",
     "experimentalDecorators": true,
     "types": [
+      "node",
       "jest"
     ],
   },

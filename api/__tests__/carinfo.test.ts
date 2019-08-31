@@ -1,3 +1,4 @@
+import "jest";
 import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import RDSDBClient from '@inf/cf-serverless-postgres';

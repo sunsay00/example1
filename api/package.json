@@ -14,5 +14,9 @@
     "test": "jest"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@inf/cf-sls": "*",
+    "@inf/vars": "*",
+    "@inf/cf-gen": "*"
+  }
 }
