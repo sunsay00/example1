@@ -1,5 +1,5 @@
 test:
-	yarn ss api test
+	yarn ss api test $(ARGS)
 
 start:
 	yarn ss api start

@@ -6,6 +6,15 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+process.on("SIGINT", function () {
+  console.log("", false, function (e) {
+    if (e) {
+      //Handle error here.
+    }
+    process.exit();
+  });
+});
+
 const error = str => console.error(colors.red(`[SS] ${str}`));
 
 const printusage = () => {
@@ -42,10 +51,20 @@ const makefileReadRules = makefilepath => {
 }
 
 const makefileInvokeRule = (makefilepath, rule, args) => new Promise((resolve, reject) => {
-  console.log('SLS_SS_ARGS:', `"${args.join(' ')}"`);
-  const proc = spawn('make', [rule], { cwd: path.dirname(makefilepath), stdio: 'inherit', env: { ...process.env, SLS_SS_ARGS: `"${args.map(s => `${s}`).join(' ')}"` } });
+  const proc = spawn('make', [rule], {
+    shell: true,
+    cwd: path.dirname(makefilepath),
+    env: {
+      ...process.env,
+      SLS_SS_ARGS: `"${args.map(s => `'${s}'`).join(' ')}"`,
+      FORCE_COLOR: 'true'
+    }
+  });
+  proc.stdout.on('data', data => process.stdout.write(data.toString()));
+  proc.stderr.on('data', data => process.stderr.write(data.toString()));
   proc.on('close', code => {
-    if (code == 0) resolve();
+    proc.stdin.end();
+    if (code == 0) setTimeout(() => resolve(), 1000);
     else reject(new Error(`failed to invoke make rule '${rule}'`));
   });
 })
@@ -74,7 +93,6 @@ const main = async (fnname, args) => {
     makefilePrintRules(fnname, cmds);
   }
 };
-
 
 const [_1, _2, fnname, ...args] = process.argv;
 main(fnname, args).catch(console.error);

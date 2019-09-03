@@ -222,7 +222,7 @@
                (map model-emit models)
                "\n"
                "\nexport const createDeck = async <C extends IUserContext>(resolver: Resolver<C>, $ctx: C, factoryId: string, title?: string, description?: string): Promise<M.Deck> => {"
-               "\n  const createQuery = `mutation ($factoryId: String!, $expiresAt: DateTime, $cards: [M.DeckCardInput!]!, $title: String = null, $description: String = null) {"
+               "\n  const createQuery = `mutation ($factoryId: String!, $expiresAt: DateTime, $cards: [DeckCardInput!]!, $title: String = null, $description: String = null) {"
                "\n      decksCreate (factoryId: $factoryId, expiresAt: $expiresAt, cards: $cards, title: $title, description: $description) {"
                "\n        sub id createdAt updatedAt factory { id } expiresAt user { name, avatarUri } cards { name value } title description"
                "\n      }"

@@ -185,7 +185,7 @@ describe('decks', () => {
     expect(decksJson.data.decksFindAll.items.length).toBeGreaterThan(2);
   });
 
-  it.skip('should have a null user if the user does not exist', async () => {
+  it('should have a null user if the user does not exist', async () => {
     const ctx: IUserContext = { sub: 'mysub', groups: [] };
 
     const { id, createdAt, updatedAt, ...deck } = await fix.createDeck(resolver, ctx, '0', 'mytitle', 'mydescription');
@@ -196,18 +196,11 @@ describe('decks', () => {
     expect(result).toBeDefined();
   });
 
-  console.error('!!!!');
-
   it('should find factories by location', async () => {
-    console.error('--------------->>');
     const ctx: IUserContext = { sub: 'factoriesuser1', groups: [] };
-    console.error('--------------->>>>');
     const { id: id1, ...man1 } = await fix.deckFactoriesCreate(resolver, ctx, 'man1', 'mandesc1', { lon: 0.1, lat: 0.1 });
-    console.error('--------------->>  >>');
     const { id: id2, ...man2 } = await fix.deckFactoriesCreate(resolver, ctx, 'man2', 'mandesc2', { lon: 0.1, lat: 0.2 });
-    console.error('--------------->>  >>  >>', man2);
     const { id: id3, ...man3 } = await fix.deckFactoriesCreate(resolver, ctx, 'man3', 'mandesc3', { lon: 0.1, lat: 0.3 });
-    console.error('----------------> man1', man1);
     expect(man1).toMatchSnapshot();
     expect(man2).toMatchSnapshot();
     expect(man3).toMatchSnapshot();

@@ -76,6 +76,23 @@ Object {
 }
 `;
 
+exports[`decks should have a null user if the user does not exist 1`] = `
+Object {
+  "cards": Array [
+    Object {
+      "name": "card1",
+      "value": 1,
+    },
+  ],
+  "description": "mydescription",
+  "expiresAt": "1970-01-01T00:00:54.321Z",
+  "factory": null,
+  "sub": "mysub",
+  "title": "mytitle",
+  "user": null,
+}
+`;
+
 exports[`decks should remove a deck 1`] = `
 Object {
   "cards": Array [],
