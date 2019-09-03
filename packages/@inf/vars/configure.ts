@@ -42,18 +42,20 @@ const ShellRecord = RT.Record({
 
 const Record = RT.Union(CloudFormationRecord, ShellRecord);
 
+export type CFEvent = 'CREATE' | 'CLEAN';
+
 type CFRecord = RT.Static<typeof Record>;
 export type CFParams = {
   configurationDir: string
 };
-export type ConfigRecord = { record: (params: CFParams) => CFRecord };
+export type ConfigRecord = { record: (event: CFEvent, params: CFParams) => CFRecord };
 export const createConfig = (rc: ConfigRecord | ((params: CFParams) => ConfigRecord)) => ({
-  record: (params: CFParams) => typeof rc == 'function' ? rc(params).record(params) : rc.record(params)
+  record: (event: CFEvent, params: CFParams) => typeof rc == 'function' ? rc(params).record(event, params) : rc.record(event, params)
 });
-export const createRecord = (rc: CFRecord | ((params: CFParams) => CFRecord)) => ({
+export const createRecord = (rc: CFRecord | ((event: CFEvent, params: CFParams) => CFRecord)) => ({
   record: typeof rc == 'function' ? rc : () => rc
 });
-export const createConfigRecord = (rc: CFRecord | ((params: CFParams) => CFRecord)) => createConfig(createRecord(rc));
+export const createConfigRecord = (rc: CFRecord | ((event: CFEvent, params: CFParams) => CFRecord)) => createConfig(createRecord(rc));
 
 type ConfigRecordFn = (outputs: (k: string) => string) => ConfigRecord;
 type ModuleRecord = ConfigRecordFn | ConfigRecord;
@@ -402,6 +404,16 @@ const main = async (cmd: string, verbose: boolean) => {
 
   const getStackname = (name: string) => `${configuration.stage}-${name}`;
 
+  let previous: { [_: string]: string } = {};
+  const modules: ModuleRecord[] = [];
+  for (let m of configuration.modules) {
+    if (Array.isArray(m)) {
+      m.forEach(i => modules.push(i));
+    } else {
+      modules.push(m);
+    }
+  }
+
   if (cmd == 'clean') {
     const tmpinputsdir = `${__dirname}/.inputs`;
     const tmpcachedir = `${__dirname}/.cache`;
@@ -410,16 +422,11 @@ const main = async (cmd: string, verbose: boolean) => {
     if (fs.existsSync(tmpcachedir))
       execSync(`rm -rf ${tmpcachedir}`);
 
-  } else if (cmd == 'up') {
-    let previous: { [_: string]: string } = {};
-    const modules: ModuleRecord[] = [];
-    for (let m of configuration.modules) {
-      if (Array.isArray(m)) {
-        m.forEach(i => modules.push(i));
-      } else {
-        modules.push(m);
-      }
+    for (let f of modules) {
+      const rec = typeof f == 'function' ? f(k => previous[k]) : f;
+      rec.record('CLEAN', { configurationDir });
     }
+  } else if (cmd == 'up') {
     for (let f of modules) {
       const rec = typeof f == 'function' ? f(k => {
         const ret = previous[k];
@@ -598,7 +605,7 @@ const main = async (cmd: string, verbose: boolean) => {
             }
           });
         }),
-      )(rec.record({ configurationDir }));
+      )(rec.record('CREATE', { configurationDir }));
 
       if (ret == undefined) {
         error(`record match failed: ${JSON.stringify(rec, null, 2)}`, 15);
