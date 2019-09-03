@@ -6,15 +6,6 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-process.on("SIGINT", function () {
-  console.log("", false, function (e) {
-    if (e) {
-      //Handle error here.
-    }
-    process.exit();
-  });
-});
-
 const error = str => console.error(colors.red(`[SS] ${str}`));
 
 const printusage = () => {
