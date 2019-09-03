@@ -47,17 +47,17 @@ const makefileInvokeRule = (makefilepath, rule, args) => new Promise((resolve, r
     cwd: path.dirname(makefilepath),
     env: {
       ...process.env,
-      SLS_SS_ARGS: `"${args.map(s => `'${s}'`).join(' ')}"`,
+      SLS_SS_ARGS: `"${args.map(s => s.replace(/'/g, '\'')).join(' ')}"`,
       FORCE_COLOR: 'true'
     }
   });
   proc.stdout.on('data', data => process.stdout.write(data.toString()));
   proc.stderr.on('data', data => process.stderr.write(data.toString()));
   proc.on('close', code => {
-    proc.stdin.end();
-    if (code == 0) setTimeout(() => resolve(), 1000);
+    if (code == 0) resolve();
     else reject(new Error(`failed to invoke make rule '${rule}'`));
   });
+  proc.stdin.end();
 })
 
 const makefilePrintRules = (fnname, rules) => {

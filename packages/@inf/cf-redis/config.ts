@@ -1,10 +1,11 @@
 import { createConfigRecord } from '@inf/vars/configure';
 
-export type Inputs = {};
+export const Config = (inputs: {
 
-export const Config = (inputs: Inputs) => createConfigRecord({
+}) => createConfigRecord({
   type: 'shell',
-  name: 'cf-redis',
+  rootDir: __dirname,
   command: 'echo',
   args: ['-n', 'NYI'],
+  outputs: {}
 });

@@ -32,6 +32,8 @@ const main = async () => {
       Subnet1: 'LOCAL_UNUSED',
       Subnet2: 'LOCAL_UNUSED',
       SecurityGroup_default: 'LOCAL_UNUSED',
+      AvailabilityZone1: 'LOCAL_UNUSED',
+      AvailabilityZone2: 'LOCAL_UNUSED',
     };
   } else {
     AWS.config = new AWS.Config({

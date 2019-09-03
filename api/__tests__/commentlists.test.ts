@@ -3,7 +3,7 @@ import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import RDSDBClient from '@inf/cf-serverless-postgres';
 import { fixtures as fix, IUserContext, User, CommentItemInput } from '@inf/cf-gen';
-import { vars } from '@inf/cf-gen/vars';
+import { vars } from '../src/vars';
 
 const config = verifyVars({
   STAGE: process.env.STAGE,

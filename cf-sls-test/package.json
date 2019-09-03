@@ -5,7 +5,10 @@
   "private": true,
   "devDependencies": {
     "@inf/cf-sls": "*",
-    "@inf/vars": "*"
+    "@inf/vars": "*",
+    "@types/pg": "6.1.41"
   },
-  "dependencies": {}
+  "dependencies": {
+    "pg": "6.1.0"
+  }
 }

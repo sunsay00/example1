@@ -1,15 +1,16 @@
 import { createConfigRecord } from '@inf/vars/configure';
 
-export type Inputs = {
+export const Config = (inputs: {
   SiteCertificateArn: string,
   Domain: string,
-  Stage: string,
   HostedZoneId: string
-};
-
-export const Config = (inputs: Inputs) => createConfigRecord({
+}) => createConfigRecord(async ({ stage }) => ({
   type: 'cloudformation',
-  name: 'cf-cdn',
+  rootDir: __dirname,
   cfpath: './cf.yaml',
-  inputs
-});
+  inputs: {
+    ...inputs,
+    Stage: stage
+  },
+  outputs: {}
+}));

@@ -1,24 +1,22 @@
 import { createConfigRecord } from '@inf/vars/configure';
 
-export type Inputs = {
-  Stage: string,
+export const Config = (inputs: {
   Domain: string,
   InvitationEmailSubject: string,
   VerificationEmailSubject: string,
   FromEmail: string,
-};
-
-export type Outputs = {
-  IdentityPoolId: string,
-  UserPoolId: string,
-  WebUserPoolClientId: string,
-  MobileUserPoolClientId: string
-};
-
-export const Config = (inputs: Inputs) => createConfigRecord({
+}) => createConfigRecord(async ({ stage }) => ({
   type: 'cloudformation',
-  name: 'cf-cognito',
+  rootDir: __dirname,
   cfpath: './cf.yaml',
-  inputs,
-  outputs: ['CognitoIdentityPoolId', 'UserPoolId', 'WebUserPoolClientId', 'MobileUserPoolClientId'] as (keyof Outputs)[]
-});
+  inputs: {
+    ...inputs,
+    Stage: stage
+  },
+  outputs: {
+    CognitoIdentityPoolId: '',
+    UserPoolId: '',
+    WebUserPoolClientId: '',
+    MobileUserPoolClientId: ''
+  }
+}));

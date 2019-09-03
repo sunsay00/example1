@@ -1,6 +1,6 @@
 import { authWrapper } from '@inf/core';
 import { verifyVars } from '@inf/common';
-import { vars } from '@inf/cf-cognito/src/vars';
+import { vars } from './vars';
 
 const params = verifyVars({
   awsRegion: process.env.AWS_REGION,

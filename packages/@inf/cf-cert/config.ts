@@ -1,17 +1,13 @@
 import { createConfigRecord } from '@inf/vars/configure';
 
-export type Inputs = {
+export const Config = (inputs: {
   Domain: string,
-};
-
-export type Outputs = {
-  CertificateArn: string
-}
-
-export const Config = (inputs: Inputs) => createConfigRecord({
+}) => createConfigRecord({
   type: 'cloudformation',
-  name: 'cf-cert',
+  rootDir: __dirname,
   cfpath: './cf.yaml',
   inputs,
-  outputs: ['CertificateArn'] as (keyof Outputs)[]
+  outputs: {
+    CertificateArn: ''
+  }
 });

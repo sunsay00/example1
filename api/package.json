@@ -16,7 +16,6 @@
   "dependencies": {},
   "devDependencies": {
     "@inf/cf-sls": "*",
-    "@inf/vars": "*",
     "@inf/cf-gen": "*"
   }
 }

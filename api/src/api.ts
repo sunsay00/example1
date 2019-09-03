@@ -2,7 +2,7 @@ import { apiWrapper } from '@inf/core';
 import { verifyVars } from '@inf/common';
 //import CacheClient from '@inf/cf-redis';
 import RDSDBClient from '@inf/cf-serverless-postgres';
-import { vars } from '@inf/cf-gen/vars';
+import { vars } from './vars';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 
 const config = verifyVars({

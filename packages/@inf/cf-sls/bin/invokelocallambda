@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+// @ts-check
+
+const path = require('path');
+const AWS = require('aws-sdk');
+
+const main = async (region, FunctionName, data) => {
+  const lambda = new AWS.Lambda({
+    apiVersion: '2015-03-31',
+    endpoint: 'http://localhost:3000',
+    region,
+    accessKeyId: 'UNUSED',
+    secretAccessKey: 'UNUSED',
+  });
+
+  const ret = await lambda.invoke({
+    FunctionName,
+    InvocationType: 'Event',
+    LogType: 'None',
+    Payload: JSON.stringify({ body: data }),
+  }).promise();
+  if (ret.StatusCode == 200) {
+    return ret.Payload;
+  } else {
+    throw new Error(`Internal Error: (${ret.StatusCode})`);
+  }
+};
+
+if (process.argv.length != 5) {
+  console.log(`usage: ${path.basename(process.argv[1])} <region> <function-name> <data>`);
+  process.exit(1);
+}
+
+const [_1, _2, region, functionName, data] = process.argv;
+
+console.log(region, functionName, data);
+
+main(region, functionName, data).then(x => {
+  console.log(x);
+  process.exit(0);
+}).catch(err => {
+  console.error(err);
+  process.exit(1);
+});

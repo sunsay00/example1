@@ -12,6 +12,7 @@
     "aws-sdk": "2.507.0",
     "aws-lambda": "0.1.2",
     "runtypes": "4.0.0",
-    "graphql-tools": "4.0.5"
+    "graphql-tools": "4.0.5",
+    "jwk-to-pem": "1.2.6"
   }
 }

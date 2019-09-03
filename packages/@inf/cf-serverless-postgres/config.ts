@@ -1,18 +1,20 @@
 import { createConfigRecord } from '@inf/vars/configure';
 
-export type Inputs = {
-  Stage: string,
+export const Config = (inputs: {
   DatabaseName: string,
   MasterUsername: string,
   MasterUserPassword: string,
   MinCapacity: number,
   MaxCapacity: number
-};
-
-export const Config = (inputs: Inputs) => createConfigRecord({
+}) => createConfigRecord(async ({ stage }) => ({
   type: 'cloudformation',
-  name: 'cf-serverless-postgres',
+  rootDir: __dirname,
   cfpath: './cf.yaml',
-  inputs,
-  outputs: [{ name: 'RDSClusterEndpointAddress', localValue: 'localhost' }]
-});
+  inputs: {
+    ...inputs,
+    Stage: stage
+  },
+  outputs: {
+    RDSClusterEndpointAddress: stage == 'local' ? 'localhost' : '',
+  }
+}));

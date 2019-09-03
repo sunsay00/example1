@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 import * as mm from 'micromatch';
 import * as path from 'path';
 import * as colors from 'colors/safe';
-import { entries, Diff } from '@inf/common';
+import { fromEntries, entries, Diff, substitute } from '@inf/common';
 
 const verifyRegEx = (value: unknown, errMessage: string) => {
   if (Object.prototype.toString.call(value) == '[object RegExp]')
@@ -14,60 +14,101 @@ const verifyRegEx = (value: unknown, errMessage: string) => {
   error(colors.red(errMessage));
   throw new Error(errMessage);
 }
+
+const _fqModuleIds: { [_: string]: boolean } = {};
+const verifyFQModuleId = (s: string) => {
+  if (!/^[a-zA-Z0-9-_:]+$/.exec(s)) {
+    error(`invalid fqModuleid'${s}' - only letters, digits, dashes, colons, and underscores are allowed`, 1);
+    throw new Error(`invalid fqModuleid'${s}' - only letters, digits, dashes, and underscores are allowed`);
+  }
+  if (_fqModuleIds[s]) {
+    error(`duplicate fqModuleid '${s}' detected`, 2);
+    throw new Error(`duplicate fqModuleid '${s}' detected`);
+  }
+  _fqModuleIds[s] = true;
+  return true;
+}
+const fqModuleIdExists = (s: string): boolean => {
+  return !!_fqModuleIds[s];
+}
+
+const verifyId = (s: string) => {
+  if (!/^[a-zA-Z0-9-_]+$/.exec(s)) {
+    error(`invalid id '${s}' - only letters, digits, dashes, and underscores are allowed`, 1);
+    throw new Error(`invalid id '${s}' - only letters, digits, dashes, and underscores are allowed`);
+  }
+  return true;
+}
+
 const CloudFormationRecord = RT.Record({
   type: RT.Literal('cloudformation'),
-  name: RT.String.withConstraint(s => verifyKey(s)),
   cfpath: RT.String,
 }).And(RT.Partial({
+  id: RT.String.withConstraint(s => verifyId(s)),
+  vars: RT.Dictionary(RT.String),
   inputs: RT.Dictionary(RT.Union(RT.String, RT.Number, RT.Array(RT.String))),
-  outputs: RT.Array(RT.Union(RT.Record({ name: RT.String, localValue: RT.String }), RT.String)),
+}));
+
+const ReplaceVarsRecord = RT.Record({
+  type: RT.Literal('replace-vars'),
+  fqModuleId: RT.String.withConstraint(s => fqModuleIdExists(s)),
+}).And(RT.Partial({
+  id: RT.String.withConstraint(s => verifyId(s)),
+  silent: RT.Boolean,
+  vars: RT.Dictionary(RT.String),
 }));
 
 const ShellRecord = RT.Record({
   type: RT.Literal('shell'),
-  name: RT.String.withConstraint(s => verifyKey(s)),
   command: RT.String,
   args: RT.Array(RT.String),
 }).And(RT.Partial({
+  id: RT.String.withConstraint(s => verifyId(s)),
   cwd: RT.String,
   dependsOn: RT.Array(RT.String),
+  vars: RT.Dictionary(RT.String),
   env: RT.Dictionary(RT.String),
-  outputs: RT.Dictionary(
-    RT.Union(
-      RT.String,
-      RT.Record({
-        outputMatcher: RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions'))
-      })))
+  outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions')))
 }));
 
-const Record = RT.Union(CloudFormationRecord, ShellRecord);
+const Record = RT.Union(CloudFormationRecord, ShellRecord, ReplaceVarsRecord);
 
-export type CFEvent = 'CREATE' | 'CLEAN';
+export type CFParams = { configurationDir: string, stage: string, region: string };
 
-type CFRecord = RT.Static<typeof Record>;
-export type CFParams = {
-  configurationDir: string
+type CFRecord<R extends { [_: string]: string }> = RT.Static<typeof Record> & {
+  rootDir: string,
+  outputs: R,
+  children?: (reg: Registerer) => Promise<void>
 };
-export type ConfigRecord = { record: (event: CFEvent, params: CFParams) => CFRecord };
-export const createConfig = (rc: ConfigRecord | ((params: CFParams) => ConfigRecord)) => ({
-  record: (event: CFEvent, params: CFParams) => typeof rc == 'function' ? rc(params).record(event, params) : rc.record(event, params)
-});
-export const createRecord = (rc: CFRecord | ((event: CFEvent, params: CFParams) => CFRecord)) => ({
-  record: typeof rc == 'function' ? rc : () => rc
-});
-export const createConfigRecord = (rc: CFRecord | ((event: CFEvent, params: CFParams) => CFRecord)) => createConfig(createRecord(rc));
 
-type ConfigRecordFn = (outputs: (k: string) => string) => ConfigRecord;
-type ModuleRecord = ConfigRecordFn | ConfigRecord;
-
-export type ShellOutput = Diff<RT.Static<typeof ShellRecord>['outputs'], undefined>;
-export type CFOutput = Diff<RT.Static<typeof CloudFormationRecord>['outputs'], undefined>;
+export type ConfigRecord<R extends { [_: string]: string }> = { up: (params: CFParams, reg: Registerer) => Promise<CFRecord<R>>, clean: (params: CFParams, reg: Registerer) => Promise<R> };
+type ConfigRecordFn<R extends { [_: string]: string }> = (outputs: (k: string) => string) => ConfigRecord<R>;
+export type ModuleRecord<R extends { [_: string]: string }> = ConfigRecordFn<R> | ConfigRecord<R>;
+type Registerer = <R extends { [_: string]: string }>(record: ModuleRecord<R>) => Promise<R>;
+export type ShellOutputMatchers = Diff<RT.Static<typeof ShellRecord>['outputMatchers'], undefined>;
 
 export type Configuration = {
-  region: string,
-  stage: string,
-  modules: (ModuleRecord | ModuleRecord[])[],
+  region: string;
+  stage: string;
+  configure: (reg: Registerer) => Promise<void>
 };
+
+export const createConfig = <R extends { [_: string]: string }>(rc: ((params: CFParams) => ConfigRecord<R>) | ConfigRecord<R>) => ({
+  up: (params: CFParams, reg: Registerer) => typeof rc == 'function' ? rc(params).up(params, reg) : rc.up(params, reg),
+  clean: (params: CFParams, reg: Registerer) => typeof rc == 'function' ? rc(params).clean(params, reg) : rc.clean(params, reg),
+});
+export const createRecord = <R extends { [_: string]: string }>(rc: CFRecord<R> | ((params: CFParams, reg: Registerer) => Promise<CFRecord<R>>)): ConfigRecord<R> => ({
+  up: async (params: CFParams, reg: Registerer) => {
+    const rec = typeof rc == 'function' ? rc(params, reg) : rc;
+    return await rec;
+  },
+  clean: async (params: CFParams, reg: Registerer) => {
+    const rec = await (typeof rc == 'function' ? rc(params, reg) : rc);
+    return rec.outputs;
+  }
+});
+export const createConfigRecord = <R extends { [_: string]: string }>(rc: CFRecord<R> | ((params: CFParams, reg: Registerer) => Promise<CFRecord<R>>)) =>
+  createConfig<R>(createRecord<R>(rc));
 
 const error = (msg: string, id?: number) => console.error(colors.red(`[CONF] error: ${msg}${id ? ` (${id})` : ''}`));
 const log = (msg: string) => process.stdout.write(`[CONF] ${msg}`);
@@ -112,15 +153,6 @@ const lastmod = (filepath: string) => {
   }
 }
 
-const touch = (filepath: string) => {
-  const time = new Date();
-  try {
-    fs.utimesSync(filepath, time, time);
-  } catch (err) {
-    fs.closeSync(fs.openSync(filepath, 'w'));
-  }
-}
-
 const printOutputs = (key: string, json?: { [_: string]: string }) => {
   if (verbose && json) {
     const ents = Object.entries(json);
@@ -129,20 +161,6 @@ const printOutputs = (key: string, json?: { [_: string]: string }) => {
       ents.forEach(([k, v]) => console.log(`  ${key}_${k}=${v}`));
     }
   }
-}
-
-const _keys: { [_: string]: boolean } = {};
-const verifyKey = (key: string) => {
-  if (!/^[a-zA-Z0-9-_]+$/.exec(key)) {
-    error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`, 1);
-    throw new Error(`invalid key '${key}' - only letters, digits, dashes, and underscores are allowed`);
-  }
-  if (_keys[key]) {
-    error(`duplicate key '${key}' detected`, 2);
-    throw new Error(`duplicate key '${key}' detected`);
-  }
-  _keys[key] = true;
-  return true;
 }
 
 const cleanJson = (data: {}) => {
@@ -217,10 +235,24 @@ const writeInput = (key: string, inputs?: { [_: string]: string | number | boole
   }
 }
 
+const expandInputVars = (inputs: { [_: string]: string | number | string[] }): { [_: string]: string | number | string[] } => {
+  const expandString = substitute(/({{([a-zA-Z0-9_]+)}})/gm, process.env);
+  const expand = (x: string | number | string[]) => {
+    if (typeof x == 'string') {
+      return expandString(x);
+    } else if (typeof x == 'number') {
+      return x;
+    } else {
+      return x.map(expandString);
+    }
+  }
+  return fromEntries(entries(inputs).map(([k, v]) => [k, expand(v)]));
+}
+
 const writeEnvs = (outPath: string, key: string, data: { [k: string]: string }) => {
   let out = '';
   Object.entries(data).map(([k, v]) => {
-    out += `${k}=${v}\n`;
+    out += `${k}=${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${$2}')}\n`;
   });
   fs.writeFileSync(outPath, `# this file has been automatically generated\n\n${out}`);
 };
@@ -228,18 +260,21 @@ const writeEnvs = (outPath: string, key: string, data: { [k: string]: string }) 
 const writeJs = (outPath: string, key: string, data: { [k: string]: string }) => {
   let out = '';
   Object.entries(data).map(([k, v]) => {
-    out += `  ${k}: ${JSON.stringify(v)},\n`;
+    out += `  ${k}: \`${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${process.env.$2}')}\`,\n`;
   });
   fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexports.vars = {\n${out}};`);
 };
 
-const writeTs = (outPath: string, key: string, data: { [k: string]: string }) => {
+const tsStr = (data: { [k: string]: string }) => {
   let out = '';
-  Object.entries(data).map(([k, v]) => {
-    out += `  ${k}: ${JSON.stringify(v)},\n`;
+  Object.entries(data).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => {
+    out += `  ${k}: \`${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${process.env.$2}')}\`,\n`;
   });
-  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexport const vars = {\n${out}};`);
+  return `// this file has been automatically generated\n\nexport const vars = {\n${out}};`;
 };
+
+const writeTs = (outPath: string, key: string, data: { [_: string]: string }) =>
+  fs.writeFileSync(outPath, tsStr(data));
 
 const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
   if (filesToIgnore.length == 0) return;
@@ -257,6 +292,39 @@ const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
     fs.writeFileSync(outPath, nents.join('\n'), { encoding: 'utf8' });
   }
 };
+
+const equalVars = (tsdir: string, data: { [_: string]: string }) => {
+  if (!fs.existsSync(`${tsdir}/src/vars.ts`)) return false;
+  return fs.readFileSync(`${tsdir}/src/vars.ts`, { encoding: 'utf8' }) == tsStr(data);
+}
+
+const unlinkVars = (tsdir: string) => {
+  if (fs.existsSync(`${tsdir}/vars.env`)) fs.unlinkSync(`${tsdir}/vars.env`);
+  if (fs.existsSync(`${tsdir}/vars.ts`)) fs.unlinkSync(`${tsdir}/vars.ts`);
+  if (fs.existsSync(`${tsdir}/vars.js`)) fs.unlinkSync(`${tsdir}/vars.js`);
+  if (fs.existsSync(`${tsdir}/src/vars.env`)) fs.unlinkSync(`${tsdir}/src/vars.env`);
+  if (fs.existsSync(`${tsdir}/src/vars.ts`)) fs.unlinkSync(`${tsdir}/src/vars.ts`);
+  if (fs.existsSync(`${tsdir}/src/vars.js`)) fs.unlinkSync(`${tsdir}/src/vars.js`);
+}
+
+export const writeVars = (tsdir: string, key: string, vars: { [_: string]: string }, tsonly: boolean = true) => {
+  if (equalVars(tsdir, vars))
+    return;
+
+  unlinkVars(tsdir);
+
+  if (!fs.existsSync(tsdir))
+    fs.mkdirSync(tsdir);
+  if (!fs.existsSync(`${tsdir}/src`))
+    fs.mkdirSync(`${tsdir}/src`);
+  if (tsonly) {
+    writeTs(`${tsdir}/src/vars.ts`, key, vars);
+  } else {
+    writeTs(`${tsdir}/src/vars.ts`, key, vars);
+    writeEnvs(`${tsdir}/vars.env`, key, vars);
+    writeJs(`${tsdir}/src/vars.js`, key, vars);
+  }
+}
 
 const main = async (cmd: string, verbose: boolean) => {
   const configPath = 'configuration.ts';
@@ -285,11 +353,6 @@ const main = async (cmd: string, verbose: boolean) => {
   AWS.config.update({
     region: configuration.region,
   });
-
-  if (configuration.modules && !Array.isArray(configuration.modules)) {
-    error('invalid modules value', 6);
-    process.exit(1);
-  }
 
   const cf = new AWS.CloudFormation({ apiVersion: '2010-05-15' });
 
@@ -343,7 +406,7 @@ const main = async (cmd: string, verbose: boolean) => {
     const exists = await stackExists(StackName);
     try {
       if (exists) {
-        process.stdout.write(`updating `);
+        process.stdout.write(' updating... ');
         await cf.updateStack({
           StackName,
           TemplateBody,
@@ -353,7 +416,7 @@ const main = async (cmd: string, verbose: boolean) => {
 
         await cf.waitFor('stackUpdateComplete', { StackName }).promise();
       } else {
-        process.stdout.write(`creating...`);
+        process.stdout.write(' creating... ');
         await cf.createStack({
           StackName,
           TemplateBody,
@@ -402,17 +465,13 @@ const main = async (cmd: string, verbose: boolean) => {
     return { ...previous, ...p };
   }
 
-  const getStackname = (name: string) => `${configuration.stage}-${name}`;
+  const getStackname = (moduleid: string, id?: string) => `${configuration.stage}-${moduleid}${id ? `-${id}` : ''}`;
+
+  const writeIgnores = (tsdir: string) => {
+    writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'src/vars.env', 'src/vars.ts', 'src/vars.js', 'lib']);
+  }
 
   let previous: { [_: string]: string } = {};
-  const modules: ModuleRecord[] = [];
-  for (let m of configuration.modules) {
-    if (Array.isArray(m)) {
-      m.forEach(i => modules.push(i));
-    } else {
-      modules.push(m);
-    }
-  }
 
   if (cmd == 'clean') {
     const tmpinputsdir = `${__dirname}/.inputs`;
@@ -422,12 +481,15 @@ const main = async (cmd: string, verbose: boolean) => {
     if (fs.existsSync(tmpcachedir))
       execSync(`rm -rf ${tmpcachedir}`);
 
-    for (let f of modules) {
-      const rec = typeof f == 'function' ? f(k => previous[k]) : f;
-      rec.record('CLEAN', { configurationDir });
-    }
+    const reg = async <R extends { [_: string]: string }>(f: ModuleRecord<R>): Promise<R> => {
+      const rec: ConfigRecord<R> = typeof f == 'function' ? f(k => previous[k]) : f;
+      return rec.clean({ configurationDir, stage: configuration.stage, region: configuration.region }, reg);
+    };
+    await configuration.configure(reg);
+
   } else if (cmd == 'up') {
-    for (let f of modules) {
+
+    const reg = (depth: number) => async <R extends { [_: string]: string }>(f: ModuleRecord<R>) => {
       const rec = typeof f == 'function' ? f(k => {
         const ret = previous[k];
         if (!ret) {
@@ -437,73 +499,83 @@ const main = async (cmd: string, verbose: boolean) => {
         return ret;
       }) : f;
 
+      const record = await rec.up({ configurationDir, stage: configuration.stage, region: configuration.region }, reg(depth + 1));
+      const absModuleDirname = path.resolve(record.rootDir);
+      const moduleid = path.basename(absModuleDirname);
+      const fqModuleId = `${moduleid}${record.id ? `:${record.id}` : ''}`;
+      verifyFQModuleId(fqModuleId);
+
+      const key = moduleid.replace(/-/g, '_').toUpperCase();
+
+      const id = '';
+
+      const showlog = depth == 0;
+
+      showlog && log(`${moduleid}${id ? `:${id}` : ''}`);
+
+      const tsdir = absModuleDirname;
+
+      let result: any = undefined;
       const ret = await Record.match(
 
         async cloudformation => {
-          const { name, inputs, outputs, cfpath: cfpath2 } = cloudformation;
-          const key = name.replace(/-/g, '_').toUpperCase();
-          log(`${name} `);
+          const { inputs, cfpath: cfpath2, vars } = cloudformation;
+
+          const expandedInputs = inputs && expandInputVars(inputs);
 
           if (configuration.stage == 'local') {
-            const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
-            if (!fs.existsSync(tsdir))
-              fs.mkdirSync(tsdir);
-            if (!fs.existsSync(`${tsdir}/src`))
-              fs.mkdirSync(`${tsdir}/src`);
-
             const prev: { [_: string]: string } = {};
-            outputs && outputs.forEach(o => typeof o == 'string' ? prev[o] = 'LOCAL_UNUSED' : prev[o.name] = o.localValue);
+            record.outputs && Object.entries(record.outputs).forEach(([key, o]) => !o ? prev[key] = 'LOCAL_UNUSED' : prev[key] = o);
+            vars && writeVars(tsdir, key, vars, false);
             writeCache(key, prev);
-            writeTs(`${tsdir}/src/vars.ts`, key, prev);
-            writeJs(`${tsdir}/src/vars.js`, key, prev);
+            writeIgnores(tsdir);
+
+            result = prev;
             previous = appendPrev(previous, key, prev);
 
-            console.log('');
+            showlog && console.log('');
             return true;
           } else {
-            const inputDirty = isInputDirty(key, inputs);
-            const cfpath = cfpath2.startsWith('/') ? cfpath2 : `${__dirname}/../../../node_modules/@inf/${name}/${cfpath2}`;
+            const inputDirty = isInputDirty(key, expandedInputs);
+            const cfpath = cfpath2.startsWith('/') ? cfpath2 : `${tsdir}/${cfpath2}`;
             if (!fs.existsSync(cfpath)) {
-              error(`invalid cf module ${name} - ${cfpath} not found`, 14);
-              throw new Error(`invalid cf module ${name} - ${cfpath} not found`);
+              error(`invalid cf module ${moduleid} - ${cfpath} not found`, 14);
+              throw new Error(`invalid cf module ${moduleid} - ${cfpath} not found`);
             }
 
             const ot = lastmod(`${__dirname}/.cache/${key}`);
             const cfDirty = lastmod(cfpath) > ot;
             if (!cfDirty && !inputDirty) {
-              console.log('');
+              showlog && console.log('');
               const prev = readCache(key);
               if (prev) {
+
+                result = prev;
                 previous = appendPrev(previous, key, prev);
+
                 return true;
               }
             }
 
-            const outs = (outputs || []).map(o => typeof o == 'string' ? o : o.name);
-            const prev = await up(getStackname(name), cfpath, inputs, outs);
+            vars && writeVars(tsdir, key, vars, false);
+            const expectedOutputs = record.outputs ? Object.entries(record.outputs).map(([k, _]) => k) : [];
+            const prev = await up(getStackname(moduleid, id), cfpath, expandedInputs, expectedOutputs);
             writeCache(key, prev);
-            writeInput(key, inputs);
+            writeInput(key, expandedInputs);
+
+            result = prev;
             previous = appendPrev(previous, key, prev);
 
-            const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
-            if (!fs.existsSync(tsdir))
-              fs.mkdirSync(tsdir);
-            if (!fs.existsSync(`${tsdir}/src`))
-              fs.mkdirSync(`${tsdir}/src`);
-            writeTs(`${tsdir}/src/vars.ts`, key, prev);
-            writeJs(`${tsdir}/src/vars.js`, key, prev);
-            writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'src/vars.env', 'src/vars.ts', 'src/vars.js', 'lib']);
+            writeVars(tsdir, key, { ...(vars || {}), ...prev }, false);
+            writeIgnores(tsdir);
 
-            console.log('(updated)');
+            showlog && console.log('(updated)');
             return true;
           }
         },
 
         shell => new Promise((resolve, reject) => {
-          const { name, command, args, env, dependsOn, cwd, outputs } = shell;
-
-          const key = name.replace(/-/g, '_').toUpperCase();
-          log(`${name} `);
+          const { command, args, env, dependsOn, cwd, outputMatchers, vars } = shell;
 
           let dirty = false;
           const prev = {};
@@ -523,17 +595,17 @@ const main = async (cmd: string, verbose: boolean) => {
           if (!dirty) {
             const prev = readCache(key);
             if (prev) {
+
+              result = prev;
               previous = appendPrev(previous, key, prev);
-              console.log('');
+
+              showlog && console.log('');
               resolve(true);
               return;
             }
           }
 
-          const tsdir = `${__dirname}/../../../node_modules/@inf/${name}`;
-          if (fs.existsSync(`${tsdir}/vars.env`)) fs.unlinkSync(`${tsdir}/vars.env`);
-          if (fs.existsSync(`${tsdir}/vars.ts`)) fs.unlinkSync(`${tsdir}/vars.ts`);
-          if (fs.existsSync(`${tsdir}/vars.js`)) fs.unlinkSync(`${tsdir}/vars.js`);
+          vars && writeVars(tsdir, key, vars, false);
 
           const cwdEnabled = !command.startsWith('.') && !command.startsWith('/') && cwd;
           const cwd2 = cwdEnabled ? cwd : path.dirname(command);
@@ -543,7 +615,7 @@ const main = async (cmd: string, verbose: boolean) => {
           proc.stdout.on('data', data => {
             const buf = data.toString();
             if (verbose) {
-              if (!buffer.length) console.log('');
+              if (!buffer.length) showlog && console.log('');
               process.stdout.write(colors.gray(buf));
             }
             buffer += buf;
@@ -553,23 +625,36 @@ const main = async (cmd: string, verbose: boolean) => {
             if (code == 0) {
 
               if (verbose && buffer.length > 0)
-                console.log('');
+                showlog && console.log('');
 
               let json: { [_: string]: string } | undefined = undefined;
               try { json = cleanJson(JSON.parse(buffer.trim())); } catch (ex) { }
               if (json) {
+                if (record.outputs) {
+                  for (let k in record.outputs)
+                    if (json[k] == undefined)
+                      throw new Error(`${moduleid} is missing the output '${k}'`);
+                }
                 buffer = '';
                 printOutputs(key, json);
                 writeCache(key, json);
+
+                result = json;
                 previous = appendPrev(previous, key, json);
               } else {
-                if (outputs) {
-                  entries(outputs).forEach(([k, v]) => {
+                if (record.outputs)
+                  Object.entries(record.outputs).forEach(([k, v]) => {
+                    if (!json) json = {};
+                    json[k] = v;
+                  })
+
+                if (outputMatchers) {
+                  entries(outputMatchers).forEach(([k, v]) => {
                     if (typeof v == 'string') {
                       if (!json) json = {};
                       json[k] = v;
                     } else {
-                      const match = (v.outputMatcher as RegExp).exec(buffer);
+                      const match = (v as RegExp).exec(buffer);
                       if (match && match.length > 1) {
                         if (!json) json = {};
                         json[k] = match[1];
@@ -582,17 +667,20 @@ const main = async (cmd: string, verbose: boolean) => {
                 if (json) {
                   if (!fs.existsSync(tsdir))
                     fs.mkdirSync(tsdir);
-                  writeEnvs(`${tsdir}/vars.env`, key, json);
-                  writeTs(`${tsdir}/vars.ts`, key, json);
-                  writeJs(`${tsdir}/vars.js`, key, json);
 
-                  writeIgnore(`${tsdir}/.gitignore`, ['vars.env', 'vars.ts', 'vars.js', 'src/vars.env', 'src/vars.ts', 'src/vars.js', 'lib']);
+                  writeVars(tsdir, key, { ...(vars || {}), ...(json || {}) }, false);
+                  writeIgnores(tsdir);
+
                   printOutputs(key, json);
                   writeCache(key, json);
+
+                  result = json;
                   previous = appendPrev(previous, key, json);
                 } else {
                   printOutputs(key, undefined);
                   writeCache(key, prev);
+
+                  result = prev;
                   previous = appendPrev(previous, key, prev);
                 }
               }
@@ -600,34 +688,38 @@ const main = async (cmd: string, verbose: boolean) => {
             if (code != 0) {
               reject(new Error('shell failed'));
             } else {
-              console.log('(updated)');
+              showlog && console.log('(updated)');
               resolve(true);
             }
           });
         }),
-      )(rec.record('CREATE', { configurationDir }));
+
+        replacevars => new Promise(resolve => {
+          const { vars } = replacevars;
+
+          vars && writeVars(tsdir, key, vars, false);
+
+          const prev = {};
+          printOutputs(key, undefined);
+          result = prev;
+          previous = appendPrev(previous, key, prev);
+
+          resolve(true);
+        }),
+
+      )(record);
 
       if (ret == undefined) {
-        error(`record match failed: ${JSON.stringify(rec, null, 2)}`, 15);
+        error(`record match failed: ${JSON.stringify(record, null, 2)}`, 15);
         process.exit(1);
       }
 
-    }
+      return result;
+    };
+    await configuration.configure(reg(0));
+
   } else if (cmd == 'down') {
     error('down not yet implemented');
-    /*
-    let previous = {};
-    const ms = configuration.modules.map(f => {
-      const n = typeof f == 'function' ? f(() => '') : f;
-      const ret = parseModule(f, previous);
-      previous = {};
-      return ret;
-    });
-    for (let i = ms.length; i > 0; --i) {
-      const m = ms[i - 1];
-      if (m) await down(getStackname(m.name));
-    }
-    */
   } else {
     error(`unknown configure command '${cmd}'`, 16);
     throw new Error(`unknown configure command '${cmd}'`);

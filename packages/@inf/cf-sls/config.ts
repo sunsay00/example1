@@ -1,4 +1,4 @@
-import { createConfigRecord, ShellOutput } from '@inf/vars/configure';
+import { createConfig, ShellOutputMatchers, writeVars } from '@inf/vars/configure';
 import { fromEntries, entries, Diff, capitalizeFirstLetter } from '@inf/common';
 import { unlinkRecursiveSync } from '@inf/core';
 
@@ -69,6 +69,7 @@ type StartCommand = {
 };
 
 export type Handler = {
+  vars?: { [_: string]: string },
   packageJsonPath: string,
   filepath: string,
   entrypoint: string
@@ -76,16 +77,23 @@ export type Handler = {
   events?: SLSFunction['events']
 };
 
-type Inputs = {
-  name: string,
+const PackageJsonRecord = RT.Partial({
+  dependencies: RT.Dictionary(RT.String),
+  devDependencies: RT.Dictionary(RT.String)
+});
+
+export const Config = (inputs: {
+  id: string,
   alias?: string,
+
+  rootDir: string,
 
   dependsOn?: string[],
 
+  vars?: { [_: string]: string },
+
   handlers: { [_: string]: Handler },
 
-  stage: string,
-  region: string,
   slsVpc?: SLSVpc,
   slsIamRoleStatements?: SLSIamRoleStatement[]
   slsIncludes?: string[],
@@ -100,35 +108,26 @@ type Inputs = {
   packageDevDependencies?: { [_: string]: string },
 
   startCommands?: StartCommand[]
-};
-
-const buildOutputs = (stage: string, handlers: { [_: string]: Handler }): ShellOutput =>
-  fromEntries(entries(handlers).map<[string, string | { outputMatcher: RegExp }][]>(([k, v]) =>
-    v.events ? v.events.map(e =>
-      [`${capitalizeFirstLetter(k)}Endpoint`, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : {
-        outputMatcher: /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm
-      }]) :
-      [[`${capitalizeFirstLetter(k)}Function`, {
-        outputMatcher: new RegExp(`Service Information[\\s\\S]+functions:[\\s\\S]+${k}: (.+)`, 'gm')
-      }]]
-  ).flat());
-
-const PackageJsonRecord = RT.Partial({
-  dependencies: RT.Dictionary(RT.String),
-  devDependencies: RT.Dictionary(RT.String)
-});
-
-export const Config = (inputs: Inputs) => createConfigRecord((event, { configurationDir }) => {
-  if (event == 'CLEAN') {
+}) => createConfig(({ stage, region, configurationDir }) => ({
+  clean: async () => {
     if (fs.existsSync(`${__dirname}/tmp`))
       unlinkRecursiveSync(`${__dirname}/tmp`);
-    return { type: 'shell', name: '', command: '', args: [] };
-  } else {
+    return {};
+  },
+  up: async () => {
     if (!fs.existsSync(`${__dirname}/tmp`))
       fs.mkdirSync(`${__dirname}/tmp`);
-    const instdir = `${__dirname}/tmp/${inputs.name}`;
+    const instdir = `${__dirname}/tmp/${inputs.id}`;
     if (!fs.existsSync(instdir))
       fs.mkdirSync(instdir);
+
+    entries(inputs.handlers).forEach(([_, v]) => {
+      if (v.vars) {
+        const tsdir = path.dirname(v.packageJsonPath)
+        const key = inputs.id.replace(/-/g, '_').toUpperCase();
+        writeVars(tsdir, key, v.vars);
+      }
+    });
 
     const { dependencies, devDependencies } = entries(inputs.handlers).reduce((acc, [_, v]) => {
       try {
@@ -151,12 +150,12 @@ export const Config = (inputs: Inputs) => createConfigRecord((event, { configura
 
     // generate serverless.yml
     const sls = {
-      service: inputs.alias || inputs.name,
+      service: inputs.alias || inputs.id,
       provider: {
         name: 'aws',
         runtime: 'nodejs10.x',
-        stage: inputs.stage,
-        region: inputs.region,
+        stage,
+        region,
         vpc: inputs.slsVpc,
         iamRoleStatements: inputs.slsIamRoleStatements,
       },
@@ -169,7 +168,7 @@ export const Config = (inputs: Inputs) => createConfigRecord((event, { configura
         environment: v.environment,
         events: v.events
       }])),
-      plugins: inputs.slsPlugins,
+      plugins: ['serverless-offline', ...inputs.slsPlugins || []],
     };
     if (!SLSConfigRecord.guard(sls))
       throw new Error('invalid sls configuration');
@@ -270,7 +269,7 @@ module.exports = {
 
     // generate package.json
     const packagejson = {
-      "name": `@inf/cf-sls.${inputs.name}`,
+      "name": `@inf/cf-sls.${inputs.id}`,
       "version": "0.0.1",
       "main": "index.js",
       "license": "MIT",
@@ -304,6 +303,9 @@ module.exports = {
         "ts-jest": "24.0.2",
         "webpack": "4.28.4",
         "webpack-cli": "3.3.6",
+        "concurrently": "4.1.2",
+        "nodemon": "1.19.2",
+        "serverless-offline": "5.10.1",
         ...(devDependencies || {}),
       }
     }
@@ -324,19 +326,26 @@ module.exports = {
   ]
 };
 `;
+
+    //start:
+    //@$(YARN) vars $(YARN) sls offline
+    //cf-sls-test-local-test 
+
     // generate makefile
     const buildInvokeRules = (handlers: { [_: string]: Handler }) =>
       entries(handlers).map<string[]>(([k, v]) =>
         v.events ? v.events.map(e =>
           `# DESC: invokes api endpoint
 invoke.${k}:
-\t@$(YARN) vars curl -H 'Authorization: Bearer Poopy' -H 'Content-Type: application/json' -d "hello world" {{${inputs.name.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}
+\t@$(YARN) vars curl -H 'Authorization: Bearer FIXME' -H 'Content-Type: application/json' -d "hello world" {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}
 # DESC: invoke guest api endpoint
 invoke.${k}.guest:
-\t@$(YARN) vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.name.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`) :
+\t@$(YARN) vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`) :
           [`# DESC: invokes lambda function
 invoke.${k}:
-\t@$(YARN) vars $(YARN) sls invoke --function ${k}`]
+${stage == 'local' ?
+              `\t@../../bin/invokelocallambda us-east-1 ${inputs.id}-local-${k} "$(SLS_SS_ARGS)"` :
+              `\t@$(YARN) vars $(YARN) sls invoke --function ${k}`}`]
       ).flat().join('\n');
 
     const startCmds: StartCommand[] = [];
@@ -344,6 +353,9 @@ invoke.${k}:
       startCmds.push({ command: 'docker-compose', args: ['up', '-d'] });
     if (inputs.startCommands)
       inputs.startCommands.forEach(c => startCmds.push(c));
+
+    if (startCmds.length == 0)
+      startCmds.push({ command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s sls offline'"`, '"tsc -w -p tsconfig.sls.json"'] });
 
     const makefile = `YARN = yarn -s
 
@@ -374,7 +386,7 @@ build:
 \t@cd ${instdir} && \\
 \t\t$(YARN) install --prefer-offline && \\
 \t\trm -f build/tsconfig.tsbuildinfo && \\
-\t\ttsc -b tsconfig.sls.json && \\
+\t\ttsc -p tsconfig.sls.json && \\
 \t\t$(YARN) webpack --config ${instdir}/webpack.config.js && \\
 \t\tmkdir -p build/src && \\
 ${entries(inputs.handlers).map(([k, v]) =>
@@ -411,12 +423,29 @@ deploy: build
 
     return {
       type: 'shell',
+      rootDir: inputs.rootDir,
       dependsOn,
-      name: inputs.name,
+      vars: inputs.vars,
+      id: inputs.id,
       cwd: instdir,
       command: 'make',
-      args: inputs.stage == 'local' ? ['build'] : ['deploy'],
-      outputs: buildOutputs(inputs.stage, inputs.handlers)
+      args: stage == 'local' ? ['build'] : ['deploy'],
+      outputMatchers: stage == 'local' ? undefined : buildOutputMatchers(inputs.handlers),
+      outputs: buildDefaultReturns(stage, inputs.handlers)
     };
   }
-});
+}));
+
+const buildDefaultReturns = (stage: string, handlers: { [_: string]: Handler }): { [_: string]: string } =>
+  fromEntries(entries(handlers).filter(([k, v]) => !!v.events).map<[string, string][]>(([k, v]) =>
+    v.events!.map(e => [`${capitalizeFirstLetter(k)}Endpoint`, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : ''])).flat());
+
+const buildOutputMatchers = (handlers: { [_: string]: Handler }): ShellOutputMatchers => {
+  const ents = entries(handlers);
+  const fmapped = ents.map<[string, RegExp][]>(([k, v]) =>
+    v.events ? v.events.map(_ =>
+      [`${capitalizeFirstLetter(k)}Endpoint`, /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm]) :
+      [[`${capitalizeFirstLetter(k)}Function`, new RegExp(`Service Information[\\s\\S]+functions:[\\s\\S]+${k}: (.+)`, 'gm')]]
+  ).flat();
+  return fromEntries(fmapped) as ShellOutputMatchers;
+}

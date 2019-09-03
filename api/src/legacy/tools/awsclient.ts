@@ -1,8 +1,7 @@
 import * as AWS from 'aws-sdk';
-import { vars } from '@inf/cf-awsinfo/src/vars';
+import { vars } from '../../vars';
 import { ICacheClient } from '@inf/cf-gen';
 import * as M from '@inf/cf-gen/model';
-import { vars as cogVars } from '@inf/cf-cognito/src/vars';
 
 let _sns: AWS.SNS | undefined = undefined;
 let _cisp: AWS.CognitoIdentityServiceProvider;
@@ -249,7 +248,7 @@ const padLeft = (str: string, len: number, fill: string = ' ') =>
 
 export const inviteUser = async (username: string, email: string, locale: string, role: string, uservar1: string, action: 'RESEND' | 'SUPRESS' | undefined): Promise<M.PendingSeller | undefined> => {
   const cisp = getCisp();
-  const poolId = cogVars.UserPoolId;
+  const poolId = vars.UserPoolId;
 
   // adminCreateUser throws UsernameExistsException even when the user does not exist,
   // as a workaround we check if the user doesn't exist with adminGetUser and ignore the exception
@@ -343,7 +342,7 @@ export const inviteUser = async (username: string, email: string, locale: string
 export const adminDeleteUser = async (username: string) => {
   const cisp = getCisp();
   await cisp.adminDeleteUser({
-    UserPoolId: cogVars.UserPoolId,
+    UserPoolId: vars.UserPoolId,
     Username: username,
   }).promise();
 }
@@ -355,11 +354,11 @@ export const adminEnableDisableUser = async (sub: string, dealershipId: string, 
     const cisp = getCisp();
     disableUser
       ? await cisp.adminDisableUser({
-        UserPoolId: cogVars.UserPoolId,
+        UserPoolId: vars.UserPoolId,
         Username: found.username != undefined ? found.username : '',
       }).promise()
       : await cisp.adminEnableUser({
-        UserPoolId: cogVars.UserPoolId,
+        UserPoolId: vars.UserPoolId,
         Username: found.username != undefined ? found.username : '',
       }).promise();
   } else {
@@ -371,7 +370,7 @@ export const adminEnableDisableUser = async (sub: string, dealershipId: string, 
 export const adminConfirmSignUp = async (username: string) => {
   const cisp = getCisp();
   await cisp.adminConfirmSignUp({
-    UserPoolId: cogVars.UserPoolId,
+    UserPoolId: vars.UserPoolId,
     Username: username,
   }).promise();
 }
@@ -379,7 +378,7 @@ export const adminConfirmSignUp = async (username: string) => {
 export const adminAddUserToGroup = async (username: string, group: string) => {
   const cisp = getCisp();
   await cisp.adminAddUserToGroup({
-    UserPoolId: cogVars.UserPoolId,
+    UserPoolId: vars.UserPoolId,
     Username: username,
     GroupName: group,
   }).promise();
@@ -388,7 +387,7 @@ export const adminAddUserToGroup = async (username: string, group: string) => {
 export const adminListUsers = async (filter: string, dealershipId: string, limit?: number, token?: string): Promise<{ sub: string, username: string, email: string, name: string, token?: string }[]> => {
   const cisp = getCisp();
   const listUsersResponse = await cisp.listUsers({
-    UserPoolId: cogVars.UserPoolId,
+    UserPoolId: vars.UserPoolId,
     Filter: 'family_name = "' + dealershipId + '" and cognito:user_status = "' + filter + '"',
     Limit: limit,
     PaginationToken: token
