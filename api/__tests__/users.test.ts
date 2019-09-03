@@ -45,7 +45,7 @@ describe('users', () => {
     expect(foundResult2).toBeUndefined();
   });
 
-  it.skip('should make deck returns correct user fields', async () => {
+  it('should make deck returns correct user fields', async () => {
     const ctx: IUserContext = { sub: 'mysub', groups: [] };
     const deck = await fix.createDeck(resolver, ctx, '0', 'mytitle', 'mydescription');
     const backendUser = await fix.backendCreateUser(resolver.store(), ctx, 'testname', 'http://http://placehold.it/24x24', 'en', 'us-east-1');

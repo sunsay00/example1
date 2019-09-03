@@ -49,7 +49,8 @@ describe('pagination', () => {
     expect(decks4.items).toHaveLength(1);
     expect(decks4.cursor).toBeNull();
 
-    for (let i = 0; i < N; ++i) { await fix.decksRemove(resolver, ctx, deckIds[i]); }
+    for (let i = 0; i < N; ++i)
+      await fix.decksRemove(resolver, ctx, deckIds[i]);
   });
 });
 

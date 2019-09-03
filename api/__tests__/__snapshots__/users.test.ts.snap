@@ -21,3 +21,23 @@ Object {
   "sub": "mysub1",
 }
 `;
+
+exports[`users should make deck returns correct user fields 1`] = `
+Object {
+  "sub": "mysub",
+  "user": Object {
+    "avatarUri": "http://http://placehold.it/24x24",
+    "name": "testname",
+  },
+}
+`;
+
+exports[`users should make deck returns correct user fields 2`] = `
+Object {
+  "sub": "mysub",
+  "user": Object {
+    "avatarUri": "http://http://placehold.it/48x48",
+    "name": "newtestname",
+  },
+}
+`;
