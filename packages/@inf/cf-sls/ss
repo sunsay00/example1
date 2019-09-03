@@ -41,28 +41,13 @@ const makefileReadRules = makefilepath => {
   return rules;
 }
 
-const makefileInvokeRule = (makefilepath, rule) => new Promise((resolve, reject) => {
-  const proc = spawn('make', [rule], { cwd: path.dirname(makefilepath), stdio: 'inherit' });
+const makefileInvokeRule = (makefilepath, rule, args) => new Promise((resolve, reject) => {
+  console.log('SLS_SS_ARGS:', `"${args.join(' ')}"`);
+  const proc = spawn('make', [rule], { cwd: path.dirname(makefilepath), stdio: 'inherit', env: { ...process.env, SLS_SS_ARGS: `"${args.map(s => `${s}`).join(' ')}"` } });
   proc.on('close', code => {
     if (code == 0) resolve();
     else reject(new Error(`failed to invoke make rule '${rule}'`));
   });
-  /*
-  const proc = spawn('make', [rule], { cwd: path.dirname(makefilepath), stdio: 'inherit' });
-  proc.stdout.on('data', data => {
-    //process.stdout.write(colors.grey(data.toString()));
-    process.stdout.write(data.toString());
-  });
-  proc.stderr.on('data', data => {
-    //process.stderr.write(colors.grey(data.toString()));
-    process.stderr.write(data.toString());
-  });
-  proc.on('close', code => {
-    if (code == 0) resolve();
-    else reject(new Error(`failed to invoke make rule '${rule}'`));
-  });
-  proc.stdin.end();
-  */
 })
 
 const makefilePrintRules = (fnname, rules) => {
@@ -81,7 +66,7 @@ const main = async (fnname, args) => {
   if (args.length > 0) {
     const [cmd, ...subargs] = args;
     if (cmds.find(c => c.name == cmd)) {
-      await makefileInvokeRule(makefilepath, cmd);
+      await makefileInvokeRule(makefilepath, cmd, subargs);
     } else {
       makefilePrintRules(fnname, cmds);
     }

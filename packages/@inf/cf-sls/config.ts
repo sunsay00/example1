@@ -344,7 +344,7 @@ invoke.${k}:
 # DESC: run tests
 test:
 \t@$(YARN) gen wipetest && \\
-\t\t$(YARN) vars $(YARN) test
+\t\t$(YARN) vars $(YARN) test $(SLS_SS_ARGS)
 
 ${inputs.dockerServices && `# DESC: start docker
 up:
