@@ -56,10 +56,10 @@ elif [[ $CMD == "seed" ]]; then
 
 elif [[ $CMD == "wipetest" ]]; then
 
-  if [ ! -f "$GENDIR/vars.env" ]; then
-    echo "invalid vars.env file - (looked in ${GENDIR})";
+  if [ ! -f "$GENDIR/_vars.env" ]; then
+    echo "invalid _vars.env file - (looked in ${GENDIR})";
   fi
-  source ${GENDIR}/vars.env
+  source ${GENDIR}/_vars.env
   if [[ -z "$DB_TEST_URL" ]] || [[ -z "$DB_URL" ]]; then
     echo "undefined db urls"
   fi
@@ -73,10 +73,10 @@ elif [[ $CMD == "wipetest" ]]; then
 
 elif [[ $CMD == "up" ]]; then
 
-  if [ ! -f "$GENDIR/vars.env" ]; then
-    echo "invalid vars.env file - (looked in ${GENDIR})";
+  if [ ! -f "$GENDIR/_vars.env" ]; then
+    echo "invalid _vars.env file - (looked in ${GENDIR})";
   fi
-  source ${GENDIR}/vars.env
+  source ${GENDIR}/_vars.env
   if [[ -z "$DB_URL" ]]; then
     echo "undefined db url"
   fi
@@ -85,10 +85,10 @@ elif [[ $CMD == "up" ]]; then
 
 elif [[ $CMD == "down" ]]; then
 
-  if [ ! -f "$GENDIR/vars.env" ]; then
-    echo "invalid vars.env file - (looked in ${GENDIR})";
+  if [ ! -f "$GENDIR/_vars.env" ]; then
+    echo "invalid _vars.env file - (looked in ${GENDIR})";
   fi
-  source ${GENDIR}/vars.env
+  source ${GENDIR}/_vars.env
   if [[ -z "$DB_URL" ]]; then
     echo "undefined db url"
   fi
@@ -97,10 +97,10 @@ elif [[ $CMD == "down" ]]; then
 
 elif [[ $CMD == "shell" ]]; then
 
-  if [ ! -f "$GENDIR/vars.env" ]; then
-    echo "invalid vars.env file - (looked in ${GENDIR})";
+  if [ ! -f "$GENDIR/_vars.env" ]; then
+    echo "invalid _vars.env file - (looked in ${GENDIR})";
   fi
-  source ${GENDIR}/vars.env
+  source ${GENDIR}/_vars.env
   if [[ -z "$DB_URL" ]]; then
     echo "undefined db test url"
   fi

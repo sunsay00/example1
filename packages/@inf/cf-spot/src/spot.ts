@@ -1,10 +1,11 @@
 import * as AWS from 'aws-sdk';
 import { vars } from './_vars';
+import * as path from 'path';
 
 export const up = async () => {
   const ec2 = new AWS.EC2({
     apiVersion: '2016-11-15',
-    region: vars.STAGE,
+    region: vars.AWS_REGION
   });
 
   console.log('describe spot instance requests...');
@@ -128,5 +129,23 @@ export const down = async () => {
 
     console.log('waiting for instance to terminate...');
     await ec2.waitFor('instanceTerminated', { InstanceIds }).promise();
+  }
+}
+
+const main = async (cmd: 'up' | 'down') => {
+  if (cmd == 'up') await up();
+  else await down();
+}
+
+if (process.argv.length != 3) {
+  console.log(`usage: ${path.basename(process.argv[1])} <up|down>`);
+  process.exit(1);
+} else {
+  const [_1, _2, cmd] = process.argv;
+  if (cmd == 'up' || cmd == 'down')
+    main(cmd).then(console.log).catch(console.error);
+  else {
+    console.log(`usage: ${path.basename(process.argv[1])} <up|down>`);
+    process.exit(1);
   }
 }

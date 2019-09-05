@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+if [[ "$1" = "" ]]; then echo "invalid user"; exit 1; fi
+if [[ "$2" = "" ]]; then echo "invalid host"; exit 1; fi
+
+echo "connecting to $1@$2..."
+ssh -t $1@$2 < /dev/tty

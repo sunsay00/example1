@@ -13,3 +13,5 @@ export const unlinkRecursiveSync = (p: string) => {
     fs.unlinkSync(p);
   }
 };
+
+export * from './maketools';

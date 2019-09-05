@@ -1,4 +1,4 @@
-import { createConfig, ShellOutputMatchers, writeVars } from '@inf/vars/configure';
+import { createConfig, ShellOutputMatchers, writeTmps } from '@inf/vars/configure';
 import { fromEntries, entries, Diff, capitalizeFirstLetter } from '@inf/common';
 import { unlinkRecursiveSync } from '@inf/core';
 
@@ -125,7 +125,7 @@ export const Config = (inputs: {
       if (v.vars) {
         const tsdir = path.dirname(v.packageJsonPath)
         const key = inputs.id.replace(/-/g, '_').toUpperCase();
-        writeVars(tsdir, key, v.vars);
+        writeTmps('vars', tsdir, v.vars);
       }
     });
 

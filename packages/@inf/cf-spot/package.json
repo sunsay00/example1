@@ -1,5 +1,11 @@
 {
   "name": "@inf/cf-spot",
   "version": "0.0.1",
-  "license": "MIT"
+  "license": "MIT",
+  "bin": {
+    "spot": "./spot"
+  },
+  "dependencies": {
+    "@inf/vars": "*"
+  }
 }

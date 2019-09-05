@@ -249,33 +249,6 @@ const expandInputVars = (inputs: { [_: string]: string | number | string[] }): {
   return fromEntries(entries(inputs).map(([k, v]) => [k, expand(v)]));
 }
 
-const writeEnvs = (outPath: string, key: string, data: { [k: string]: string }) => {
-  let out = '';
-  Object.entries(data).map(([k, v]) => {
-    out += `${k}=${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${$2}')}\n`;
-  });
-  fs.writeFileSync(outPath, `# this file has been automatically generated\n\n${out}`);
-};
-
-const writeJs = (name: string, outPath: string, data: { [k: string]: string }) => {
-  let out = '';
-  Object.entries(data).map(([k, v]) => {
-    out += `  ${k}: \`${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${process.env.$2}')}\`,\n`;
-  });
-  fs.writeFileSync(outPath, `// this file has been automatically generated\n\nexports.${name} = {\n${out}};`);
-};
-
-const tsStr = (name: string, data: { [k: string]: string }) => {
-  let out = '';
-  Object.entries(data).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => {
-    out += `  ${k}: \`${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${process.env.$2}')}\`,\n`;
-  });
-  return `// this file has been automatically generated\n\nexport const ${name} = {\n${out}};`;
-};
-
-const writeTs = (name: string, outPath: string, data: { [_: string]: string }) =>
-  fs.writeFileSync(outPath, tsStr(name, data));
-
 const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
   if (filesToIgnore.length == 0) return;
   const ents = [...filesToIgnore].sort((a, b) => a.localeCompare(b));
@@ -293,56 +266,78 @@ const writeIgnore = (outPath: string, filesToIgnore: string[]) => {
   }
 };
 
-const readTmps = (name: string, tsdir: string) => fs.readFileSync(`${tsdir}/src/_${name}.ts`, { encoding: 'utf8' });
+export const writeTmps = (name: 'outputs' | 'vars', tsdir: string, data: { [_: string]: string }) => {
+  const writeEnvs = (outPath: string) => {
+    let out = '';
+    Object.entries(data).map(([k, v]) => {
+      out += `${k}=${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${$2}')}\n`;
+    });
+    fs.writeFileSync(outPath, `# this file has been automatically generated\n\n${out}`);
+  };
 
-const equalTmps = (name: string, tsdir: string, data: { [_: string]: string }) => {
-  if (!fs.existsSync(`${tsdir}/src/_${name}.ts`)) return false;
-  return readTmps(name, tsdir) == tsStr(name, data);
-}
+  const tsStr = (data: { [k: string]: string }) => {
+    let out = '';
+    Object.entries(data).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => {
+      out += `  ${k}: \`${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${process.env.$2}')}\`,\n`;
+    });
+    return `// this file has been automatically generated\n\nexport const ${name} = {\n${out}};`;
+  };
 
-const unlinkVars = (tsdir: string) => {
-  if (fs.existsSync(`${tsdir}/vars.env`)) fs.unlinkSync(`${tsdir}/vars.env`);
-  if (fs.existsSync(`${tsdir}/vars.ts`)) fs.unlinkSync(`${tsdir}/vars.ts`);
-  if (fs.existsSync(`${tsdir}/vars.js`)) fs.unlinkSync(`${tsdir}/vars.js`);
-  if (fs.existsSync(`${tsdir}/src/vars.env`)) fs.unlinkSync(`${tsdir}/src/vars.env`);
-  if (fs.existsSync(`${tsdir}/src/vars.ts`)) fs.unlinkSync(`${tsdir}/src/vars.ts`);
-  if (fs.existsSync(`${tsdir}/src/vars.js`)) fs.unlinkSync(`${tsdir}/src/vars.js`);
+  const writeTs = (outPath: string) =>
+    fs.writeFileSync(outPath, tsStr(data));
 
-  if (fs.existsSync(`${tsdir}/src/_vars.env`)) fs.unlinkSync(`${tsdir}/src/_vars.env`);
-  if (fs.existsSync(`${tsdir}/src/_vars.ts`)) fs.unlinkSync(`${tsdir}/src/_vars.ts`);
-}
+  const readTmps = () => fs.readFileSync(`${tsdir}/src/_${name}.ts`, { encoding: 'utf8' });
 
-const unlinkTmps = (tsdir: string) => {
-  if (fs.existsSync(`${tsdir}/src/_outputs.ts`)) fs.unlinkSync(`${tsdir}/src/_outputs.ts`);
-}
+  const equalTmps = () => {
+    if (!fs.existsSync(`${tsdir}/src/_${name}.ts`)) return false;
+    return readTmps() == tsStr(data);
+  }
 
-export const writeVars = (tsdir: string, key: string, vars: { [_: string]: string }) => {
-  if (equalTmps('vars', tsdir, vars))
+  const unlinkTmps = () => {
+    if (fs.existsSync(`${tsdir}/src/_${name}.env`)) fs.unlinkSync(`${tsdir}/src/_${name}.env`);
+    if (fs.existsSync(`${tsdir}/src/_${name}.ts`)) fs.unlinkSync(`${tsdir}/src/_${name}.ts`);
+  }
+
+  const writeGen = () => {
+    const writeIndex = (outpath: string) => {
+      const hasvars = fs.existsSync(`${tmpdir}/vars.ts`);
+      const hasoutputs = fs.existsSync(`${tmpdir}/outputs.ts`);
+      if (fs.existsSync(outpath)) fs.unlinkSync(outpath);
+      const indexstr = `
+${hasvars ? `export { vars } from './vars';` : ''}
+${hasoutputs ? `export { outputs } from './outputs';` : ''}
+`;
+      fs.writeFileSync(outpath, `// this file has been automatically generated\n\n${indexstr}`, { encoding: 'utf8' });
+    }
+
+    const gendir = path.join(__dirname, 'gen');
+    if (!fs.existsSync(gendir))
+      fs.mkdirSync(gendir);
+    const tmpdir = path.join(gendir, path.basename(tsdir));
+    if (!fs.existsSync(tmpdir))
+      fs.mkdirSync(tmpdir);
+
+    writeTs(`${tmpdir}/${name}.ts`);
+    if (name == 'vars')
+      writeEnvs(`${tmpdir}/${name}.env`);
+
+    writeIndex(`${tmpdir}/index.ts`);
+  }
+
+  //writeGen();
+
+  if (equalTmps())
     return;
 
-  unlinkVars(tsdir);
+  unlinkTmps();
 
   if (!fs.existsSync(tsdir))
     fs.mkdirSync(tsdir);
   if (!fs.existsSync(`${tsdir}/src`))
     fs.mkdirSync(`${tsdir}/src`);
 
-  writeTs('vars', `${tsdir}/src/_vars.ts`, vars);
-  writeEnvs(`${tsdir}/_vars.env`, key, vars);
-}
-
-export const writeOutputs = (tsdir: string, key: string, outputs: { [_: string]: string }) => {
-  if (equalTmps('outputs', tsdir, outputs))
-    return;
-
-  unlinkTmps(tsdir);
-
-  if (!fs.existsSync(tsdir))
-    fs.mkdirSync(tsdir);
-  if (!fs.existsSync(`${tsdir}/src`))
-    fs.mkdirSync(`${tsdir}/src`);
-
-  writeTs('outputs', `${tsdir}/src/_outputs.ts`, outputs);
+  writeTs(`${tsdir}/src/_${name}.ts`);
+  writeEnvs(`${tsdir}/_${name}.env`);
 }
 
 const main = async (cmd: string, verbose: boolean) => {
@@ -526,7 +521,7 @@ const main = async (cmd: string, verbose: boolean) => {
 
       const key = moduleid.replace(/-/g, '_').toUpperCase();
 
-      const id = '';
+      const id = record.id || '';
 
       const showlog = depth == 0;
 
@@ -545,7 +540,7 @@ const main = async (cmd: string, verbose: boolean) => {
           if (configuration.stage == 'local') {
             const prev: { [_: string]: string } = {};
             record.outputs && Object.entries(record.outputs).forEach(([key, o]) => !o ? prev[key] = 'LOCAL_UNUSED' : prev[key] = o);
-            vars && writeVars(tsdir, key, vars);
+            vars && writeTmps('vars', tsdir, vars);
             writeCache(key, prev);
             writeIgnores(tsdir);
 
@@ -576,7 +571,7 @@ const main = async (cmd: string, verbose: boolean) => {
               }
             }
 
-            vars && writeVars(tsdir, key, vars);
+            vars && writeTmps('vars', tsdir, vars);
             const expectedOutputs = record.outputs ? Object.entries(record.outputs).map(([k, _]) => k) : [];
             const prev = await up(getStackname(moduleid, id), cfpath, expandedInputs, expectedOutputs);
             writeCache(key, prev);
@@ -585,10 +580,11 @@ const main = async (cmd: string, verbose: boolean) => {
             result = prev;
             previous = appendPrev(previous, key, prev);
 
-            writeOutputs(tsdir, key, prev);
+            writeTmps('outputs', tsdir, prev);
             writeIgnores(tsdir);
 
             showlog && console.log('(updated)');
+
             return true;
           }
         },
@@ -624,7 +620,7 @@ const main = async (cmd: string, verbose: boolean) => {
             }
           }
 
-          vars && writeVars(tsdir, key, vars);
+          vars && writeTmps('vars', tsdir, vars);
 
           const cwdEnabled = !command.startsWith('.') && !command.startsWith('/') && cwd;
           const cwd2 = cwdEnabled ? cwd : path.dirname(command);
@@ -687,7 +683,7 @@ const main = async (cmd: string, verbose: boolean) => {
                   if (!fs.existsSync(tsdir))
                     fs.mkdirSync(tsdir);
 
-                  writeOutputs(tsdir, key, json);
+                  writeTmps('outputs', tsdir, json);
                   writeIgnores(tsdir);
 
                   printOutputs(key, json);
@@ -703,12 +699,12 @@ const main = async (cmd: string, verbose: boolean) => {
                   previous = appendPrev(previous, key, prev);
                 }
               }
-            }
-            if (code != 0) {
-              reject(new Error('shell failed'));
-            } else {
+
+
               showlog && console.log('(updated)');
               resolve(true);
+            } else {
+              reject(new Error('shell failed'));
             }
           });
         }),
@@ -716,7 +712,7 @@ const main = async (cmd: string, verbose: boolean) => {
         replacevars => new Promise(resolve => {
           const { vars } = replacevars;
 
-          vars && writeVars(tsdir, key, vars);
+          vars && writeTmps('vars', tsdir, vars);
 
           const prev = {};
           printOutputs(key, undefined);

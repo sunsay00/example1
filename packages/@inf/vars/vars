@@ -21,12 +21,9 @@ const substitute = (arg, envs) => {
   }, arg);
 }
 
-let g_verbose = false;
-
 const argv = [];
 process.argv.forEach(v => {
   if (v == '-V') {
-    g_verbose = true;
     return;
   } else {
     argv.push(v);
@@ -42,7 +39,7 @@ if (argv.length == 2) {
   Object.entries(vars).forEach(([k, v]) => console.log(`${k}=${v}`));
 } else {
   let failed = false;
-  const [_, __, cmd, ...args] = argv;
+  const [_1, _2, cmd, ...args] = argv;
   const proc = spawn(cmd, args.map(a => substitute(a, vars)), { env: vars, stdio: [process.stdin, process.stdout, 'pipe'] });
   proc.stderr.on('data', data => {
     if (/Unhandled rejection ServerlessError/.exec(data.toString())) // workaround for invalid return code from serverless

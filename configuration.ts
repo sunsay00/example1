@@ -94,7 +94,7 @@ const configuration: Configuration = {
     await reg(Sls.Config({
       id: 'cf-sls-test',
       rootDir: './cf-sls-test',
-      dependsOn: ['./cf-sls-test/package.json', './cf-sls-test/src/**/*.ts'],
+      dependsOn: ['./cf-sls-test/package.json', './cf-sls-test/**/*.ts'],
       handlers: {
         test: {
           vars: {
@@ -116,8 +116,9 @@ const configuration: Configuration = {
       bidPrice: 0.006,
       prebootImageId: 'ami-009d6802948d06e52', // Amazon Linux 2 AMI (HVM), SSD Volume Type
       instanceType: 't3a.small',
-      pubKey: 'jump',
-      subnet: aws.Subnet1
+      pubKey: { name: 'jump', path: './jump.pub' },
+      subnet: aws.Subnet1,
+      shellUser: 'ec2-user'
     }));
 
   }

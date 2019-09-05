@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+// @ts-check
+
+const { maketools } = require('@inf/core');
+
+maketools.main(`${__dirname}/Makefile`, process.argv).catch(console.error);
