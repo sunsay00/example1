@@ -7,6 +7,10 @@ Parameters:
     Type: String
   AvailabilityZone:
     Type: String
+  VolumeTagName:
+    Type: String
+  VolumeSize:
+    Type: Number
 
 Resources:
   Role:
@@ -56,14 +60,14 @@ Resources:
   Volume:
     Type: AWS::EC2::Volume
     Properties:
-      Size: 128
+      Size: !Sub ${VolumeSize}
       Encrypted: false
       AvailabilityZone: !Sub ${AvailabilityZone}
       Tags:
         - Key: tag-key
           Value: Name
         - Key: tag-value
-          Value: spot
+          Value: !Sub ${VolumeTagName}
 
 Outputs:
   SecurityGroupId:

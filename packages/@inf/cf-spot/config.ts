@@ -1,5 +1,6 @@
-import { createConfigRecord } from '@inf/vars/configure';
+import { createConfigRecord, getStackname } from '@inf/vars/configure';
 import * as fs from 'fs';
+import * as path from 'path';
 
 import * as AWS from 'aws-sdk';
 
@@ -12,6 +13,7 @@ export const Config = (inputs: {
   pubKey: { name: string, path: string },
   subnet: string,
   shellUser: string,
+  volumeSizeInGB: number,
 }) => createConfigRecord(async ({ stage, region }, reg) => {
 
   const ec2 = new AWS.EC2({
@@ -33,14 +35,21 @@ export const Config = (inputs: {
     }).promise();
   }
 
+  const id = '1';
+  const moduleid = path.basename(__dirname);
+  const stackName = getStackname(stage, moduleid, id);
+
   const spot = await reg(createConfigRecord({
     type: 'cloudformation',
     rootDir: __dirname,
     cfpath: './cf.yaml',
+    id,
     inputs: {
       VpcId: inputs.vpcId,
       AvailabilityZone: inputs.availabilityZone,
-      Stage: stage
+      Stage: stage,
+      VolumeSize: inputs.volumeSizeInGB,
+      VolumeTagName: inputs.pubKey.name,
     },
     outputs: {
       SecurityGroupId: '',
@@ -52,9 +61,8 @@ export const Config = (inputs: {
   return {
     type: 'replace-vars',
     rootDir: __dirname,
-    fqModuleId: 'cf-spot',
-    id: 'replace-vars',
-    silent: true,
+    targetModuleId: 'cf-spot',
+    dependsOn: [path.resolve(inputs.pubKey.path), `${__dirname}/cf.yaml`],
     vars: {
       STAGE: stage,
       AWS_REGION: region,
@@ -68,6 +76,7 @@ export const Config = (inputs: {
       VOLUME_ID: spot.VolumeId,
       SPOT_ML_INSTANCE_PROFILE_NAME: spot.InstanceProfileName,
       SHELL_USER: inputs.shellUser,
+      STACK_NAME: stackName
     },
     outputs: {}
   };

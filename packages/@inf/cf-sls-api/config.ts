@@ -2,11 +2,14 @@ import { createConfig } from '@inf/vars/configure';
 import * as Sls from '@inf/cf-sls/config';
 
 export const Config = (inputs: {
+  id: string,
   accountId: string,
   dependsOn?: string[],
   cognitoUserPoolId: string,
   securityGroupIds: string[],
   subnetIds: string[],
+  localMasterUsername: string,
+  localMasterUserPassword: string,
   apiHandler: {
     DB_URL: string,
     DB_TEST_URL: string,
@@ -16,17 +19,13 @@ export const Config = (inputs: {
   }
 }) => {
   return createConfig(({ stage, region }) => Sls.Config({
-    id: 'cf-sls-api',
+    id: inputs.id,
     alias: 'api',
-
     rootDir: __dirname,
-
     dependsOn: inputs.dependsOn,
-
     vars: {
       UserPoolId: inputs.cognitoUserPoolId,
     },
-
     handlers: {
       auth: {
         packageJsonPath: `${__dirname}/package.json`,
@@ -102,9 +101,9 @@ export const Config = (inputs: {
         ports: ['5432:5432'],
         image: 'mdillon/postgis:9.6-alpine',
         environment: [
-          'POSTGRES_USER=root',
-          'POSTGRES_PASSWORD=for-development-only',
-          'POSTGRES_DB=mainlocal'
+          `POSTGRES_USER=${inputs.localMasterUsername}`,
+          `POSTGRES_PASSWORD=${inputs.localMasterUserPassword}`,
+          `POSTGRES_DB=mainlocal`
         ]
       }
     },

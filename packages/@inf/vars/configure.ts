@@ -51,10 +51,9 @@ const CloudFormationRecord = RT.Record({
 
 const ReplaceVarsRecord = RT.Record({
   type: RT.Literal('replace-vars'),
-  fqModuleId: RT.String.withConstraint(s => fqModuleIdExists(s)),
+  targetModuleId: RT.String.withConstraint(s => fqModuleIdExists(s)),
 }).And(RT.Partial({
   id: RT.String.withConstraint(s => verifyId(s)),
-  silent: RT.Boolean,
   vars: RT.Dictionary(RT.String),
 }));
 
@@ -72,6 +71,8 @@ const ShellRecord = RT.Record({
 }));
 
 const Record = RT.Union(CloudFormationRecord, ShellRecord, ReplaceVarsRecord);
+
+export const getStackname = (stage: string, moduleid: string, id?: string) => `${stage}-${moduleid}${id ? `-${id}` : ''}`;
 
 export type CFParams = { configurationDir: string, stage: string, region: string };
 
@@ -479,8 +480,6 @@ const main = async (cmd: string, verbose: boolean) => {
     return { ...previous, ...p };
   }
 
-  const getStackname = (moduleid: string, id?: string) => `${configuration.stage}-${moduleid}${id ? `-${id}` : ''}`;
-
   const writeIgnores = (tsdir: string) => {
     writeIgnore(`${tsdir}/.gitignore`, ['_vars.*', '_outputs.*']);
   }
@@ -526,6 +525,8 @@ const main = async (cmd: string, verbose: boolean) => {
       const showlog = depth == 0;
 
       showlog && log(`${moduleid}${id ? `:${id}` : ''}`);
+
+      const stackName = getStackname(configuration.stage, moduleid, id);
 
       const tsdir = absModuleDirname;
 
@@ -573,7 +574,7 @@ const main = async (cmd: string, verbose: boolean) => {
 
             vars && writeTmps('vars', tsdir, vars);
             const expectedOutputs = record.outputs ? Object.entries(record.outputs).map(([k, _]) => k) : [];
-            const prev = await up(getStackname(moduleid, id), cfpath, expandedInputs, expectedOutputs);
+            const prev = await up(stackName, cfpath, expandedInputs, expectedOutputs);
             writeCache(key, prev);
             writeInput(key, expandedInputs);
 

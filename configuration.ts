@@ -53,7 +53,6 @@ const configuration: Configuration = {
     await reg(createConfigRecord({
       type: 'shell',
       rootDir: './site',
-      id: 'site',
       command: './site/make',
       args: [vars.STAGE == 'local' ? 'build' : 'deploy'],
       dependsOn: [
@@ -77,11 +76,14 @@ const configuration: Configuration = {
     }));
 
     await reg(SlsApi.Config({
+      id: 'cf-sls-api',
       dependsOn: ['./api/package.json', './api/src/**/*.ts'],
       accountId: vars.AWS_ACCOUNT_ID,
       cognitoUserPoolId: cog.UserPoolId,
       securityGroupIds: [aws.SecurityGroup_default],
       subnetIds: [aws.Subnet1, aws.Subnet2],
+      localMasterUsername: 'root',
+      localMasterUserPassword: 'for-development-only',
       apiHandler: {
         DB_URL: gen.DB_URL,
         DB_TEST_URL: gen.DB_TEST_URL,
@@ -118,7 +120,8 @@ const configuration: Configuration = {
       instanceType: 't3a.small',
       pubKey: { name: 'jump', path: './jump.pub' },
       subnet: aws.Subnet1,
-      shellUser: 'ec2-user'
+      shellUser: 'ec2-user',
+      volumeSizeInGB: 10
     }));
 
   }

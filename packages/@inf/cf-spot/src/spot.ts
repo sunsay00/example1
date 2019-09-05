@@ -47,22 +47,22 @@ touch /root/log.txt
 echo "booting..." > /root/log.txt 2>&1
 set -e
 export TERM="linux"
-curl http://169.254.169.254/latest/meta-data/iam/security-credentials/${vars.AWS_REGION}-mlspot-SpotMLRole-${vars.STAGE} > /root/.creds
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/${vars.AWS_REGION}-${vars.STACK_NAME}-Role-${vars.STAGE} > /root/.creds
 mkdir -p /root/.aws
 echo "[default]" > /root/.aws/credentials
-echo "aws_access_key_id=\`jq -r '.AccessKeyId' /root/.creds\`" >> /root/.aws/credentials
-echo "aws_secret_access_key=${'`'}jq -r '.SecretAccessKey' /root/.creds\`" >> /root/.aws/credentials
-echo "aws_session_token=\`jq -r '.Token' /root/.creds\`" >> /root/.aws/credentials
+echo "aws_access_key_id=${'`'}cat /root/.creds | sed -n 's/.*"AccessKeyId" : "\\([^"]\\+\\)".*/\\1/p'${'`'}" >> /root/.aws/credentials
+echo "aws_secret_access_key=${'`'}cat /root/.creds | sed -n 's/.*"SecretAccessKey" : "\\([^"]\\+\\)".*/\\1/p'${'`'}" >> /root/.aws/credentials
+echo "aws_session_token=${'`'}cat /root/.creds | sed -n 's/.*"Token" : "\\([^"]\\+\\)".*/\\1/p'${'`'}" >> /root/.aws/credentials
 echo "[default]" > /root/.aws/config
 echo "region=${vars.AWS_REGION}" >> /root/.aws/config
 echo "output=json" >> /root/.aws/config
 echo "attching volume..." >> /root/log.txt 2>&1
-aws ec2 describe-volumes --volume-ids ${vars.VOLUME_ID} >> /root/log.txt 2>&1
+#aws ec2 describe-volumes --volume-ids ${vars.VOLUME_ID} >> /root/log.txt 2>&1
 aws ec2 attach-volume --dev /dev/xvdf --instance-id \`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id\` --volume-id ${vars.VOLUME_ID} >> /root/log.txt 2>&1
 aws ec2 wait volume-in-use --volume-ids ${vars.VOLUME_ID} >> /root/log.txt 2>&1
 rm /root/.creds
-NEEDS_FORMAT="\`sudo file -s /dev/xvdf\`"
-if [ "$NEEDS_FORMAT" = "/dev/xvdf: data" ]; then
+NEEDS_FORMAT="\`blkid --match-token TYPE=ext4 /dev/xvdf\`"
+if [ "$NEEDS_FORMAT" = "TYPE=\\"ext4\\"" ]; then
   echo "formating..." >> /root/log.txt 2>&1
   sudo mkfs -t ext4 /dev/xvdf >> /root/log.txt 2>&1
 else
@@ -72,7 +72,7 @@ sleep 1
 echo "mounting..." >> /root/log.txt 2>&1
 mkdir -p /workspace
 sudo mount /dev/xvdf /workspace >> /root/log.txt 2>&1
-chown -R ubuntu:ubuntu /workspace
+chown -R ${vars.SHELL_USER}:${vars.SHELL_USER} /workspace
 cd /workspace/daemon/
 make install
 make start
