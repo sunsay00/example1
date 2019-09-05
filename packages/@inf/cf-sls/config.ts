@@ -416,10 +416,11 @@ deploy: build
       }
     }
 
-    const dependsOn = [
-      ...entries(inputs.handlers).map(([_, v]) => v.packageJsonPath),
-      ...entries(inputs.handlers).map(([_, v]) => `${path.dirname(v.packageJsonPath)}/**/*.ts`),
-      ...(inputs.dependsOn || [])];
+    //const dependsOn = [
+    //...entries(inputs.handlers).map(([_, v]) => path.resolve(v.packageJsonPath)),
+    //...entries(inputs.handlers).map(([_, v]) => `${path.resolve(path.dirname(v.packageJsonPath))}/**/*.ts`),
+    //...(inputs.dependsOn || [])];
+    const dependsOn = inputs.dependsOn;
 
     return {
       type: 'shell',

@@ -77,6 +77,7 @@ const configuration: Configuration = {
     }));
 
     await reg(SlsApi.Config({
+      dependsOn: ['./api/package.json', './api/src/**/*.ts'],
       accountId: vars.AWS_ACCOUNT_ID,
       cognitoUserPoolId: cog.UserPoolId,
       securityGroupIds: [aws.SecurityGroup_default],
@@ -93,6 +94,7 @@ const configuration: Configuration = {
     await reg(Sls.Config({
       id: 'cf-sls-test',
       rootDir: './cf-sls-test',
+      dependsOn: ['./cf-sls-test/package.json', './cf-sls-test/src/**/*.ts'],
       handlers: {
         test: {
           vars: {

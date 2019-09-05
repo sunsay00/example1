@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import { vars } from './vars';
+import { vars } from './_vars';
 
 export const up = async () => {
   const ec2 = new AWS.EC2({

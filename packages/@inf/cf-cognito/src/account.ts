@@ -3,7 +3,7 @@ import UserLogin from './userlogin';
 import UserProfile from './userprofile';
 import UserRegistration from './userregistration';
 import { CognitoUserSession, CognitoClient, UserPoolMode, LocalStorage, Storage } from './types';
-import { vars } from './vars';
+import { outputs } from './_outputs';
 import * as RT from 'runtypes';
 import { Client } from './client';
 
@@ -150,7 +150,7 @@ export class Account {
     // the storage used by the cognito-user object will fix.
     const user = await this._util.getCurrentUser();
     if (!user) throw new Error('invalid cognito user');
-    const clientId = this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId;
+    const clientId = this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
     const lastUserKeyKey = `CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
     const lastUserKey = (user as any).storage.getItem(lastUserKeyKey);
     if (lastUserKey)

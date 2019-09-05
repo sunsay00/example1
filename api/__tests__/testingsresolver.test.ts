@@ -2,8 +2,8 @@ import "jest";
 import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import RDSDBClient from '@inf/cf-serverless-postgres';
-import { fixtures as fix, IUserContext, Deck } from '@inf/cf-gen';
-import { vars } from '../src/vars';
+import { IUserContext } from '@inf/cf-gen';
+import { vars } from '../src/_vars';
 
 const config = verifyVars({
   STAGE: process.env.STAGE,

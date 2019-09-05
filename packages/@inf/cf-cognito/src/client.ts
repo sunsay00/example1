@@ -1,6 +1,6 @@
 import * as AWS from 'aws-sdk';
 import { ICognitoStorage, AuthenticationDetails as AWSAuthenticationDetails, CognitoUserPool as AWSCognitoUserPool, CognitoUser as AWSCognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
-import { vars } from './vars';
+import { outputs } from './_outputs';
 import { CompleteNewPasswordChallengeHandler, AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPoolMode, UserPool, LocalStorage } from './types';
 
 class StorageAdaptor {
@@ -130,7 +130,7 @@ export class Client implements CognitoClient {
 
   setCognitoIdentityPoolDetails = (Logins?: { [_: string]: string }): CognitoIdentityCredentials => {
     const credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: vars.CognitoIdentityPoolId,
+      IdentityPoolId: outputs.CognitoIdentityPoolId,
       Logins
     });
     AWS.config.credentials = credentials;
@@ -140,8 +140,8 @@ export class Client implements CognitoClient {
   private _createCognitoUserPool = (): AWSCognitoUserPool => {
     // Initialize Cognito User Pool
     return new AWSCognitoUserPool({
-      UserPoolId: vars.UserPoolId,
-      ClientId: this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId,
+      UserPoolId: outputs.UserPoolId,
+      ClientId: this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId,
       Storage: this._storage.getStorage(),
     });
   }

@@ -1,3 +1,7 @@
+_outputs.*
+_outputs.*
+_vars.*
+_vars.*
 .cache/
 .DS_Store
 .env
@@ -46,13 +50,7 @@ node_modules/
 npm-debug.log*
 pids
 public
-src/vars.env
-src/vars.js
-src/vars.ts
 typings/
-vars.env
-vars.js
-vars.ts
 yarn-debug.log*
 yarn-error.log
 yarn-error.log*

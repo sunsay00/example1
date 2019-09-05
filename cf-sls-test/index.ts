@@ -1,6 +1,6 @@
 import { domainWrapper } from '@inf/core';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { vars } from './src/vars';
+import { vars } from './src/_vars';
 import { Client } from 'pg';
 
 export const handler = domainWrapper(async (event: APIGatewayProxyEvent, context: Context) => {

@@ -95,8 +95,8 @@ if (process.argv.length < 2) {
     if (!fs.existsSync(tsdir))
       fs.mkdirSync(tsdir);
     const outvars = { AWS_REGION: vars.AWS_ACCESS_KEY_ID }
-    writeTs(`${tsdir}/vars.ts`, outvars);
-    writeJs(`${tsdir}/vars.js`, outvars);
+    writeTs(`${tsdir}/_vars.ts`, outvars);
+    writeJs(`${tsdir}/_vars.js`, outvars);
   }).catch(err => {
     if (outpath)
       fs.existsSync(outpath) && fs.unlinkSync(outpath);

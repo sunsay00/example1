@@ -1,6 +1,6 @@
 import CognitoUtil from './cognitoutil';
 import { CognitoUserAttribute, UserPoolMode, CognitoClient } from './types';
-import { vars } from './vars';
+import { outputs } from './_outputs';
 
 export default class UserRegistration {
   private _client: CognitoClient;
@@ -62,7 +62,7 @@ export default class UserRegistration {
   resendConfirmationCode = async (): Promise<void> => {
     const Username = await this._util.getUserName();
     if (Username === undefined) throw new Error('failed to resend confirmation code');
-    const ClientId = this._mode == UserPoolMode.Web ? vars.WebUserPoolClientId : vars.MobileUserPoolClientId;
+    const ClientId = this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
     const cognitoParams = { ClientId, Username };
     await this._client.createCognitoServiceProvider().resendConfirmationCode(cognitoParams).promise();
   }
