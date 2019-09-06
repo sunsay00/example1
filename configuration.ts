@@ -52,7 +52,7 @@ const configuration: Configuration = {
       pubKey: { name: 'jump', path: './jump.pub' },
       subnet: aws.Subnet1,
       shellUser: 'ec2-user',
-      volumeSizeInGB: 10
+      volumeSizeInGB: 8
     }));
 
     const gen = await reg(Gen.Config({

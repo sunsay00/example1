@@ -473,7 +473,6 @@ const main = async (cmd: string, verbose: boolean) => {
           Capabilities: ['CAPABILITY_NAMED_IAM'],
           Parameters
         }).promise();
-
         await cf.waitFor('stackUpdateComplete', { StackName }).promise();
       } else {
         process.stdout.write(' creating... ');
@@ -571,7 +570,7 @@ const main = async (cmd: string, verbose: boolean) => {
 
       const moduleid = `${rootid}${record.id ? `:${record.id}` : ''}`;
       verifyModuleId(moduleid);
-      showlog && log(moduleid);
+      /*showlog &&*/ log(`${'  '.repeat(depth)}${depth > 0 ? colors.grey(moduleid) : moduleid}`);
 
       const stackName = makeStackname(configuration.stage, rootid, id);
 
@@ -775,7 +774,7 @@ const main = async (cmd: string, verbose: boolean) => {
         process.exit(1);
       }
 
-      showlog && console.log('');
+      /*showlog &&*/ console.log('');
 
       return result;
     };

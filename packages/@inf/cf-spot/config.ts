@@ -1,4 +1,5 @@
 import { createConfig, createConfigRecord, makeStackname, configEffect } from '@inf/vars/configure';
+import { maketools } from '@inf/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -48,7 +49,6 @@ export const Config = (inputs: {
       cfpath: './cf.yaml',
       id: inputs.id,
       inputs: {
-        Id: inputs.id,
         VpcId: inputs.vpcId,
         AvailabilityZone: inputs.availabilityZone,
         Stage: stage,
@@ -61,6 +61,8 @@ export const Config = (inputs: {
         InstanceProfileName: ''
       }
     }));
+
+    await maketools.invokeRule(`${__dirname}/Makefile`, 'up', []);
 
     return {
       type: 'replace-vars',

@@ -7,7 +7,6 @@ export const up = async () => {
     apiVersion: '2016-11-15',
     region: vars.AWS_REGION
   });
-
   console.log('describe spot instance requests...');
   const ires = await ec2.describeSpotInstanceRequests().promise();
   if (!ires.SpotInstanceRequests) throw new Error('invalid spot instance request result');
@@ -143,7 +142,7 @@ if (process.argv.length != 3) {
 } else {
   const [_1, _2, cmd] = process.argv;
   if (cmd == 'up' || cmd == 'down')
-    main(cmd).then(console.log).catch(console.error);
+    main(cmd).catch(console.error);
   else {
     console.log(`usage: ${path.basename(process.argv[1])} <up|down>`);
     process.exit(1);
