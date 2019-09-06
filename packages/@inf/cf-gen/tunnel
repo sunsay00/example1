@@ -28,8 +28,6 @@ const parseArgs = () => {
 
 const spawnHelperRaw = async (cmd, args, params) => {
   const sshproc = spawn(cmd, args, { shell: true, stdio: 'inherit' });
-  //if (params.onStdOut) sshproc.stdout.on('data', data => params.onStdErr(data.toString()))
-  //if (params.onStdErr) sshproc.stderr.on('data', data => params.onStdErr(data.toString()))
   if (params.onClose) sshproc.on('close', code => params.onClose(code));
   return sshproc;
 };
@@ -65,13 +63,11 @@ const spawnCommand = async (cmd, args) => new Promise((resolve, reject) => {
       if (code == 0) resolve(p)
       else reject(new Error(`process exited with ${code}`));
     },
-    onStdErr: data => process.stderr.write(colors.grey(data.replace(/\n/, '\n  '))),
-    onStdOut: data => process.stdout.write(colors.grey(data.replace(/\n/, '\n  '))),
   });
 });
 
 const main = async params => {
-  process.stderr.write(`Tunnel ${colors.grey(`localhost:${params.localPort} -> ${params.remoteHost}:${params.remotePort}`)}`);
+  process.stderr.write(`BEGIN-TUNNEL: ${colors.grey(`localhost:${params.localPort} -> ${params.remoteHost}:${params.remotePort}`)}`);
   const p = await spawnTunnel(params.localPort, params.remoteHost, params.remotePort, params.jumpHost);
   console.log('');
   const [cmd, ...args] = params.args;
@@ -79,11 +75,12 @@ const main = async params => {
     await spawnCommand(cmd, args);
   } finally {
     p.kill('SIGKILL');
+    console.log('END-TUNNEL');
   }
   process.exit(0);
 };
 
-main(parseArgs()).then(() => { }).catch(err => {
+main(parseArgs()).catch(err => {
   console.error(err);
   process.exit(1);
 });

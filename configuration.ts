@@ -25,8 +25,8 @@ const configuration: Configuration = {
 
     const rds = await reg(ServerlessPostgress.Config({
       DatabaseName: 'main',
-      MasterUsername: '{{MASTER_USERNAME}}',
-      MasterUserPassword: '{{MASTER_USER_PASSWORD}}',
+      MasterUsername: vars.MASTER_USERNAME,
+      MasterUserPassword: vars.MASTER_USER_PASSWORD,
       MinCapacity: 2,
       MaxCapacity: 2,
     }));
@@ -55,8 +55,8 @@ const configuration: Configuration = {
     }));
 
     const gen = await reg(Gen.Config({
-      MasterUsername: '{{MASTER_USERNAME}}',
-      MasterUserPassword: '{{MASTER_USER_PASSWORD}}',
+      MasterUsername: vars.MASTER_USERNAME,
+      MasterUserPassword: vars.MASTER_USER_PASSWORD,
       RDSServiceId: ServiceIds.RDS,
       RDSClusterEndpointAddress: rds.RDSClusterEndpointAddress,
       ledgerPath: 'ledger.scm',

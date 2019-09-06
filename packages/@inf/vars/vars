@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // @ts-check
 
-const { vars } = require('./index');
+// @ts-ignore
+const { _vars: vars } = require('./index');
 const { spawn } = require('child_process');
 const path = require('path');
 
