@@ -9,7 +9,7 @@ import * as colors from 'colors/safe';
 import { fromEntries, entries, Diff, substitute } from '@inf/common';
 
 export const makeStackname = (stage: string, rootid: string, id?: string) =>
-  `${stage}-${rootid}${id ? `--${id}` : ''}`;
+  `${stage ? `${stage}-` : ''}${rootid}${id ? `--${id}` : ''}`;
 
 const verifyRegEx = (value: unknown, errMessage: string) => {
   if (Object.prototype.toString.call(value) == '[object RegExp]')
@@ -23,6 +23,10 @@ const verifyModuleId = (s: string) => {
   if (!/^[a-zA-Z0-9-_:]+$/.exec(s)) {
     error(`invalid moduleid '${s}' - only letters, digits, dashes, colons, and underscores are allowed`, 1);
     throw new Error(`invalid moduleid '${s}' - only letters, digits, dashes, and underscores are allowed`);
+  }
+  if (s.includes('--')) {
+    error(`invalid moduleid '${s}' - cannot have multiple sequential dashes`);
+    throw new Error(`invalid moduleid '${s}' - cannot have multiple sequential dashes`);
   }
   if (_moduleids[s]) {
     error(`duplicate moduleid '${s}' detected`, 2);
@@ -40,6 +44,10 @@ const verifyId = (s: string) => {
   if (!/^[a-zA-Z0-9-_]+$/.exec(s)) {
     error(`invalid id '${s}' - only letters, digits, dashes, and underscores are allowed`, 1);
     throw new Error(`invalid id '${s}' - only letters, digits, dashes, and underscores are allowed`);
+  }
+  if (s.includes('--')) {
+    error(`invalid id '${s}' - cannot have multiple sequential dashes`);
+    throw new Error(`invalid id '${s}' - cannot have multiple sequential dashes`);
   }
   return true;
 }

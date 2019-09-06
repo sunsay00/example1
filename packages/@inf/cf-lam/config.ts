@@ -155,7 +155,7 @@ export const Config = (inputs: {
 
     // generate serverless.yml
     const lam = {
-      service: inputs.alias || makeStackname(stage, path.basename(inputs.rootDir), inputs.id),
+      service: inputs.alias || makeStackname('', path.basename(inputs.rootDir), inputs.id),
       provider: {
         name: 'aws',
         runtime: 'nodejs10.x',
