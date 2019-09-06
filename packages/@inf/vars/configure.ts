@@ -497,7 +497,9 @@ const main = async (cmd: string, verbose: boolean) => {
 
     const reg = async <R extends { [_: string]: string }>(f: ModuleRecord<R>): Promise<R> => {
       const rec: ConfigRecord<R> = typeof f == 'function' ? f(k => previous[k]) : f;
-      return rec.clean({ configurationDir, stage: configuration.stage, region: configuration.region }, reg);
+      const ret = await rec.clean({ configurationDir, stage: configuration.stage, region: configuration.region }, reg);
+      console.log(ret);
+      return ret;
     };
     await configuration.configure(reg);
 

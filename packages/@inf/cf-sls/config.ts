@@ -7,6 +7,12 @@ import * as path from 'path';
 import * as yamljs from 'yamljs';
 import * as RT from 'runtypes';
 
+type MakeRule = {
+  deps?: string[],
+  desc?: string,
+  commands?: string[],
+}
+
 const SLSConfigRecord = RT.Record({
   service: RT.String,
   provider: RT.Record({
@@ -283,19 +289,11 @@ module.exports = {
         "test": "jest"
       },
       "dependencies": {
-        //"@inf/cf-gen": "*",
-        //"aws-lambda": "0.1.2",
-        //"graphql": "14.4.2",
-        //"graphql-tools": "4.0.5",
         "@inf/vars": "*",
         ...(dependencies || {}),
       },
       "devDependencies": {
-        //"@inf/cf-cognito": "*",
-        //"@types/aws-lambda": "8.10.31",
-        //"@types/graphql": "14.2.3",
         "@types/jest": "24.0.18",
-        //"@types/node": "12.6.8",
         "babel-jest": "24.8.0",
         "jest": "24.8.0",
         "jwk-to-pem": "2.0.1",
@@ -327,26 +325,7 @@ module.exports = {
 };
 `;
 
-    //start:
-    //@$(YARN) vars $(YARN) sls offline
-    //cf-sls-test-local-test 
-
     // generate makefile
-    const buildInvokeRules = (handlers: { [_: string]: Handler }) =>
-      entries(handlers).map<string[]>(([k, v]) =>
-        v.events ? v.events.map(e =>
-          `# DESC: invokes api endpoint
-invoke.${k}:
-\t@$(YARN) vars curl -H 'Authorization: Bearer FIXME' -H 'Content-Type: application/json' -d "hello world" {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}
-# DESC: invoke guest api endpoint
-invoke.${k}.guest:
-\t@$(YARN) vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`) :
-          [`# DESC: invokes lambda function
-invoke.${k}:
-${stage == 'local' ?
-              `\t@../../bin/invokelocallambda us-east-1 ${inputs.id}-local-${k} "$(SLS_SS_ARGS)"` :
-              `\t@$(YARN) vars $(YARN) sls invoke --function ${k}`}`]
-      ).flat().join('\n');
 
     const startCmds: StartCommand[] = [];
     if (inputs.dockerServices)
@@ -357,46 +336,72 @@ ${stage == 'local' ?
     if (startCmds.length == 0)
       startCmds.push({ command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s sls offline'"`, '"tsc -w -p tsconfig.sls.json"'] });
 
-    const makefile = `YARN = yarn -s
+    ////////////////
+    const rules: { [_: string]: MakeRule | undefined } = {
+      test: {
+        desc: 'run tests',
+        commands: [`yarn -s gen wipetest`, `yarn -s vars -s test $(SLS_SS_ARGS)`]
+      },
+      up: inputs.dockerServices && {
+        desc: 'start docker',
+        commands: ['docker-compose up -d']
+      },
+      down: inputs.dockerServices && {
+        desc: 'stop docker',
+        commands: ['docker-compose down']
+      },
+      start: startCmds.length && {
+        desc: 'starts server',
+        commands: startCmds.map(c => `yarn -s vars ${c.command}${c.args.length == 0 ? '' : ` ${c.args.join(' ')}`}`)
+      } || undefined,
+      ...fromEntries(entries(inputs.handlers).map(([k, v]) => {
+        if (v.events) {
+          return v.events.map(_ => [
+            [`invoke.${k}`, {
+              desc: 'invokes api endpoint',
+              commands: [`yarn -s vars curl -H 'Authorization: Bearer FIXME' -H 'Content-Type: application/json' -d "hello world" {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`]
+            }],
+            [`invoke.${k}.guest`, {
+              desc: 'invokes guest api endpoint',
+              commands: [`yarn -s vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`]
+            }]] as const);
+        } else {
+          return [[[`invoke.${k}`, {
+            desc: 'invokes lambda function',
+            commands: stage == 'local' ?
+              [`../../bin/invokelocallambda us-east-1 ${inputs.id}-local-${k} "$(SLS_SS_ARGS)"`] :
+              [`yarn -s vars yarn -s sls invoke --function ${k}`]
+          }]]] as const;
+        }
+      }).flat().flat()),
+      ...fromEntries(entries(inputs.handlers).map(([k]) => [`logs.${k}`, {
+        desc: 'tails out log messages',
+        commands: [`yarn -s vars sls logs -s {{STAGE}} -f ${k} -t -r {{AWS_REGION}}`]
+      }])),
+      build: {
+        commands: [
+          `cd ${instdir}`,
+          'yarn -s install --prefer-offline',
+          'rm -f build/tsconfig.tsbuildinfo',
+          'tsc -p tsconfig.sls.json',
+          `yarn -s webpack --config ${instdir}/webpack.config.js`,
+          'mkdir -p build/src',
+          ...entries(inputs.handlers).map(([_, v]) =>
+            `cp build/_${path.basename(v.filepath.replace(/(.ts$)/, '.js'))} build/${v.filepath.replace(/(.ts$)/, '.js')}`)]
+      },
+      deploy: {
+        deps: ['build'],
+        commands: ['yarn -s vars yarn -s sls deploy --no-confirm']
+      },
+      ['.PHONY']: { deps: ['build', 'deploy'] }
+    };
 
-# DESC: run tests
-test:
-\t@$(YARN) gen wipetest && \\
-\t\t$(YARN) vars $(YARN) test $(SLS_SS_ARGS)
+    const printMakefile = (rules: { [_: string]: MakeRule | undefined }) =>
+      entries(rules).filter(([k, v]) => !!v).map(([k, v]) =>
+        !v ? '' : `${v.desc ? `# DESC: ${v.desc}\n` : ''}${k}: ${(v.deps || []).join(' ')}${v.commands ? `\n\t@${v.commands.join(' && \\\n\t\t')}` : ''}`
+      ).join('\n\n');
 
-${inputs.dockerServices && `# DESC: start docker
-up:
-\t@docker-compose up -d` || ''}
-
-${inputs.dockerServices && `# DESC: stop docker
-down:
-\t@docker-compose down` || ''}
-
-${startCmds.length == 0 ? '' : `# DESC: starts server
-start:
-${`\t@${startCmds.map(c => `$(YARN) vars ${c.command}${c.args.length == 0 ? '' : ` ${c.args.join(' ')}`}`).join(' && \\\n\t\t')}`}`}
-
-${buildInvokeRules(inputs.handlers)}
-
-${entries(inputs.handlers).map(([k, v]) => `# DESC: tails out log messages
-logs.${k}:
-\t@$(YARN) vars sls logs -s {{STAGE}} -f ${k} -t -r {{AWS_REGION}}`).join('\n')}
-
-build:
-\t@cd ${instdir} && \\
-\t\t$(YARN) install --prefer-offline && \\
-\t\trm -f build/tsconfig.tsbuildinfo && \\
-\t\ttsc -p tsconfig.sls.json && \\
-\t\t$(YARN) webpack --config ${instdir}/webpack.config.js && \\
-\t\tmkdir -p build/src && \\
-${entries(inputs.handlers).map(([k, v]) =>
-      `\t\tcp build/_${path.basename(v.filepath.replace(/(.ts$)/, '.js'))} build/${v.filepath.replace(/(.ts$)/, '.js')}`).join(' && \\\n')}
-
-deploy: build
-\t@$(YARN) vars $(YARN) sls deploy --no-confirm
-
-.PHONY: build deploy
-`;
+    const makefile = printMakefile(rules);
 
     fs.writeFileSync(`${instdir}/serverless.yml`, yamljs.stringify(sls, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
     fs.writeFileSync(`${instdir}/webpack.config.js`, webpackconf, { encoding: 'utf8' });
@@ -443,10 +448,10 @@ const buildDefaultReturns = (stage: string, handlers: { [_: string]: Handler }):
 
 const buildOutputMatchers = (handlers: { [_: string]: Handler }): ShellOutputMatchers => {
   const ents = entries(handlers);
-  const fmapped = ents.map<[string, RegExp][]>(([k, v]) =>
+  const fmapped = ents.map(([k, v]) =>
     v.events ? v.events.map(_ =>
       [`${capitalizeFirstLetter(k)}Endpoint`, /Service Information[\s\S.]+endpoints:[\s\S.]+POST - (.+)$/gm]) :
-      [[`${capitalizeFirstLetter(k)}Function`, new RegExp(`Service Information[\\s\\S]+functions:[\\s\\S]+${k}: (.+)`, 'gm')]]
+      [[`${capitalizeFirstLetter(k)}Function`, new RegExp(`Service Information[\\s\\S]+functions:[\\s\\S]+${k}: (.+)`, 'gm')]] as const
   ).flat();
   return fromEntries(fmapped) as ShellOutputMatchers;
 }
