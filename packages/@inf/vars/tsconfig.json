@@ -9,7 +9,7 @@
       "node"
     ],
   },
-  "include": [
-    "./tunnel"
+  "exclude": [
+    "*"
   ]
 }

@@ -8,6 +8,9 @@ import * as path from 'path';
 import * as colors from 'colors/safe';
 import { fromEntries, entries, Diff, substitute } from '@inf/common';
 
+export const makeStackname = (stage: string, rootid: string, id?: string) =>
+  `${stage}-${rootid}${id ? `--${id}` : ''}`;
+
 const verifyRegEx = (value: unknown, errMessage: string) => {
   if (Object.prototype.toString.call(value) == '[object RegExp]')
     return true;
@@ -15,21 +18,22 @@ const verifyRegEx = (value: unknown, errMessage: string) => {
   throw new Error(errMessage);
 }
 
-const _fqModuleIds: { [_: string]: boolean } = {};
-const verifyFQModuleId = (s: string) => {
+const _moduleids: { [_: string]: boolean } = {};
+const verifyModuleId = (s: string) => {
   if (!/^[a-zA-Z0-9-_:]+$/.exec(s)) {
-    error(`invalid fqModuleid'${s}' - only letters, digits, dashes, colons, and underscores are allowed`, 1);
-    throw new Error(`invalid fqModuleid'${s}' - only letters, digits, dashes, and underscores are allowed`);
+    error(`invalid moduleid '${s}' - only letters, digits, dashes, colons, and underscores are allowed`, 1);
+    throw new Error(`invalid moduleid '${s}' - only letters, digits, dashes, and underscores are allowed`);
   }
-  if (_fqModuleIds[s]) {
-    error(`duplicate fqModuleid '${s}' detected`, 2);
-    throw new Error(`duplicate fqModuleid '${s}' detected`);
+  if (_moduleids[s]) {
+    error(`duplicate moduleid '${s}' detected`, 2);
+    throw new Error(`duplicate moduleid '${s}' detected`);
   }
-  _fqModuleIds[s] = true;
+  _moduleids[s] = true;
   return true;
 }
-const fqModuleIdExists = (s: string): boolean => {
-  return !!_fqModuleIds[s];
+
+const moduleIdExists = (s: string): boolean => {
+  return !!_moduleids[s];
 }
 
 const verifyId = (s: string) => {
@@ -51,7 +55,7 @@ const CloudFormationRecord = RT.Record({
 
 const ReplaceVarsRecord = RT.Record({
   type: RT.Literal('replace-vars'),
-  targetModuleId: RT.String.withConstraint(s => fqModuleIdExists(s)),
+  targetModuleId: RT.String.withConstraint(s => moduleIdExists(s)),
 }).And(RT.Partial({
   id: RT.String.withConstraint(s => verifyId(s)),
   vars: RT.Dictionary(RT.String),
@@ -71,8 +75,6 @@ const ShellRecord = RT.Record({
 }));
 
 const Record = RT.Union(CloudFormationRecord, ShellRecord, ReplaceVarsRecord);
-
-export const getStackname = (stage: string, moduleid: string, id?: string) => `${stage}-${moduleid}${id ? `-${id}` : ''}`;
 
 export type CFParams = { configurationDir: string, stage: string, region: string };
 
@@ -108,7 +110,7 @@ export const createRecord = <R extends { [_: string]: string }>(rc: CFRecord<R> 
     return rec.outputs;
   }
 });
-export const createConfigRecord = <R extends { [_: string]: string }>(rc: CFRecord<R>) => // | ((params: CFParams, reg: Registerer) => Promise<CFRecord<R>>)) =>
+export const createConfigRecord = <R extends { [_: string]: string }>(rc: CFRecord<R>) =>
   createConfig<R>(createRecord<R>(rc));
 
 const error = (msg: string, id?: number) => console.error(colors.red(`[CONF] error: ${msg}${id ? ` (${id})` : ''}`));
@@ -514,22 +516,21 @@ const main = async (cmd: string, verbose: boolean) => {
       }) : f;
 
       const record = await rec.up({ configurationDir, stage: configuration.stage, region: configuration.region }, reg(depth + 1));
-      const absModuleDirname = path.resolve(record.rootDir);
-      const moduleid = path.basename(absModuleDirname);
-      const fqModuleId = `${moduleid}${record.id ? `:${record.id}` : ''}`;
-      verifyFQModuleId(fqModuleId);
+      const rootid = path.basename(record.rootDir);
 
-      const key = moduleid.replace(/-/g, '_').toUpperCase();
+      const key = rootid.replace(/-/g, '_').toUpperCase();
 
       const id = record.id || '';
 
       const showlog = depth == 0;
 
-      showlog && log(`${moduleid}${id ? `:${id}` : ''}`);
+      const moduleid = `${rootid}${record.id ? `:${record.id}` : ''}`;
+      verifyModuleId(moduleid);
+      showlog && log(moduleid);
 
-      const stackName = getStackname(configuration.stage, moduleid, id);
+      const stackName = makeStackname(configuration.stage, rootid, id);
 
-      const tsdir = absModuleDirname;
+      const tsdir = path.resolve(record.rootDir);
 
       let result: any = undefined;
       const ret = await Record.match(
@@ -648,7 +649,7 @@ const main = async (cmd: string, verbose: boolean) => {
                 if (record.outputs) {
                   for (let k in record.outputs)
                     if (json[k] == undefined)
-                      throw new Error(`${moduleid} is missing the output '${k}'`);
+                      throw new Error(`${moduleid} is missing output '${k}'`);
                 }
                 buffer = '';
                 printOutputs(key, json);

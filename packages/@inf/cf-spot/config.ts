@@ -1,10 +1,11 @@
-import { createConfig, createConfigRecord, getStackname } from '@inf/vars/configure';
+import { createConfig, createConfigRecord, makeStackname } from '@inf/vars/configure';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import * as AWS from 'aws-sdk';
 
 export const Config = (inputs: {
+  id: string,
   vpcId: string,
   availabilityZone: string,
   bidPrice: number,
@@ -36,16 +37,16 @@ export const Config = (inputs: {
       }).promise();
     }
 
-    const id = '1';
-    const moduleid = path.basename(__dirname);
-    const stackName = getStackname(stage, moduleid, id);
+    const rootid = path.basename(__dirname);
+    const stackName = makeStackname(stage, rootid, inputs.id);
 
     const spot = await reg(createConfigRecord({
       type: 'cloudformation',
       rootDir: __dirname,
       cfpath: './cf.yaml',
-      id,
+      id: inputs.id,
       inputs: {
+        Id: inputs.id,
         VpcId: inputs.vpcId,
         AvailabilityZone: inputs.availabilityZone,
         Stage: stage,

@@ -1,4 +1,4 @@
-import { createConfig, ShellOutputMatchers, writeTmps } from '@inf/vars/configure';
+import { createConfig, ShellOutputMatchers, writeTmps, makeStackname } from '@inf/vars/configure';
 import { fromEntries, entries, Diff, capitalizeFirstLetter } from '@inf/common';
 import { unlinkRecursiveSync } from '@inf/core';
 
@@ -155,7 +155,7 @@ export const Config = (inputs: {
 
     // generate serverless.yml
     const lam = {
-      service: inputs.alias || inputs.id,
+      service: inputs.alias || makeStackname(stage, path.basename(inputs.rootDir), inputs.id),
       provider: {
         name: 'aws',
         runtime: 'nodejs10.x',

@@ -43,6 +43,7 @@ const configuration: Configuration = {
     }));
 
     await reg(Spot.Config({
+      id: '1',
       vpcId: aws.VPC_ID,
       availabilityZone: aws.AvailabilityZone1,
       bidPrice: 0.007,
@@ -110,15 +111,15 @@ const configuration: Configuration = {
     }));
 
     await reg(Lam.Config({
-      id: 'cf-lam-test',
-      rootDir: './test',
-      dependsOn: ['./test/package.json', './test/**/*.ts'],
+      id: 'test1',
+      rootDir: './cf-lam-test',
+      dependsOn: ['./cf-lam-test/package.json', './cf-lam-test/**/*.ts'],
       handlers: {
         test: {
           vars: {
             DB_URL: gen.DB_URL
           },
-          packageJsonPath: './test/package.json', filepath: 'index.ts', entrypoint: 'handler'
+          packageJsonPath: './cf-lam-test/package.json', filepath: 'index.ts', entrypoint: 'handler'
         }
       },
       webpackIgnore: /^pg-native$/,

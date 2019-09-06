@@ -1,5 +1,7 @@
 ---
 Parameters:
+  Id:
+    Type: String
   Stage:
     Type: String
     AllowedValues: [dev]
@@ -16,7 +18,7 @@ Resources:
   Role:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::Region}-${AWS::StackName}-Role-${Stage}
+      RoleName: !Sub ${AWS::Region}-${AWS::StackName}-${Id}-Role-${Stage}
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement: 
@@ -26,7 +28,7 @@ Resources:
           Action: sts:AssumeRole
       Path: /
       Policies:
-        - PolicyName: !Sub ${AWS::Region}-${AWS::StackName}-Policy
+        - PolicyName: !Sub ${AWS::Region}-${AWS::StackName}-${Id}-Policy-${Stage}
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -43,13 +45,13 @@ Resources:
     DependsOn: Role
     Type: AWS::IAM::InstanceProfile
     Properties: 
-      InstanceProfileName: !Sub ${AWS::Region}-${AWS::StackName}-InstanceProfile-${Stage}
+      InstanceProfileName: !Sub ${AWS::Region}-${AWS::StackName}-${Id}-InstanceProfile-${Stage}
       Roles: 
         - !Ref Role
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub ${AWS::Region}-${AWS::StackName}-${Stage}
+      GroupName: !Sub ${AWS::Region}-${AWS::StackName}-${Id}-SecurityGroup-${Stage}
       GroupDescription: Allow remote access to cache
       VpcId: !Sub ${VpcId}
       SecurityGroupIngress:

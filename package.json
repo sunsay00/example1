@@ -9,7 +9,7 @@
     "packages/*",
     "api",
     "site",
-    "test",
+    "cf-lam-test",
     "packages/@inf/*",
     "packages/@inf/cf-lam/tmp/*"
   ],
