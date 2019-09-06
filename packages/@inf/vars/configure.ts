@@ -86,6 +86,12 @@ const verifyId = (s: string) => {
   return true;
 }
 
+const NoOpRecord = RT.Record({
+  type: RT.Literal('no-op')
+}).And(RT.Partial({
+  id: RT.String.withConstraint(s => verifyId(s)),
+}));
+
 const CloudFormationRecord = RT.Record({
   type: RT.Literal('cloudformation'),
   cfpath: RT.String,
@@ -116,14 +122,13 @@ const ShellRecord = RT.Record({
   outputMatchers: RT.Dictionary(RT.Unknown.withConstraint(s => verifyRegEx(s, 'outputMatchers must only contain regular expressions')))
 }));
 
-const Record = RT.Union(CloudFormationRecord, ShellRecord, ReplaceVarsRecord);
+const Record = RT.Union(CloudFormationRecord, ShellRecord, ReplaceVarsRecord, NoOpRecord);
 
 export type CFParams = { configurationDir: string, stage: string, region: string };
 
 type CFRecord<R extends { [_: string]: string }> = RT.Static<typeof Record> & {
   rootDir: string,
   outputs: R,
-  children?: (reg: Registerer) => Promise<void>
 };
 
 export type ConfigRecord<R extends { [_: string]: string }> = { up: (params: CFParams, reg: Registerer) => Promise<CFRecord<R>>, clean: (params: CFParams, reg: Registerer) => Promise<R> };
@@ -766,6 +771,8 @@ const main = async (cmd: string, verbose: boolean) => {
 
           resolve(true);
         }),
+
+        async noop => true
 
       )(record);
 

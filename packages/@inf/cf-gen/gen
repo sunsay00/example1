@@ -51,7 +51,7 @@ elif [[ $CMD == "seed" ]]; then
   if [[ ${STAGE} == "dev" ]]; then
     TUNNEL="yarn -s tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
   else
-    TUNNEL=""
+    TUNNEL=eval
   fi
 
   ${TUNNEL} yarn -s vars ${DIR}/seed ${DB_URL} ${SERVICE_ID}
@@ -71,7 +71,7 @@ elif [[ $CMD == "wipetest" ]]; then
   if [[ ${STAGE} == "dev" ]]; then
     TUNNEL="yarn -s tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
   else
-    TUNNEL=""
+    TUNNEL=eval
   fi
 
   ${TUNNEL} STAGE=${STAGE} DB_URL=${DB_URL} DB_TEST_URL=${DB_TEST_URL} GENDIR=${GENDIR} ${GENDIR}/wipetest
@@ -90,7 +90,7 @@ elif [[ $CMD == "up" ]]; then
   if [[ ${STAGE} == "dev" ]]; then
     TUNNEL="yarn -s tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
   else
-    TUNNEL=""
+    TUNNEL=eval
   fi
 
   ${TUNNEL} DB=`yarn -s vars echo ${DB_URL}` yarn -s db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
@@ -109,7 +109,7 @@ elif [[ $CMD == "down" ]]; then
   if [[ ${STAGE} == "dev" ]]; then
     TUNNEL="yarn -s tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
   else
-    TUNNEL=""
+    TUNNEL=eval
   fi
 
   ${TUNNEL} DB=`yarn -s vars echo ${DB_URL}` yarn -s db-migrate down --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
@@ -128,7 +128,7 @@ elif [[ $CMD == "shell" ]]; then
   if [[ ${STAGE} == "dev" ]]; then
     TUNNEL="yarn -s tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
   else
-    TUNNEL=""
+    TUNNEL=eval
   fi
   ${TUNNEL} yarn -s vars pgcli "$DB_URL"
 

@@ -113,7 +113,10 @@ export const Config = (inputs: {
   packageDependencies?: { [_: string]: string },
   packageDevDependencies?: { [_: string]: string },
 
-  startCommands?: StartCommand[]
+  startCommands?: StartCommand[],
+
+  makeRules?: { [_: string]: MakeRule | undefined }
+
 }) => createConfig(({ stage, region, configurationDir }) => ({
   clean: async () => {
     if (fs.existsSync(`${__dirname}/tmp`))
@@ -325,7 +328,6 @@ module.exports = {
 `;
 
     // generate makefile
-
     const startCmds: StartCommand[] = [];
     if (inputs.dockerServices)
       startCmds.push({ command: 'docker-compose', args: ['up', '-d'] });
@@ -352,26 +354,14 @@ module.exports = {
         desc: 'starts server',
         commands: startCmds.map(c => `yarn -s vars ${c.command}${c.args.length == 0 ? '' : ` ${c.args.join(' ')}`}`)
       } || undefined,
-      ...fromEntries(entries(inputs.handlers).map(([k, v]) => {
-        if (v.events) {
-          return v.events.map(_ => [
-            [`invoke.${k}`, {
-              desc: 'invokes api endpoint',
-              commands: [`yarn -s vars curl -H 'Authorization: Bearer FIXME' -H 'Content-Type: application/json' -d "hello world" {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`]
-            }],
-            [`invoke.${k}.guest`, {
-              desc: 'invokes guest api endpoint',
-              commands: [`yarn -s vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.id.toUpperCase().replace(/-/g, '_')}_${capitalizeFirstLetter(k)}Endpoint}}`]
-            }]] as const);
-        } else {
-          return [[[`invoke.${k}`, {
-            desc: 'invokes lambda function',
-            commands: stage == 'local' ?
-              [`../../bin/invokelocallambda us-east-1 ${inputs.id}-local-${k} "$(SLS_SS_ARGS)"`] :
-              [`yarn -s vars yarn -s sls invoke --function ${k}`]
-          }]]] as const;
-        }
-      }).flat().flat()),
+      ...fromEntries(entries(inputs.handlers).map(([k, v]) =>
+        [[[`invoke.${k}`, {
+          desc: 'invokes lambda function',
+          commands: stage == 'local' ?
+            [`../../bin/invokelocallambda ${region} ${inputs.id}-local-${k} "$(SLS_SS_ARGS)"`] :
+            [`yarn -s vars yarn -s sls invoke --function ${k}`]
+        }]]] as const
+      ).flat().flat()),
       ...fromEntries(entries(inputs.handlers).map(([k]) => [`logs.${k}`, {
         desc: 'tails out log messages',
         commands: [`yarn -s vars sls logs -s {{STAGE}} -f ${k} -t -r {{AWS_REGION}}`]
@@ -391,6 +381,7 @@ module.exports = {
         deps: ['build'],
         commands: ['yarn -s vars yarn -s sls deploy --no-confirm']
       },
+      ...(inputs.makeRules || {}),
       ['.PHONY']: { deps: ['build', 'deploy'] }
     };
 
@@ -423,12 +414,11 @@ module.exports = {
     //...entries(inputs.handlers).map(([_, v]) => path.resolve(v.packageJsonPath)),
     //...entries(inputs.handlers).map(([_, v]) => `${path.resolve(path.dirname(v.packageJsonPath))}/**/*.ts`),
     //...(inputs.dependsOn || [])];
-    const dependsOn = inputs.dependsOn;
 
     return {
       type: 'shell',
       rootDir: inputs.rootDir,
-      dependsOn,
+      dependsOn: inputs.dependsOn,
       vars: inputs.vars,
       id: inputs.id,
       cwd: instdir,
