@@ -2,6 +2,9 @@
   "private": true,
   "name": "beauty",
   "version": "0.0.1",
+  "scripts": {
+    "wakka": "yarn -s vars ./tmp"
+  },
   "workspaces": [
     "packages/*",
     "api",
