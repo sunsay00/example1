@@ -15,6 +15,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@inf/vars": "*",
     "@inf/cf-lam": "*",
     "@inf/cf-gen": "*"
   }

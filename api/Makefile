@@ -1,15 +1,15 @@
 test:
-	yarn ss api test $(ARGS)
+	yarn -s lam api test $(ARGS)
 
 start:
-	yarn ss api start
+	yarn -s lam api start
 
 invoke:
-	yarn ss api invoke.api
+	yarn -s lam api invoke.api
 invoke.guest:
-	yarn ss api invoke.api.guest
+	yarn -s lam api invoke.api.guest
 
 logs.auth:
-	yarn vars sls logs -s {{STAGE}} -f auth -t -r {{AWS_REGION}}
+	yarn -s vars yarn -s lam api logs.auth
 logs.api:
-	yarn vars sls logs -s {{STAGE}} -f api -t -r {{AWS_REGION}}
+	yarn -s vars yarn -s lam api logs.api
