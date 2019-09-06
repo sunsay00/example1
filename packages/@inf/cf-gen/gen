@@ -10,8 +10,6 @@ else
   GENDIR="$DIR"
 fi
 
-function runsql { echo "$2" | psql "$1"; }
-
 function printusage {
   echo "usage: gen <command>"
   echo "  commands:"
@@ -20,7 +18,7 @@ function printusage {
   echo "    - wipetest                    # wipes out test database"
   echo "    - up                          # transitions the database to the lastest migration"
   echo "    - down                        # transitions the database to its previous migration"
-  echo "    - shell                       # connects to localdb"
+  echo "    - shell                       # connects to db"
 }
 
 if [[ -z ${1} ]]; then
@@ -50,9 +48,14 @@ elif [[ $CMD == "seed" ]]; then
   DB_URL="${2}"
   SERVICE_ID="${3}"
 
-  #${DIR}/seed ${DB_URL} ${SERVICE_ID}
+  if [[ ${STAGE} == "dev" ]]; then
+    TUNNEL="${GENDIR}/tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
+  else
+    TUNNEL=""
+  fi
 
-  #DB=${DB_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+  ${TUNNEL} yarn -s vars ${DIR}/seed ${DB_URL} ${SERVICE_ID}
+  ${TUNNEL} DB=`yarn -s vars echo ${DB_URL}` yarn -s db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
 
 elif [[ $CMD == "wipetest" ]]; then
 
@@ -64,12 +67,14 @@ elif [[ $CMD == "wipetest" ]]; then
     echo "undefined db urls"
   fi
 
-  runsql "${DB_URL}" "DROP DATABASE IF EXISTS testlocal"
-  runsql "${DB_URL}" "CREATE DATABASE testlocal"
+  STAGE=`yarn -s vars echo {{STAGE}}`
+  if [[ ${STAGE} == "dev" ]]; then
+    TUNNEL="${GENDIR}/tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
+  else
+    TUNNEL=""
+  fi
 
-  ${GENDIR}/seed ${DB_TEST_URL} 0
-
-  cd "$GENDIR" && DB=${DB_TEST_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+  ${TUNNEL} STAGE=${STAGE} DB_URL=${DB_URL} DB_TEST_URL=${DB_TEST_URL} GENDIR=${GENDIR} ${GENDIR}/wipetest
 
 elif [[ $CMD == "up" ]]; then
 
@@ -81,7 +86,14 @@ elif [[ $CMD == "up" ]]; then
     echo "undefined db url"
   fi
   
-  DB=${DB_URL} yarn db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+  STAGE=`yarn -s vars echo {{STAGE}}`
+  if [[ ${STAGE} == "dev" ]]; then
+    TUNNEL="${GENDIR}/tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
+  else
+    TUNNEL=""
+  fi
+
+  ${TUNNEL} DB=`yarn -s vars echo ${DB_URL}` yarn -s db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
 
 elif [[ $CMD == "down" ]]; then
 
@@ -93,7 +105,14 @@ elif [[ $CMD == "down" ]]; then
     echo "undefined db url"
   fi
   
-  DB=${DB_URL} yarn db-migrate down --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+  STAGE=`yarn -s vars echo {{STAGE}}`
+  if [[ ${STAGE} == "dev" ]]; then
+    TUNNEL="${GENDIR}/tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
+  else
+    TUNNEL=""
+  fi
+
+  ${TUNNEL} DB=`yarn -s vars echo ${DB_URL}` yarn -s db-migrate down --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
 
 elif [[ $CMD == "shell" ]]; then
 
@@ -105,7 +124,13 @@ elif [[ $CMD == "shell" ]]; then
     echo "undefined db test url"
   fi
 
-  pgcli "$DB_URL"
+  STAGE=`yarn -s vars echo {{STAGE}}`
+  if [[ ${STAGE} == "dev" ]]; then
+    TUNNEL="${GENDIR}/tunnel ${LOCAL_PORT} ${RDS_HOST} 5432 ${PROXY_HOST}"
+  else
+    TUNNEL=""
+  fi
+  ${TUNNEL} yarn -s vars pgcli "$DB_URL"
 
 else
   echo "unknown command: ${CMD}"

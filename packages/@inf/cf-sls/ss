@@ -36,10 +36,10 @@ const main = async (fnname, args) => {
     if (cmds.find(c => c.name == cmd)) {
       await maketools.invokeRule(makefilepath, cmd, subargs);
     } else {
-      maketools.printRules(fnname, cmds);
+      maketools.printRules(cmds);
     }
   } else {
-    maketools.printRules(fnname, cmds);
+    maketools.printRules(cmds);
   }
 };
 

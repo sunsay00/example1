@@ -42,12 +42,28 @@ const configuration: Configuration = {
       FromEmail: `verification@${vars.NICE_NAME}`
     }));
 
+    await reg(Spot.Config({
+      vpcId: aws.VPC_ID,
+      availabilityZone: aws.AvailabilityZone1,
+      bidPrice: 0.007,
+      prebootImageId: 'ami-009d6802948d06e52', // Amazon Linux 2 AMI (HVM), SSD Volume Type
+      instanceType: 't3a.small',
+      pubKey: { name: 'jump', path: './jump.pub' },
+      subnet: aws.Subnet1,
+      shellUser: 'ec2-user',
+      volumeSizeInGB: 10
+    }));
+
     const gen = await reg(Gen.Config({
       MasterUsername: '{{MASTER_USERNAME}}',
       MasterUserPassword: '{{MASTER_USER_PASSWORD}}',
       RDSServiceId: ServiceIds.RDS,
       RDSClusterEndpointAddress: rds.RDSClusterEndpointAddress,
-      ledgerPath: 'ledger.scm'
+      ledgerPath: 'ledger.scm',
+      rdsProxy: vars.STAGE == 'local' ? undefined : {
+        proxyHost: 'ec2-user@ec2-52-73-213-184.compute-1.amazonaws.com',
+        localPort: 54321
+      }
     }));
 
     await reg(createConfigRecord({
@@ -110,18 +126,6 @@ const configuration: Configuration = {
         securityGroupIds: [aws.SecurityGroup_default],
         subnetIds: [aws.Subnet1, aws.Subnet2],
       }
-    }));
-
-    await reg(Spot.Config({
-      vpcId: aws.VPC_ID,
-      availabilityZone: aws.AvailabilityZone1,
-      bidPrice: 0.006,
-      prebootImageId: 'ami-009d6802948d06e52', // Amazon Linux 2 AMI (HVM), SSD Volume Type
-      instanceType: 't3a.small',
-      pubKey: { name: 'jump', path: './jump.pub' },
-      subnet: aws.Subnet1,
-      shellUser: 'ec2-user',
-      volumeSizeInGB: 10
     }));
 
   }

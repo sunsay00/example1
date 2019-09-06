@@ -28,7 +28,7 @@ export const Config = (inputs: {
     Filters: [{ Name: 'key-name', Values: [inputs.pubKey.name] }]
   }).promise();
 
-  if (keys.KeyPairs.length == 0) {
+  if (keys.KeyPairs && keys.KeyPairs.length == 0) {
     await ec2.importKeyPair({
       KeyName: inputs.pubKey.name,
       PublicKeyMaterial: fs.readFileSync(inputs.pubKey.path),

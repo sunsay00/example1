@@ -271,7 +271,8 @@ export const writeTmps = (name: 'outputs' | 'vars', tsdir: string, data: { [_: s
   const writeEnvs = (outPath: string) => {
     let out = '';
     Object.entries(data).map(([k, v]) => {
-      out += `${k}=${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${$2}')}\n`;
+      out += `${k}=${v}\n`;
+      //out += `${k}=${v.replace(/({{([a-zA-Z0-9_]+)}})/gm, '${$2}')}\n`;
     });
     fs.writeFileSync(outPath, `# this file has been automatically generated\n\n${out}`);
   };

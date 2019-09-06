@@ -23,10 +23,12 @@ fi
 # SEED
 run "DROP SEQUENCE IF EXISTS global_id_sequence"
 run "DROP TABLE IF EXISTS serviceId"
-run "REVOKE ALL ON schema public FROM public"
-run "CREATE TABLE serviceId (id INT); INSERT INTO serviceId (id) VALUES(${SERVICEID})"
-run "CREATE SEQUENCE global_id_sequence"
-run "CREATE EXTENSION IF NOT EXISTS postgis"
-run "CREATE EXTENSION IF NOT EXISTS citext"
+
+run "REVOKE ALL ON schema public FROM public; \
+ CREATE TABLE serviceId (id INT); \
+ INSERT INTO serviceId (id) VALUES(${SERVICEID}); \
+ CREATE SEQUENCE global_id_sequence; \
+ CREATE EXTENSION IF NOT EXISTS postgis; \
+ CREATE EXTENSION IF NOT EXISTS citext"
 
 #cd ${DIR}/.. && DB=${DB} sh ${DIR}/migrate up

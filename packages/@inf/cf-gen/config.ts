@@ -1,25 +1,50 @@
 import { createConfigRecord } from '@inf/vars/configure';
 
-export const Config = (opts: {
+export const Config = (inputs: {
   MasterUsername: string,
   MasterUserPassword: string,
   RDSServiceId: number,
   RDSClusterEndpointAddress: string,
   ledgerPath: string,
+  rdsProxy?: {
+    proxyHost: string,
+    localPort: number
+  }
 }) => createConfigRecord(async ({ stage }) => {
-  const DB_URL = `postgres://${opts.MasterUsername}:${opts.MasterUserPassword}@${opts.RDSClusterEndpointAddress}:5432/main${stage}`;
-  const DB_TEST_URL = `postgres://${opts.MasterUsername}:${opts.MasterUserPassword}@${opts.RDSClusterEndpointAddress}:5432/test${stage}`;
+  const port = inputs.rdsProxy ? inputs.rdsProxy.localPort : 5432;
+  const dbhost = inputs.rdsProxy ? 'localhost' : inputs.RDSClusterEndpointAddress;
+  const DB_URL = `postgres://${inputs.MasterUsername}:${inputs.MasterUserPassword}@${dbhost}:${port}/main${stage}`;
+  const DB_TEST_URL = `postgres://${inputs.MasterUsername}:${inputs.MasterUserPassword}@${dbhost}:${port}/test${stage}`;
   return {
     type: 'shell',
     rootDir: __dirname,
     command: 'make',
-    env: {
-      SERVICE_ID: `${opts.RDSServiceId}`,
+    env: inputs.rdsProxy ? {
+      SERVICE_ID: `${inputs.RDSServiceId}`,
       DB_URL,
-    },
+      RDS_HOST: inputs.RDSClusterEndpointAddress,
+      PROXY_HOST: inputs.rdsProxy.proxyHost,
+      LOCAL_PORT: `${inputs.rdsProxy.localPort}`
+    } : {
+        SERVICE_ID: `${inputs.RDSServiceId}`,
+        DB_URL,
+        RDS_HOST: '',
+        PROXY_HOST: '',
+        LOCAL_PORT: ''
+      },
     args: ['-f', `${__dirname}/Makefile`, 'configure'],
-    dependsOn: [`${__dirname}/generator/**/*.scm`, opts.ledgerPath],
-    vars: { DB_URL, DB_TEST_URL },
+    dependsOn: [`${__dirname}/generator/**/*.scm`, inputs.ledgerPath],
+    vars: inputs.rdsProxy ? {
+      DB_URL, DB_TEST_URL,
+      RDS_HOST: inputs.RDSClusterEndpointAddress,
+      PROXY_HOST: inputs.rdsProxy.proxyHost,
+      LOCAL_PORT: `${inputs.rdsProxy.localPort}`
+    } : {
+        DB_URL, DB_TEST_URL,
+        RDS_HOST: '',
+        PROXY_HOST: '',
+        LOCAL_PORT: '0'
+      },
     outputs: { DB_URL, DB_TEST_URL }
   };
 });
