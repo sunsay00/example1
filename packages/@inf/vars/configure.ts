@@ -108,7 +108,7 @@ export const createRecord = <R extends { [_: string]: string }>(rc: CFRecord<R> 
     return rec.outputs;
   }
 });
-export const createConfigRecord = <R extends { [_: string]: string }>(rc: CFRecord<R> | ((params: CFParams, reg: Registerer) => Promise<CFRecord<R>>)) =>
+export const createConfigRecord = <R extends { [_: string]: string }>(rc: CFRecord<R>) => // | ((params: CFParams, reg: Registerer) => Promise<CFRecord<R>>)) =>
   createConfig<R>(createRecord<R>(rc));
 
 const error = (msg: string, id?: number) => console.error(colors.red(`[CONF] error: ${msg}${id ? ` (${id})` : ''}`));
@@ -551,7 +551,6 @@ const main = async (cmd: string, verbose: boolean) => {
             result = prev;
             previous = appendPrev(previous, key, prev);
 
-            showlog && console.log('');
             return true;
           } else {
             const inputDirty = isInputDirty(key, expandedInputs);
@@ -564,7 +563,6 @@ const main = async (cmd: string, verbose: boolean) => {
             const ot = lastmod(`${__dirname}/.cache/${key}`);
             const cfDirty = lastmod(cfpath) > ot;
             if (!cfDirty && !inputDirty) {
-              showlog && console.log('');
               const prev = readCache(key);
               if (prev) {
 
@@ -587,7 +585,7 @@ const main = async (cmd: string, verbose: boolean) => {
             writeTmps('outputs', tsdir, prev);
             writeIgnores(tsdir);
 
-            showlog && console.log('(updated)');
+            showlog && process.stdout.write('(updated)');
 
             return true;
           }
@@ -618,7 +616,7 @@ const main = async (cmd: string, verbose: boolean) => {
               result = prev;
               previous = appendPrev(previous, key, prev);
 
-              showlog && console.log('');
+              showlog && process.stdout.write('');
               resolve(true);
               return;
             }
@@ -705,7 +703,7 @@ const main = async (cmd: string, verbose: boolean) => {
               }
 
 
-              showlog && console.log('(updated)');
+              showlog && process.stdout.write('(updated)');
               resolve(true);
             } else {
               reject(new Error('shell failed'));
@@ -732,6 +730,8 @@ const main = async (cmd: string, verbose: boolean) => {
         error(`record match failed: ${JSON.stringify(record, null, 2)}`, 15);
         process.exit(1);
       }
+
+      showlog && console.log('');
 
       return result;
     };

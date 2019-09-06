@@ -1,4 +1,4 @@
-import { createConfigRecord } from '@inf/vars/configure';
+import { createConfig } from '@inf/vars/configure';
 
 export const Config = (inputs: {
   DatabaseName: string,
@@ -6,15 +6,20 @@ export const Config = (inputs: {
   MasterUserPassword: string,
   MinCapacity: number,
   MaxCapacity: number
-}) => createConfigRecord(async ({ stage }) => ({
-  type: 'cloudformation',
-  rootDir: __dirname,
-  cfpath: './cf.yaml',
-  inputs: {
-    ...inputs,
-    Stage: stage
-  },
-  outputs: {
-    RDSClusterEndpointAddress: stage == 'local' ? 'localhost' : '',
-  }
+}) => createConfig(({ stage }) => ({
+  clean: async () => ({
+    RDSClusterEndpointAddress: ''
+  }),
+  up: async () => ({
+    type: 'cloudformation',
+    rootDir: __dirname,
+    cfpath: './cf.yaml',
+    inputs: {
+      ...inputs,
+      Stage: stage
+    },
+    outputs: {
+      RDSClusterEndpointAddress: stage == 'local' ? 'localhost' : '',
+    }
+  })
 }));
