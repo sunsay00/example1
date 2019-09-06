@@ -13,8 +13,8 @@ const printusage = () => {
   console.log('    FUNCTION-NAME');
   const tmpdir = `${__dirname}/tmp`;
   if (fs.existsSync(tmpdir) && fs.statSync(tmpdir).isDirectory()) {
-    fs.readdirSync(tmpdir).filter(f => f.startsWith('cf-sls-') && f.substr(7)).forEach(f => {
-      console.log(`    - ${f.substr(7)}`);
+    fs.readdirSync(tmpdir).forEach(f => {
+      console.log(`    - ${f}`);
     });
   }
 };
@@ -25,7 +25,7 @@ if (process.argv.length < 3) {
 }
 
 const main = async (fnname, args) => {
-  const makefilepath = `${__dirname}/tmp/cf-sls-${fnname}/Makefile`;
+  const makefilepath = `${__dirname}/tmp/${fnname}/Makefile`;
   if (!fs.existsSync(makefilepath)) {
     error('invalid makefile');
     process.exit(1);

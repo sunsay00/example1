@@ -15,7 +15,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@inf/cf-sls": "*",
+    "@inf/cf-lam": "*",
     "@inf/cf-gen": "*"
   }
 }

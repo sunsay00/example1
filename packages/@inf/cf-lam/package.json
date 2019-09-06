@@ -1,8 +1,8 @@
 {
-  "name": "@inf/cf-sls",
+  "name": "@inf/cf-lam",
   "version": "0.0.1",
   "bin": {
-    "ss": "./ss"
+    "lam": "./lam"
   },
   "license": "MIT",
   "dependencies": {},

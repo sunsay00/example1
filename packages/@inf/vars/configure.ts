@@ -422,7 +422,7 @@ const main = async (cmd: string, verbose: boolean) => {
     const exists = await stackExists(StackName);
     try {
       if (exists) {
-        process.stdout.write(' updating... ');
+        console.log(' updating... ');
         await cf.updateStack({
           StackName,
           TemplateBody,
@@ -497,9 +497,7 @@ const main = async (cmd: string, verbose: boolean) => {
 
     const reg = async <R extends { [_: string]: string }>(f: ModuleRecord<R>): Promise<R> => {
       const rec: ConfigRecord<R> = typeof f == 'function' ? f(k => previous[k]) : f;
-      const ret = await rec.clean({ configurationDir, stage: configuration.stage, region: configuration.region }, reg);
-      console.log(ret);
-      return ret;
+      return await rec.clean({ configurationDir, stage: configuration.stage, region: configuration.region }, reg);
     };
     await configuration.configure(reg);
 

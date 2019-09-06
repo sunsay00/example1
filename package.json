@@ -11,7 +11,7 @@
     "site",
     "test",
     "packages/@inf/*",
-    "packages/@inf/cf-sls/tmp/*"
+    "packages/@inf/cf-lam/tmp/*"
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",

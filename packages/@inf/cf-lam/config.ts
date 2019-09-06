@@ -100,11 +100,11 @@ export const Config = (inputs: {
 
   handlers: { [_: string]: Handler },
 
-  slsVpc?: SLSVpc,
-  slsIamRoleStatements?: SLSIamRoleStatement[]
-  slsIncludes?: string[],
-  slsExcludes?: string[],
-  slsPlugins?: string[],
+  lamVpc?: SLSVpc,
+  lamIamRoleStatements?: SLSIamRoleStatement[]
+  lamIncludes?: string[],
+  lamExcludes?: string[],
+  lamPlugins?: string[],
 
   webpackIgnore?: RegExp,
 
@@ -130,7 +130,6 @@ export const Config = (inputs: {
     entries(inputs.handlers).forEach(([_, v]) => {
       if (v.vars) {
         const tsdir = path.dirname(v.packageJsonPath)
-        const key = inputs.id.replace(/-/g, '_').toUpperCase();
         writeTmps('vars', tsdir, v.vars);
       }
     });
@@ -155,28 +154,28 @@ export const Config = (inputs: {
       Array.isArray(x) ? (r ? [...x, ...r] : x) : (r ? [x, ...r] : [x]);
 
     // generate serverless.yml
-    const sls = {
+    const lam = {
       service: inputs.alias || inputs.id,
       provider: {
         name: 'aws',
         runtime: 'nodejs10.x',
         stage,
         region,
-        vpc: inputs.slsVpc,
-        iamRoleStatements: inputs.slsIamRoleStatements,
+        vpc: inputs.lamVpc,
+        iamRoleStatements: inputs.lamIamRoleStatements,
       },
       package: {
-        include: maybePush(entries(inputs.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), inputs.slsIncludes),
-        exclude: maybePush('**/*', inputs.slsExcludes)
+        include: maybePush(entries(inputs.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), inputs.lamIncludes),
+        exclude: maybePush('**/*', inputs.lamExcludes)
       },
       functions: fromEntries(entries(inputs.handlers).map(([k, v]) => [k, {
         handler: `./build/${v.filepath.replace(/(.ts$)/, '')}.${v.entrypoint}`,
         environment: v.environment,
         events: v.events
       }])),
-      plugins: ['serverless-offline', ...inputs.slsPlugins || []],
+      plugins: ['serverless-offline', ...inputs.lamPlugins || []],
     };
-    if (!SLSConfigRecord.guard(sls))
+    if (!SLSConfigRecord.guard(lam))
       throw new Error('invalid sls configuration');
 
     const dirnames = entries(inputs.handlers).map(([k, v]) => ({
@@ -336,7 +335,6 @@ module.exports = {
     if (startCmds.length == 0)
       startCmds.push({ command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s sls offline'"`, '"tsc -w -p tsconfig.sls.json"'] });
 
-    ////////////////
     const rules: { [_: string]: MakeRule | undefined } = {
       test: {
         desc: 'run tests',
@@ -403,7 +401,7 @@ module.exports = {
 
     const makefile = printMakefile(rules);
 
-    fs.writeFileSync(`${instdir}/serverless.yml`, yamljs.stringify(sls, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
+    fs.writeFileSync(`${instdir}/serverless.yml`, yamljs.stringify(lam, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
     fs.writeFileSync(`${instdir}/webpack.config.js`, webpackconf, { encoding: 'utf8' });
     fs.writeFileSync(`${instdir}/tsconfig.sls.json`, JSON.stringify(tsconfig, null, 2), { encoding: 'utf8' });
     fs.writeFileSync(`${instdir}/package.json`, JSON.stringify(packagejson, null, 2), { encoding: 'utf8' });

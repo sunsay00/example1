@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "@inf/cf-sls": "*",
+    "@inf/cf-lam": "*",
     "@inf/vars": "*",
     "@types/pg": "6.1.41"
   },

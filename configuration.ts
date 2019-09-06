@@ -8,8 +8,8 @@ import * as Cognito from '@inf/cf-cognito/config';
 import * as Cert from '@inf/cf-cert/config';
 import * as Gen from '@inf/cf-gen/config';
 import * as CDN from '@inf/cf-cdn/config';
-import * as SlsApi from '@inf/cf-sls-api/config';
-import * as Sls from '@inf/cf-sls/config';
+import * as LamApi from '@inf/cf-lam-api/config';
+import * as Lam from '@inf/cf-lam/config';
 import * as Spot from '@inf/cf-spot/config';
 
 enum ServiceIds {
@@ -91,8 +91,8 @@ const configuration: Configuration = {
       HostedZoneId: aws.HostedZoneId,
     }));
 
-    await reg(SlsApi.Config({
-      id: 'cf-sls-api',
+    await reg(LamApi.Config({
+      id: 'api',
       dependsOn: ['./api/package.json', './api/src/**/*.ts'],
       accountId: vars.AWS_ACCOUNT_ID,
       cognitoUserPoolId: cog.UserPoolId,
@@ -109,20 +109,20 @@ const configuration: Configuration = {
       },
     }));
 
-    await reg(Sls.Config({
-      id: 'cf-sls-test',
-      rootDir: './cf-sls-test',
-      dependsOn: ['./cf-sls-test/package.json', './cf-sls-test/**/*.ts'],
+    await reg(Lam.Config({
+      id: 'cf-lam-test',
+      rootDir: './test',
+      dependsOn: ['./test/package.json', './test/**/*.ts'],
       handlers: {
         test: {
           vars: {
             DB_URL: gen.DB_URL
           },
-          packageJsonPath: './cf-sls-test/package.json', filepath: 'index.ts', entrypoint: 'handler'
+          packageJsonPath: './test/package.json', filepath: 'index.ts', entrypoint: 'handler'
         }
       },
       webpackIgnore: /^pg-native$/,
-      slsVpc: {
+      lamVpc: {
         securityGroupIds: [aws.SecurityGroup_default],
         subnetIds: [aws.Subnet1, aws.Subnet2],
       }

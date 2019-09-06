@@ -1,5 +1,5 @@
 import { createConfig } from '@inf/vars/configure';
-import * as Sls from '@inf/cf-sls/config';
+import * as Lam from '@inf/cf-lam/config';
 
 export const Config = (inputs: {
   id: string,
@@ -18,7 +18,7 @@ export const Config = (inputs: {
     entrypoint: string,
   }
 }) => {
-  return createConfig(({ stage, region }) => Sls.Config({
+  return createConfig(({ stage, region }) => Lam.Config({
     id: inputs.id,
     alias: 'api',
     rootDir: __dirname,
@@ -53,11 +53,11 @@ export const Config = (inputs: {
         }]
       },
     },
-    slsVpc: {
+    lamVpc: {
       securityGroupIds: inputs.securityGroupIds,
       subnetIds: inputs.subnetIds,
     },
-    slsIamRoleStatements: [{
+    lamIamRoleStatements: [{
       Effect: 'Allow',
       Resource: [`arn:aws:cognito-idp:${region}:${inputs.accountId}:userpool/${inputs.cognitoUserPoolId}`],
       Action: [
