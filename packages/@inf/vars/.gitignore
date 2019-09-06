@@ -1,4 +1,5 @@
 index.d.ts
 .cache
 .inputs
+.effects
 gen

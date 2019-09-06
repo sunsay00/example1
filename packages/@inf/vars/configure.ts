@@ -6,7 +6,41 @@ import * as crypto from 'crypto';
 import * as mm from 'micromatch';
 import * as path from 'path';
 import * as colors from 'colors/safe';
-import { fromEntries, entries, Diff, substitute } from '@inf/common';
+import { fromEntries, entries, Diff, substitute, JSONArray, JSONValue } from '@inf/common';
+
+const getJSONHash = (data: JSONValue) => {
+  const shasum = crypto.createHash('sha1');
+  const recur = (x: JSONValue) => {
+    if (x == null) {
+      shasum.update('[null]');
+    } else if (x instanceof Array) {
+      shasum.update('[array]');
+      x.forEach(i => recur(i));
+    } else if (typeof x == 'object') {
+      shasum.update('[object]');
+      entries(x).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => [k, recur(v)]);
+    } else {
+      shasum.update(JSON.stringify(x));
+    }
+  };
+  recur(data);
+  return shasum.digest('hex');
+}
+
+export const configEffect = async (fn: () => Promise<void>, changes?: JSONArray) => {
+  if (!changes) {
+    await fn();
+  } else {
+    if (!fs.existsSync(`${__dirname}/.effects`))
+      fs.mkdirSync(`${__dirname}/.effects`);
+    const hash = getJSONHash(changes);
+    const hashpath = `${__dirname}/.effects/${hash}`;
+    if (!fs.existsSync(hashpath)) {
+      await fn();
+      fs.writeFileSync(hashpath, '', { encoding: 'utf8' });
+    }
+  }
+}
 
 export const makeStackname = (stage: string, rootid: string, id?: string) =>
   `${stage ? `${stage}-` : ''}${rootid}${id ? `--${id}` : ''}`;
@@ -500,10 +534,13 @@ const main = async (cmd: string, verbose: boolean) => {
   if (cmd == 'clean') {
     const tmpinputsdir = `${__dirname}/.inputs`;
     const tmpcachedir = `${__dirname}/.cache`;
+    const tmpeffectsdir = `${__dirname}/.effects`;
     if (fs.existsSync(tmpinputsdir))
       execSync(`rm -rf ${tmpinputsdir}`);
     if (fs.existsSync(tmpcachedir))
       execSync(`rm -rf ${tmpcachedir}`);
+    if (fs.existsSync(tmpeffectsdir))
+      execSync(`rm -rf ${tmpeffectsdir}`);
 
     const reg = async <R extends { [_: string]: string }>(f: ModuleRecord<R>): Promise<R> => {
       const rec: ConfigRecord<R> = typeof f == 'function' ? f(k => previous[k]) : f;

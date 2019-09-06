@@ -9,7 +9,7 @@
       "node"
     ],
   },
-  "exclude": [
-    "*"
+  "include": [
+    "./shill.ts"
   ]
 }

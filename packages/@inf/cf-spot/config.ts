@@ -1,4 +1,4 @@
-import { createConfig, createConfigRecord, makeStackname } from '@inf/vars/configure';
+import { createConfig, createConfigRecord, makeStackname, configEffect } from '@inf/vars/configure';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -26,16 +26,18 @@ export const Config = (inputs: {
     if (!fs.existsSync(inputs.pubKey.path))
       throw new Error('public key not found');
 
-    const keys = await ec2.describeKeyPairs({
-      Filters: [{ Name: 'key-name', Values: [inputs.pubKey.name] }]
-    }).promise();
-
-    if (keys.KeyPairs && keys.KeyPairs.length == 0) {
-      await ec2.importKeyPair({
-        KeyName: inputs.pubKey.name,
-        PublicKeyMaterial: fs.readFileSync(inputs.pubKey.path),
+    await configEffect(async () => {
+      const keys = await ec2.describeKeyPairs({
+        Filters: [{ Name: 'key-name', Values: [inputs.pubKey.name] }]
       }).promise();
-    }
+
+      if (keys.KeyPairs && keys.KeyPairs.length == 0) {
+        await ec2.importKeyPair({
+          KeyName: inputs.pubKey.name,
+          PublicKeyMaterial: fs.readFileSync(inputs.pubKey.path),
+        }).promise();
+      }
+    }, [inputs.pubKey.name, inputs.pubKey.path]);
 
     const rootid = path.basename(__dirname);
     const stackName = makeStackname(stage, rootid, inputs.id);
