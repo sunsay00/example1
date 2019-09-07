@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig-base",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "rootDir": ".",
+    "experimentalDecorators": true,
+    "types": [
+      "node"
+    ],
+  }
+}

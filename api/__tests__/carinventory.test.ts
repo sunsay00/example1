@@ -4,7 +4,7 @@ import { verifyVars } from '@inf/common';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import RDSDBClient from '@inf/cf-serverless-postgres';
 import { fixtures as fix, IUserContext, Dealership, Seller, CarInventory } from '@inf/cf-gen';
-import { vars } from '../src/_vars';
+import vars from '../src/_vars';
 
 const config = verifyVars({
   STAGE: process.env.STAGE,

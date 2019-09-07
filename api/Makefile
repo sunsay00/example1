@@ -1,15 +1,15 @@
 test:
-	yarn -s lam api test $(ARGS)
+	yarn -s x api test
 
 start:
-	yarn -s lam api start
+	yarn -s x api start
 
-invoke:
-	yarn -s lam api invoke.api
-invoke.guest:
-	yarn -s lam api invoke.api.guest
+request.api:
+	yarn -s x api request.api
+request.guest:
+	yarn -s x api request.guest
 
 logs.auth:
-	yarn -s vars yarn -s lam api logs.auth
+	yarn -s x api logs.auth
 logs.api:
-	yarn -s vars yarn -s lam api logs.api
+	yarn -s x api logs.api

@@ -2,8 +2,22 @@
 
 set -e
 
-if [ -z ${STAGE} ] || [ -z ${DB_URL} ] || [ -z ${DB_TEST_URL} ] || [ -z ${GENDIR} ]; then
-  echo "following envars must be defined STAGE, DB_URL, DB_TEST_URL GENDIR"
+
+if [ -z ${STAGE} ]; then
+  echo "following envars must be defined STAGE"
+  exit 1
+fi
+if [ -z ${DB_URL} ]; then
+  echo "following envars must be defined DB_URL"
+  exit 1
+fi
+if [ -z ${DB_TEST_URL} ]; then
+  echo "following envars must be defined DB_TEST_URL"
+  exit 1
+fi
+if [ -z ${GENDIR} ]; then
+  echo "following envars must be defined GENDIR"
+  exit 1
 fi
 
 DB=`yarn -s vars echo ${DB_URL}`

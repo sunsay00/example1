@@ -3,13 +3,12 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./lib",
-    "rootDir": "./src",
+    "rootDir": ".",
     "types": [
       "node"
     ],
   },
   "exclude": [
-    "./config.ts",
     "./lib"
   ]
 }

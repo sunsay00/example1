@@ -1,4 +1,4 @@
-import { CognitoClient, LocalStorage, UserState, UserPoolMode, UserPool, CognitoUser } from './types';
+import { CognitoClient, LocalStorage, UserState, UserPool, CognitoUser } from './types';
 
 export default class CognitoUtil {
   private _client: CognitoClient;

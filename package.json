@@ -2,20 +2,17 @@
   "private": true,
   "name": "beauty",
   "version": "0.0.1",
-  "scripts": {
-    "wakka": "yarn -s vars ./tmp"
-  },
   "workspaces": [
     "packages/*",
     "api",
     "site",
     "cf-lam-test",
     "packages/@inf/*",
-    "packages/@inf/cf-lam/tmp/*"
+    "packages/@inf/hookops/.tmp/*"
   ],
   "devDependencies": {
     "@types/node": "^12.6.8",
     "react-native-cli": "^2.0.1",
-    "typescript": "3.6.2"
+    "typescript": "3.6.3"
   }
 }

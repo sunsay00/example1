@@ -1,4 +1,4 @@
-all: configure
+all: install
 
 start:
 	@yarn -s ss api start
@@ -6,8 +6,10 @@ start:
 vars:
 	@yarn -s vars -V
 
-configure:
+install:
 	@yarn -s vars yarn -s configure up -v
+force:
+	@yarn -s vars yarn -s configure up -v -f
 
 clean:
 	@yarn -s configure clean

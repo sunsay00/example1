@@ -1,14 +1,12 @@
 {
   "name": "@inf/cf-lam",
   "version": "0.0.1",
-  "bin": {
-    "lam": "./lam"
-  },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@inf/hookops": "*"
+  },
   "devDependencies": {
     "@types/yamljs": "0.2.30",
-    "yamljs": "0.3.0",
-    "@inf/vars": "*"
+    "yamljs": "0.3.0"
   }
 }

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState, useContext } from 'react';
 import { Account } from '../account';
-import { UserPoolMode } from '../types';
 import * as UI from '@inf/core-ui';
 
 export enum LogInResult { Success, ChangePassword, UserNotFound, NotAuthorized, UserNotConfirmed, Unknown };
@@ -33,10 +32,7 @@ type ContextValue = {
   ready: boolean,
 };
 
-const _account: Account | undefined = new Account(
-  UI.Platform.OS == 'web' ? UserPoolMode.Web : UserPoolMode.Mobile,
-  UI.AsyncStorage
-);
+const _account: Account | undefined = new Account(UI.AsyncStorage);
 
 const AccountContext = React.createContext<ContextValue | undefined>(undefined);
 
@@ -198,7 +194,13 @@ export const useAccount = () => {
   };
 }
 
-export const AccountProvider = (props: { region: string, children?: React.ReactNode }) => {
+export const AccountProvider = (props: {
+  region: string,
+  identityPoolId: string,
+  userPoolId: string,
+  clientId: string,
+  children?: React.ReactNode
+}) => {
   const [initialized, setInitialized] = React.useState(false);
   const [ready, setReady] = React.useState(false);
   const { setLoading } = UI.useLoading(AccountProvider);
@@ -207,7 +209,7 @@ export const AccountProvider = (props: { region: string, children?: React.ReactN
 
   React.useEffect(() => {
     setLoading(true);
-    _account.init(props.region)
+    _account.init(props.region, props.identityPoolId, props.userPoolId, props.clientId)
       .then(async () => {
         const user = await _account.getCurrentUser();
         setMode(user ? AccountMode.LoggedIn : AccountMode.LoggedOut);

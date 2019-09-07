@@ -1,7 +1,6 @@
 import * as AWS from 'aws-sdk';
 import { ICognitoStorage, AuthenticationDetails as AWSAuthenticationDetails, CognitoUserPool as AWSCognitoUserPool, CognitoUser as AWSCognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js';
-import { outputs } from './_outputs';
-import { CompleteNewPasswordChallengeHandler, AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPoolMode, UserPool, LocalStorage } from './types';
+import { CompleteNewPasswordChallengeHandler, AuthenticationDetails, CognitoUserSession, CognitoIdentityServiceProvider, CognitoUser, CognitoClient, UserPool, LocalStorage } from './types';
 
 class StorageAdaptor {
   static MEMORY_KEY_PREFIX = '@cognito:';
@@ -108,10 +107,14 @@ class UserPoolAdaptor implements UserPool {
 
 export class Client implements CognitoClient {
   private _storage: StorageAdaptor;
-  private _mode: UserPoolMode;
-  constructor(region: string, mode: UserPoolMode, storage: LocalStorage) {
+  private _identityPoolId: string;
+  private _userPoolId: string;
+  private _clientId: string;
+  constructor(region: string, identityPoolId: string, userPoolId: string, clientId: string, storage: LocalStorage) {
     AWS.config.update({ region });
-    this._mode = mode;
+    this._identityPoolId = identityPoolId;
+    this._userPoolId = userPoolId;
+    this._clientId = clientId;
     this._storage = new StorageAdaptor(storage);
   }
 
@@ -130,7 +133,7 @@ export class Client implements CognitoClient {
 
   setCognitoIdentityPoolDetails = (Logins?: { [_: string]: string }): CognitoIdentityCredentials => {
     const credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: outputs.CognitoIdentityPoolId,
+      IdentityPoolId: this._identityPoolId,
       Logins
     });
     AWS.config.credentials = credentials;
@@ -140,8 +143,8 @@ export class Client implements CognitoClient {
   private _createCognitoUserPool = (): AWSCognitoUserPool => {
     // Initialize Cognito User Pool
     return new AWSCognitoUserPool({
-      UserPoolId: outputs.UserPoolId,
-      ClientId: this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId,
+      UserPoolId: this._userPoolId,
+      ClientId: this._clientId,
       Storage: this._storage.getStorage(),
     });
   }

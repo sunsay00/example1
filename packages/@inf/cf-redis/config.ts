@@ -1,11 +1,26 @@
-import { createConfigRecord } from '@inf/vars/configure';
+import { createModule, useGlobals } from '@inf/hookops';
+import { useDocker } from '@inf/cf-docker/config';
 
-export const Config = (inputs: {
+export const useRedis = () => createModule(__dirname, async () => {
+  const { stage } = useGlobals();
+  if (stage == 'local') {
+    const redis = await useDocker({
+      id: 'redis',
+      service: {
+        ports: ['6379:6379'],
+        image: 'redis:3.2.10-alpine'
+      },
+      outputs: { host: 'localhost:6370' }
+    });
 
-}) => createConfigRecord({
-  type: 'shell',
-  rootDir: __dirname,
-  command: 'echo',
-  args: ['-n', 'NYI'],
-  outputs: {}
+    return {
+      host: redis.host,
+      port: 6379
+    };
+  } else {
+    return {
+      host: '',
+      port: 6379
+    };
+  }
 });

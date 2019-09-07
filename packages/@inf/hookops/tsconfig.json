@@ -2,14 +2,21 @@
   "extends": "../../../tsconfig-base",
   "compilerOptions": {
     "composite": true,
-    "noEmit": true,
+    "outDir": "./lib",
     "rootDir": ".",
     "experimentalDecorators": true,
     "types": [
       "node"
-    ],
+    ]
   },
   "include": [
-    "./shill.ts"
+    "src/vartools.ts",
+    "src/index.ts",
+    "src/hooks/**/*.ts"
+  ],
+  "exclude": [
+    "lib",
+    "tmp",
+    "configure.ts"
   ]
 }

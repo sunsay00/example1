@@ -18,16 +18,25 @@ export const vars: Vars;
   fs.writeFileSync(outfile, data, { encoding: 'utf8' });
 }
 
+const lastmod = (filepath) => {
+  if (fs.existsSync(filepath)) {
+    const stats = fs.statSync(filepath);
+    return new Date(stats.mtime).getTime();
+  } else {
+    return 0;
+  }
+}
+
 const makeSafe = env => {
   let ret = {};
   Object.entries(env).map(([k, v]) => {
     ret = {
       ...ret, get [k]() {
         if (env.STAGE == 'local' && ['AWS_ACCOUNT_ID', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'].includes(k)) {
-          return 'LOCAL_UNUSED';
+          return 'LOCAL_UNDEFINED';
         } else {
           const v = env[k];
-          if (!v) throw new Error(`Undefined envvar detected ${k}`);
+          if (!v) throw new Error(`undefined envvar detected ${k}`);
           return v;
         }
       }
@@ -130,7 +139,8 @@ const additionalEnv = additionalEnvPaths.reduce((a, p) => ({ ...a, ...parseJson(
 
 const env = makeSafe(parseEnv('.env'));
 
-genTypes(`${__dirname}/index.d.ts`, env);
+if (lastmod('.env') > lastmod(`${__dirname}/vars.d.ts`))
+  genTypes(`${__dirname}/vars.d.ts`, env);
 
 const vars = { ...additionalEnv, ...env, ...process.env };
 verifyEnv(vars, examples);

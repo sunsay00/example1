@@ -1,6 +1,6 @@
 import { authWrapper } from '@inf/core';
 import { verifyVars } from '@inf/common';
-import { vars } from './_vars';
+import vars from './_vars';
 
 const params = verifyVars({
   awsRegion: process.env.AWS_REGION,

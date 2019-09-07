@@ -1,4 +1,3 @@
-export { UserPoolMode } from './types';
 export { Account } from './account';
 
 // hooks

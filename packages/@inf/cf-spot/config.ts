@@ -1,11 +1,11 @@
-import { createConfig, createConfigRecord, makeStackname, configEffect } from '@inf/vars/configure';
-import { maketools } from '@inf/core';
 import * as fs from 'fs';
-import * as path from 'path';
-
 import * as AWS from 'aws-sdk';
 
-export const Config = (inputs: {
+import { createModule, useEffect, useMemo, useGlobals, useShell } from '@inf/hookops';
+import { vars } from '@inf/hookops/vars';
+import { useVarsWriter, useCloudFormation } from '@inf/hooks';
+
+export const useSpot = (inputs: {
   id: string,
   vpcId: string,
   availabilityZone: string,
@@ -16,83 +16,95 @@ export const Config = (inputs: {
   subnet: string,
   shellUser: string,
   volumeSizeInGB: number,
-}) => createConfig(({ stage, region }) => ({
-  clean: async () => ({}),
-  up: async (_, reg) => {
-    const ec2 = new AWS.EC2({
-      apiVersion: '2016-11-15',
-      region: region
+}) => createModule(__dirname, async () => {
+  const { stage } = useGlobals();
+
+  const ec2 = new AWS.EC2({
+    apiVersion: '2016-11-15',
+    region: vars.AWS_REGION
+  });
+
+  if (stage == 'local') {
+
+    return { host: '' };
+
+  } else {
+    if (!fs.existsSync(inputs.pubKey.path))
+      throw new Error('public key not found');
+
+    await useEffect(async () => {
+      const keys = await ec2.describeKeyPairs({
+        Filters: [{ Name: 'key-name', Values: [inputs.pubKey.name] }]
+      }).promise();
+
+      if (keys.KeyPairs && keys.KeyPairs.length == 0) {
+        await ec2.importKeyPair({
+          KeyName: inputs.pubKey.name,
+          PublicKeyMaterial: fs.readFileSync(inputs.pubKey.path),
+        }).promise();
+      }
+    }, [inputs.pubKey.name, inputs.pubKey.path]);
+
+    const spotid = `cf-spot--${inputs.id}`;
+
+    const spot = await useCloudFormation({
+      id: spotid,
+      cfyamlpath: `${__dirname}/cf.yaml`,
+      inputs: {
+        VpcId: inputs.vpcId,
+        AvailabilityZone: inputs.availabilityZone,
+        Stage: stage,
+        VolumeSize: inputs.volumeSizeInGB,
+        VolumeTagName: inputs.pubKey.name,
+      },
+      defaultOutputs: {
+        SecurityGroupId: '',
+        VolumeId: '',
+        InstanceProfileName: ''
+      }
     });
 
-    if (stage == 'local') {
-      return {
-        type: 'no-op',
-        rootDir: __dirname,
-        outputs: {}
-      };
-    } else {
-      if (!fs.existsSync(inputs.pubKey.path))
-        throw new Error('public key not found');
+    await useEffect(async () => {
+      useVarsWriter('shell', __dirname, {
+        ID: spotid,
+        STAGE: stage,
+        AWS_REGION: vars.AWS_REGION,
+        BID_PRICE: `${inputs.bidPrice}`,
+        PREBOOT_IMAGE_ID: inputs.prebootImageId,
+        INSTANCE_TYPE: inputs.instanceType,
+        PUB_KEY: inputs.pubKey.name,
+        SUBNET: inputs.subnet,
+        AVAILABILITY_ZONE: inputs.availabilityZone,
+        SECURITY_GROUP: spot.SecurityGroupId,
+        VOLUME_ID: spot.VolumeId,
+        SPOT_ML_INSTANCE_PROFILE_NAME: spot.InstanceProfileName,
+        SHELL_USER: inputs.shellUser
+      });
+    }, [stage, vars.AWS_REGION, inputs, spot, spotid]);
 
-      await configEffect(async () => {
-        const keys = await ec2.describeKeyPairs({
-          Filters: [{ Name: 'key-name', Values: [inputs.pubKey.name] }]
-        }).promise();
-
-        if (keys.KeyPairs && keys.KeyPairs.length == 0) {
-          await ec2.importKeyPair({
-            KeyName: inputs.pubKey.name,
-            PublicKeyMaterial: fs.readFileSync(inputs.pubKey.path),
-          }).promise();
+    const publicdnsname = await useMemo(async () => {
+      const { instanceId } = await useShell({
+        command: 'make',
+        args: ['up'],
+        cwd: __dirname,
+        outputMatchers: {
+          instanceId: /InstanceId: '([^']+)'/gm
         }
-      }, [inputs.pubKey.name, inputs.pubKey.path]);
+      });
 
-      const rootid = path.basename(__dirname);
-      const stackName = makeStackname(stage, rootid, inputs.id);
+      const ret = await ec2.describeInstances({
+        InstanceIds: [instanceId]
+      }).promise();
 
-      const spot = await reg(createConfigRecord({
-        type: 'cloudformation',
-        rootDir: __dirname,
-        cfpath: './cf.yaml',
-        id: inputs.id,
-        inputs: {
-          VpcId: inputs.vpcId,
-          AvailabilityZone: inputs.availabilityZone,
-          Stage: stage,
-          VolumeSize: inputs.volumeSizeInGB,
-          VolumeTagName: inputs.pubKey.name,
-        },
-        outputs: {
-          SecurityGroupId: '',
-          VolumeId: '',
-          InstanceProfileName: ''
-        }
-      }));
+      const publicdnsname = ret.Reservations && ret.Reservations.reduce<string | undefined>((a, r) =>
+        a || r.Instances && r.Instances.reduce<string | undefined>((a, i) =>
+          a || i.PublicDnsName, undefined), undefined);
+      if (!publicdnsname)
+        throw new Error('invalid to retrieve public dns name');
 
-      await maketools.invokeRule(`${__dirname}/Makefile`, 'up', []);
+      return publicdnsname;
+    }, []);
 
-      return {
-        type: 'replace-vars',
-        rootDir: __dirname,
-        targetModuleId: 'cf-spot',
-        dependsOn: [path.resolve(inputs.pubKey.path), `${__dirname}/cf.yaml`],
-        vars: {
-          STAGE: stage,
-          AWS_REGION: region,
-          BID_PRICE: `${inputs.bidPrice}`,
-          PREBOOT_IMAGE_ID: inputs.prebootImageId,
-          INSTANCE_TYPE: inputs.instanceType,
-          PUB_KEY: inputs.pubKey.name,
-          SUBNET: inputs.subnet,
-          AVAILABILITY_ZONE: inputs.availabilityZone,
-          SECURITY_GROUP: spot.SecurityGroupId,
-          VOLUME_ID: spot.VolumeId,
-          SPOT_ML_INSTANCE_PROFILE_NAME: spot.InstanceProfileName,
-          SHELL_USER: inputs.shellUser,
-          STACK_NAME: stackName
-        },
-        outputs: {}
-      };
-    }
+    return { host: `${inputs.shellUser}@${publicdnsname}` }
   }
-}));
+});

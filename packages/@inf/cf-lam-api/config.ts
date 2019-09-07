@@ -1,7 +1,10 @@
-import { createConfig, makeStackname, expandVariables } from '@inf/vars/configure';
-import * as Lam from '@inf/cf-lam/config';
+import { createModule, useGlobals, useScriptRegistry, vartools } from '@inf/hookops';
+import { vars } from '@inf/hookops/vars';
+import { useLam } from '@inf/cf-lam/config';
+import { pathTransformer } from '@inf/core';
 
-export const Config = (inputs: {
+export const useLamApi = (inputs: {
+  rootDir: string,
   id: string,
   accountId: string,
   dependsOn?: string[],
@@ -11,39 +14,45 @@ export const Config = (inputs: {
   MasterUsername: string,
   MasterUserPassword: string,
   apiHandler: {
-    DB_URL: string,
-    DB_TEST_URL: string,
+    dbUrl: string,
+    dbTestUrl: string,
     packageJsonPath: string,
     filepath: string,
     entrypoint: string,
   }
-}) => {
-  const localname = makeStackname('', __dirname, inputs.id);
-  return createConfig(({ stage, region }) => Lam.Config({
+}) => createModule(__dirname, async () => {
+  const { stage } = useGlobals();
+
+  const transformPath = pathTransformer(__dirname, inputs.rootDir);
+
+  const result = await useLam({
+    rootDir: __dirname,
+
     id: inputs.id,
     alias: 'api',
-    rootDir: __dirname,
-    dependsOn: inputs.dependsOn,
-    vars: {
-      UserPoolId: inputs.cognitoUserPoolId,
-    },
+    dependsOn: inputs.dependsOn && inputs.dependsOn.map(transformPath),
     handlers: {
       auth: {
         packageJsonPath: `${__dirname}/package.json`,
         filepath: `src/auth.ts`,
-        entrypoint: 'handler'
+        entrypoint: 'handler',
+        environment: { STAGE: stage }
       },
       api: {
         vars: {
           UserPoolId: inputs.cognitoUserPoolId,
-          AWS_REGION: region,
-          DB_URL: inputs.apiHandler.DB_URL,
-          DB_TEST_URL: inputs.apiHandler.DB_TEST_URL,
+          AWS_REGION: vars.AWS_REGION,
+          DB_URL: inputs.apiHandler.dbUrl,
+          DB_TEST_URL: inputs.apiHandler.dbTestUrl,
         },
-        packageJsonPath: inputs.apiHandler.packageJsonPath,
+        packageJsonPath: transformPath(inputs.apiHandler.packageJsonPath),
         filepath: inputs.apiHandler.filepath,
         entrypoint: inputs.apiHandler.entrypoint,
-        environment: { STAGE: stage },
+        environment: {
+          STAGE: stage,
+          MASTER_USERNAME: vartools.expand(inputs.MasterUsername),
+          MASTER_USER_PASSWORD: vartools.expand(inputs.MasterUserPassword)
+        },
         events: [{
           http: {
             authorizer: 'auth',
@@ -54,13 +63,13 @@ export const Config = (inputs: {
         }]
       },
     },
-    lamVpc: {
+    slsVpc: {
       securityGroupIds: inputs.securityGroupIds,
       subnetIds: inputs.subnetIds,
     },
-    lamIamRoleStatements: [{
+    slsIamRoleStatements: [{
       Effect: 'Allow',
-      Resource: [`arn:aws:cognito-idp:${region}:${inputs.accountId}:userpool/${inputs.cognitoUserPoolId}`],
+      Resource: [`arn:aws:cognito-idp:${vars.AWS_REGION}:${inputs.accountId}:userpool/${inputs.cognitoUserPoolId}`],
       Action: [
         'cognito-idp:AdminCreateUser',
         'cognito-idp:AdminDeleteUser',
@@ -86,40 +95,40 @@ export const Config = (inputs: {
         's3:AbortMultipartUpload'
       ],
       Resource: [
-        `arn:aws:s3:::uploads-${stage}-${region}`,
-        `arn:aws:s3:::uploads-${stage}-${region}/*`
+        `arn:aws:s3:::uploads-${stage}-${vars.AWS_REGION}`,
+        `arn:aws:s3:::uploads-${stage}-${vars.AWS_REGION}/*`
       ]
     }],
     webpackIgnore: /^pg-native$/,
-    dockerServices: stage != 'local' ? undefined : {
-      [`redis_${localname}`]: {
-        container_name: `redis_${localname}`,
-        ports: ['6379:6379'],
-        image: 'redis:3.2.10-alpine'
-      },
-      [`postgres_${localname}`]: {
-        container_name: `postgres_${localname}`,
-        ports: ['5432:5432'],
-        image: 'mdillon/postgis:9.6-alpine',
-        environment: [
-          `POSTGRES_USER=${inputs.MasterUsername}`,
-          `POSTGRES_PASSWORD=${inputs.MasterUserPassword}`,
-          `POSTGRES_DB=mainlocal`
-        ].map(expandVariables)
-      }
-    },
     startCommands: [
-      { command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s serverless offline --host 0.0.0.0 --stage {{STAGE}} --skipCacheInvalidation true'"`, '"tsc -w -p tsconfig.sls.json"'] }
-    ],
-    makeRules: {
+      { command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s vars yarn -s serverless offline --host 0.0.0.0 --stage ${vars.STAGE} --skipCacheInvalidation true'"`, '"tsc -w -p tsconfig.sls.json"'] }
+    ]
+  });
+
+  useScriptRegistry(inputs.id, {
+    rules: {
       ['request.api']: {
         desc: 'makes a web request to api endpoint',
-        commands: [`yarn -s vars curl -H 'Authorization: Bearer FIXME' -H 'Content-Type: application/json' -d "hello world" {{${inputs.id.toUpperCase().replace(/-/g, '_')}_ApiEndpoint}}`]
+        commands: [{
+          command: 'yarn',
+          args: ['-s', 'vars', 'curl', '-s', '-H', `'Authorization: Bearer FIXME'`, '-H', `'Content-Type: application/json'`, '-d', '"hello world"', result.api]
+        }]
       },
       ['request.guest']: {
         desc: 'makes a web request to guest api endpoint',
-        commands: [`yarn -s vars curl -H 'Authorization: Guest' -H 'content-type: application/json' -d '{"query":"query($$arg: String!) { testUnauthorized (arg: $$arg) }","variables": { "arg": "pong" }}' {{${inputs.id.toUpperCase().replace(/-/g, '_')}_ApiEndpoint}}`]
+        commands: [{
+          command: 'yarn',
+          args: [
+            '-s', 'vars', 'curl', '-s', '-H', `'Authorization: Guest'`, '-H', `'content-type: application/json'`, '-d',
+            `'${JSON.stringify({
+              query: 'query($arg: String!) { testUnauthorized (arg: $arg) }',
+              variables: { arg: 'pong' }
+            }).replace(/'/, '\'\'')}'`,
+            result.api]
+        }]
       }
     }
-  }));
-}
+  });
+
+  return result;
+});

@@ -1,0 +1,6 @@
+.cache
+.trash
+vars.d.ts
+.tmp
+lib
+.scripts

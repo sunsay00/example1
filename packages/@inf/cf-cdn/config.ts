@@ -1,19 +1,23 @@
-import { createConfig } from '@inf/vars/configure';
+import { createModule, useGlobals } from '@inf/hookops';
+import { useCloudFormation } from '@inf/hooks';
 
-export const Config = (inputs: {
+export const useCDN = (inputs: {
   SiteCertificateArn: string,
   Domain: string,
   HostedZoneId: string
-}) => createConfig(({ stage }) => ({
-  clean: async () => ({}),
-  up: async () => ({
-    type: 'cloudformation',
-    rootDir: __dirname,
-    cfpath: './cf.yaml',
+}) => createModule(__dirname, async () => {
+  const { stage } = useGlobals();
+
+  await useCloudFormation({
+    id: 'cf-cdn',
+    cfyamlpath: `${__dirname}/cf.yaml`,
     inputs: {
-      ...inputs,
+      SiteCertificateArn: inputs.SiteCertificateArn,
+      Domain: inputs.Domain,
+      HostedZoneId: inputs.HostedZoneId,
       Stage: stage
-    },
-    outputs: {}
-  })
-}));
+    }
+  });
+
+  return {};
+})

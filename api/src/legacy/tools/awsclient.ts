@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import { vars } from '../../_vars';
+import vars from '../../_vars';
 import { ICacheClient } from '@inf/cf-gen';
 import * as M from '@inf/cf-gen/model';
 

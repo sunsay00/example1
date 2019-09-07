@@ -14,4 +14,10 @@ export const unlinkRecursiveSync = (p: string) => {
   }
 };
 
+export const pathTransformer = (from: string, to: string) => (p: string) => {
+  if (p.startsWith('/'))
+    return p;
+  return path.relative(from, path.resolve(`${to}/${p}`));
+}
+
 export * from './maketools';

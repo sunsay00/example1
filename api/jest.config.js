@@ -4,5 +4,10 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
-  testPathIgnorePatterns: ["/build/"]
+  testPathIgnorePatterns: ["/build/"],
+  globals: {
+    'ts-jest': {
+      tsConfig: false
+    }
+  }
 };

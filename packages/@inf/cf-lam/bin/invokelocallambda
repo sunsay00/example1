@@ -33,9 +33,17 @@ if (process.argv.length != 5) {
 
 const [_1, _2, region, functionName, data] = process.argv;
 
+let json = undefined;
+try {
+  json = JSON.parse(data);
+} catch (err) {
+  console.error(`failed to parse json '${data}'`);
+  process.exit(1);
+}
+
 console.log(region, functionName, data);
 
-main(region, functionName, data).then(x => {
+main(region, functionName, json).then(x => {
   console.log(x);
   process.exit(0);
 }).catch(err => {

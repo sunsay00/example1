@@ -2,7 +2,7 @@
 // @ts-check
 
 // @ts-ignore
-const { _vars: vars } = require('./index');
+const { _vars: vars } = require('./vars');
 const { spawn } = require('child_process');
 const path = require('path');
 
@@ -17,7 +17,7 @@ const substitute = (arg, envs) => {
   }
   return keys.reduce((a, b) => {
     const v = envs[b];
-    if (!v) throw new Error(`invalid variable substitution: ${b}`);
+    if (!v) throw new Error(`invalid variable substitution: ${b} not found in environment`);
     return a.replace(`{{${b}}}`, v);
   }, arg);
 }
@@ -48,7 +48,6 @@ if (argv.length == 2) {
     process.stderr.write(data.toString());
   });
   proc.on('close', code => {
-    console.log('');
     process.exit(failed ? 1 : code);
   });
 }

@@ -2,5 +2,8 @@
   "name": "@inf/cf-lam-api",
   "version": "0.0.1",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@inf/hookops": "*"
+  }
 }

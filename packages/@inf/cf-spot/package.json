@@ -6,6 +6,6 @@
     "spot": "./spot"
   },
   "dependencies": {
-    "@inf/vars": "*"
+    "@inf/hookops": "*"
   }
 }

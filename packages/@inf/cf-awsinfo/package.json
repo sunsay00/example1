@@ -1,8 +1,8 @@
 {
   "name": "@inf/cf-awsinfo",
   "version": "0.0.1",
-  "bin": {
-    "awsinfo": "index.js"
-  },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@inf/hookops": "*"
+  }
 }

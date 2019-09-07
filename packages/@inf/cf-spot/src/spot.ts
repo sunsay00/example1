@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import { vars } from './_vars';
+import vars from './_vars';
 import * as path from 'path';
 
 export const up = async () => {
@@ -13,6 +13,7 @@ export const up = async () => {
   const reqs = ires.SpotInstanceRequests.filter(r => (r.State == 'open' || r.State == 'active') && r.LaunchSpecification && r.LaunchSpecification.KeyName == vars.PUB_KEY);
   const reqIds = reqs.map(r => r.SpotInstanceRequestId);
   if (reqIds.length > 0) {
+    console.log(reqs);
     console.log('already started');
     return;
   }
@@ -46,7 +47,7 @@ touch /root/log.txt
 echo "booting..." > /root/log.txt 2>&1
 set -e
 export TERM="linux"
-curl http://169.254.169.254/latest/meta-data/iam/security-credentials/${vars.AWS_REGION}-${vars.STACK_NAME}-Role-${vars.STAGE} > /root/.creds
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/${vars.AWS_REGION}-${vars.STAGE}-${vars.ID}-Role-${vars.STAGE} > /root/.creds
 mkdir -p /root/.aws
 echo "[default]" > /root/.aws/credentials
 echo "aws_access_key_id=${'`'}cat /root/.creds | sed -n 's/.*"AccessKeyId" : "\\([^"]\\+\\)".*/\\1/p'${'`'}" >> /root/.aws/credentials

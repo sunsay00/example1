@@ -15,8 +15,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@inf/vars": "*",
+    "@types/jest": "24.0.18",
+    "jest": "24.8.0",
+    "ts-jest": "24.0.2",
+    "@inf/cf-gen": "*",
     "@inf/cf-lam": "*",
-    "@inf/cf-gen": "*"
+    "@inf/hookops": "*"
   }
 }

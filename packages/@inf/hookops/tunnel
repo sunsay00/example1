@@ -67,15 +67,13 @@ const spawnCommand = async (cmd, args) => new Promise((resolve, reject) => {
 });
 
 const main = async params => {
-  process.stderr.write(`BEGIN-TUNNEL: ${colors.grey(`localhost:${params.localPort} -> ${params.remoteHost}:${params.remotePort}`)}`);
+  console.log(`${colors.blue('tunnel:')} localhost:${params.localPort} -> ${params.remoteHost}:${params.remotePort}`);
   const p = await spawnTunnel(params.localPort, params.remoteHost, params.remotePort, params.jumpHost);
-  console.log('');
   const [cmd, ...args] = params.args;
   try {
     await spawnCommand(cmd, args);
   } finally {
     p.kill('SIGKILL');
-    console.log('END-TUNNEL');
   }
   process.exit(0);
 };

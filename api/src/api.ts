@@ -2,8 +2,9 @@ import { apiWrapper } from '@inf/core';
 import { verifyVars } from '@inf/common';
 //import CacheClient from '@inf/cf-redis';
 import RDSDBClient from '@inf/cf-serverless-postgres';
-import { vars } from './_vars';
+import vars from './_vars';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
+import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 const config = verifyVars({
   stage: process.env.STAGE,
@@ -29,4 +30,6 @@ const resolver = createDefaultResolver({
   }
 });
 
-export const handler = apiWrapper(config)(resolver.resolve);
+export const handler = (event: APIGatewayProxyEvent, context: Context, next: any) => {
+  return apiWrapper(config)(resolver.resolve)(event, context, next);
+}

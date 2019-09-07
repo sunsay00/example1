@@ -2,11 +2,11 @@ import * as sjcl from 'sjcl';
 import CognitoUtil from './cognitoutil';
 import UserProfileService from './userprofile';
 import { CognitoClient, Obj, LocalStorage, CognitoUser, CognitoUserSession } from './types';
-import { outputs } from './_outputs';
 
 export default class UserLogin {
   private _client: CognitoClient;
   private _region: string;
+  private _userPoolId: string;
   private _profile: UserProfileService;
   private _util: CognitoUtil;
   private _accessToken?: string;
@@ -15,9 +15,10 @@ export default class UserLogin {
   private _localStorage: LocalStorage;
   private _currentSignInUser?: CognitoUser;
 
-  constructor(client: CognitoClient, region: string, profile: UserProfileService, util: CognitoUtil, localStorage: LocalStorage) {
+  constructor(client: CognitoClient, region: string, userPoolId: string, profile: UserProfileService, util: CognitoUtil, localStorage: LocalStorage) {
     this._client = client;
     this._region = region;
+    this._userPoolId = userPoolId;
     this._profile = profile;
     this._util = util;
     this._localStorage = localStorage;
@@ -323,7 +324,7 @@ export default class UserLogin {
       cognitoUser.getSession((err: Error, result: any) => {
         if (err) return reject(err);
 
-        logins[`cognito-idp.${this._region}.amazonaws.com/${outputs.UserPoolId}`] = result.getIdToken().getJwtToken();
+        logins[`cognito-idp.${this._region}.amazonaws.com/${this._userPoolId}`] = result.getIdToken().getJwtToken();
 
         // Add the User's Id token to the Cognito credentials login map
         const credentials = this._client.setCognitoIdentityPoolDetails(logins);

@@ -2,8 +2,7 @@ import CognitoUtil from './cognitoutil';
 import UserLogin from './userlogin';
 import UserProfile from './userprofile';
 import UserRegistration from './userregistration';
-import { CognitoUserSession, CognitoClient, UserPoolMode, LocalStorage, Storage } from './types';
-import { outputs } from './_outputs';
+import { CognitoUserSession, CognitoClient, LocalStorage, Storage } from './types';
 import * as RT from 'runtypes';
 import { Client } from './client';
 
@@ -63,7 +62,9 @@ class StorageAdaptor {
 }
 
 export class Account {
-  private _mode: UserPoolMode;
+  private _identityPoolId: string | undefined;
+  private _userPoolId: string | undefined;
+  private _clientId: string | undefined;
   private _client: CognitoClient | undefined;
   private _util: CognitoUtil | undefined;
   private _reg: UserRegistration | undefined;
@@ -73,19 +74,24 @@ export class Account {
   private _clientStorage: LocalStorage;
   private _initialized: boolean = false;
 
-  constructor(mode: UserPoolMode, storage: Storage) {
-    this._mode = mode;
+  constructor(storage: Storage) {
     this._storage = new StorageAdaptor(storage, '@account:');
     this._clientStorage = new StorageAdaptor(storage, '');
   }
 
-  init = async (region: string): Promise<boolean> => {
+  init = async (region: string, identityPoolId: string, userPoolId: string, clientId: string): Promise<boolean> => {
     if (this._initialized) return true;
-    const client = new Client(region, this._mode, this._clientStorage) as CognitoClient;
+
+    this._identityPoolId = identityPoolId;
+    this._userPoolId = userPoolId;
+    this._clientId = clientId;
+
+    const client = new Client(region, this._identityPoolId, this._userPoolId, this._clientId, this._clientStorage) as CognitoClient;
     this._util = new CognitoUtil(client, this._storage);
-    this._reg = new UserRegistration(client, this._mode, this._util);
+    this._reg = new UserRegistration(client, this._clientId, this._util);
     this._profile = new UserProfile(client, this._util, this._storage);
-    this._login = new UserLogin(client, region, this._profile, this._util, this._storage);
+    this._login = new UserLogin(client, region, this._userPoolId, this._profile, this._util, this._storage);
+
     await client.init();
     await this._util.sync();
     this._client = client;
@@ -150,8 +156,7 @@ export class Account {
     // the storage used by the cognito-user object will fix.
     const user = await this._util.getCurrentUser();
     if (!user) throw new Error('invalid cognito user');
-    const clientId = this._mode == UserPoolMode.Web ? outputs.WebUserPoolClientId : outputs.MobileUserPoolClientId;
-    const lastUserKeyKey = `CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
+    const lastUserKeyKey = `CognitoIdentityServiceProvider.${this._clientId}.LastAuthUser`;
     const lastUserKey = (user as any).storage.getItem(lastUserKeyKey);
     if (lastUserKey)
       (user as any).storage.removeItem(lastUserKeyKey);
