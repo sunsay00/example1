@@ -99,8 +99,8 @@ const configuration: Configuration = {
       cognitoUserPoolId: cog.UserPoolId,
       securityGroupIds: [aws.SecurityGroup_default],
       subnetIds: [aws.Subnet1, aws.Subnet2],
-      MasterUsername: 'root',
-      MasterUserPassword: 'for-development-only',
+      MasterUsername: vars.MASTER_USERNAME,
+      MasterUserPassword: vars.MASTER_USER_PASSWORD,
       apiHandler: {
         DB_URL: gen.DB_URL,
         DB_TEST_URL: gen.DB_TEST_URL,

@@ -285,15 +285,16 @@ const writeInput = (key: string, inputs?: { [_: string]: string | number | boole
   }
 }
 
+export const expandVariables = substitute(/({{([a-zA-Z0-9_]+)}})/gm, process.env);
+
 const expandInputVars = (inputs: { [_: string]: string | number | string[] }): { [_: string]: string | number | string[] } => {
-  const expandString = substitute(/({{([a-zA-Z0-9_]+)}})/gm, process.env);
   const expand = (x: string | number | string[]) => {
     if (typeof x == 'string') {
-      return expandString(x);
+      return expandVariables(x);
     } else if (typeof x == 'number') {
       return x;
     } else {
-      return x.map(expandString);
+      return x.map(expandVariables);
     }
   }
   return fromEntries(entries(inputs).map(([k, v]) => [k, expand(v)]));
