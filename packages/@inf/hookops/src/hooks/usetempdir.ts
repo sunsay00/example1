@@ -4,14 +4,14 @@ import { useClean } from './useclean';
 import { useGlobals } from './useglobals';
 
 export const useTempDir = (key: string) => {
-  const { hookOpsDir, currentRootDir } = useGlobals();
+  const { hookOpsDir, currentModuleDir } = useGlobals();
 
   const tmprootdir = `${hookOpsDir}/.tmp`;
 
   if (!fs.existsSync(tmprootdir))
     fs.mkdirSync(tmprootdir)
 
-  const tmpkeydir = `${tmprootdir}/${key}--${path.basename(currentRootDir)}`;
+  const tmpkeydir = `${tmprootdir}/${key}--${path.basename(currentModuleDir)}`;
 
   if (!fs.existsSync(tmpkeydir))
     fs.mkdirSync(tmpkeydir);

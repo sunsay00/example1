@@ -1,6 +1,7 @@
 import { useLamApi } from '@inf/cf-lam-api/config';
+import { createModule, useTempDir, useScriptRegistry, useGlobals } from '@inf/hookops';
 import { vars } from '@inf/hookops/vars';
-import { useVarsWriter } from '@inf/hooks';
+import { useVarsWriter, Tunnel } from '@inf/hooks';
 
 export const useApi = async (inputs: {
   accountId: string,
@@ -10,8 +11,26 @@ export const useApi = async (inputs: {
   MasterUsername: string,
   MasterUserPassword: string,
   dbUrl: string,
-  dbTestUrl: string
-}) => {
+  dbTestUrl: string,
+  tunnel: Tunnel
+}) => createModule('cf-lam-api', async () => {
+
+  const id = 'api';
+
+  const tmpdir = useTempDir(id);
+
+  useScriptRegistry(id, {
+    rules: {
+      test: {
+        cwd: tmpdir,
+        desc: 'run tests',
+        commands: [
+          { command: 'yarn', args: ['-s', 'x', 'db', 'wipetest'] },
+          inputs.tunnel({ command: 'yarn', args: ['-s', 'vars', 'yarn', '-s', 'test', '2>&1'] })
+        ]
+      }
+    }
+  });
 
   useVarsWriter('ts', __dirname, {
     DB_URL: inputs.dbUrl,
@@ -21,8 +40,8 @@ export const useApi = async (inputs: {
   });
 
   return await useLamApi({
-    rootDir: __dirname,
-    id: 'api',
+    id,
+    _deprecatedAlias: 'api',
     dependsOn: ['./package.json', './src/**/*.ts', './config.ts'],
     accountId: inputs.accountId,
     cognitoUserPoolId: inputs.cognitoUserPoolId,
@@ -38,4 +57,4 @@ export const useApi = async (inputs: {
       entrypoint: 'handler',
     }
   });
-}
+})

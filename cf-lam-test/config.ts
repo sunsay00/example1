@@ -5,7 +5,7 @@ export const useLamTest = (inputs: {
   dbUrl: string
   securityGroupIds: string[],
   subnetIds: string[]
-}) => createModule(__dirname, async () => {
+}) => createModule('cf-lam-test', async () => {
   return await useLam({
     rootDir: __dirname,
     id: 'test1',

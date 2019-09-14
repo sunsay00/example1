@@ -1,6 +1,6 @@
 import { createModule, useShell, useGlobals } from '@inf/hookops';
 
-export const useSite = () => createModule(__dirname, async () => {
+export const useSite = () => createModule('site', async () => {
   const { stage } = useGlobals();
 
   if (stage != 'local') {

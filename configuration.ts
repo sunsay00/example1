@@ -1,4 +1,5 @@
-import { Configuration } from '@inf/hookops';
+import { Configuration, useGlobals } from '@inf/hookops';
+import { useTunnel } from '@inf/hooks';
 import { vars } from '@inf/hookops/vars';
 
 import { useAwsInfo } from '@inf/cf-awsinfo/config';
@@ -43,6 +44,8 @@ const configuration: Configuration = {
       volumeSizeInGB: 8
     });
 
+    const proxy = { host: spot.host, port: 54321 };
+
     await useRedis();
 
     const postgres = await usePostgres({
@@ -53,19 +56,16 @@ const configuration: Configuration = {
       MaxCapacity: 2,
     });
 
+    const tunnel = useTunnel({ target: postgres, proxy });
+
     const gen = await useGen({
-      db: {
-        username: vars.MASTER_USERNAME,
-        password: vars.MASTER_USER_PASSWORD,
-        host: postgres.host,
-        port: postgres.port
-      },
-      proxy: {
-        host: spot.host,
-        port: 54321
-      },
+      username: vars.MASTER_USERNAME,
+      password: vars.MASTER_USER_PASSWORD,
+      db: postgres,
+      proxy,
       RDSServiceId: ServiceIds.RDS,
       ledgerPath: LEDGER_PATH,
+      tunnel
     });
 
     const cog = await useCognito({
@@ -92,6 +92,7 @@ const configuration: Configuration = {
       MasterUserPassword: vars.MASTER_USER_PASSWORD,
       dbUrl: gen.dbUrl,
       dbTestUrl: gen.dbTestUrl,
+      tunnel
     });
 
     await useLamTest({

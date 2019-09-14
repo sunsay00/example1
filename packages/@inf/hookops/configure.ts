@@ -42,7 +42,7 @@ const main = async (event: string, verbose: boolean, force: boolean) => {
     if (rec.rootDir != __dirname)
       log(`${'  '.repeat(rootstate.rootDirStackLength() - 1)}${colors.grey(modulename)} `);
 
-    rootConfiguration.currentRootDir = rootstate.rootDirPush(rec.rootDir);
+    rootConfiguration.currentModuleDir = rootstate.rootDirPush(rec.rootDir);
 
     const ret = await rec.run(use);
 
@@ -51,7 +51,7 @@ const main = async (event: string, verbose: boolean, force: boolean) => {
       process.exit(1);
     }
 
-    rootConfiguration.currentRootDir = rootstate.rootDirPop();
+    rootConfiguration.currentModuleDir = rootstate.rootDirPop();
 
     if (rec.rootDir != __dirname && updated)
       console.log(colors.green('(updated)'));
@@ -62,7 +62,7 @@ const main = async (event: string, verbose: boolean, force: boolean) => {
   const rootConfiguration = rootstate.setConfig({
     verbose,
     force,
-    currentRootDir: undefined as string | undefined,
+    currentModuleDir: undefined as string | undefined,
     configurationDir,
     hookOpsDir: __dirname,
     stage: configuration.stage,

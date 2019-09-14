@@ -1,27 +1,18 @@
 import * as fs from 'fs';
 import { createModule, useShell, useScriptRegistry, useGlobals } from '@inf/hookops';
+import { Tunnel } from '@inf/hooks';
 
-const useDbProxy = (inputs: {
-  db: {
-    username: string,
-    password: string,
-    host: string,
-    port: number
-  },
-  proxy: {
-    host: string,
-    port: number
-  }
-}) => {
-  const { stage } = useGlobals();
-  const host = stage == 'local' ? inputs.db.host : inputs.db.host;
-  //const host = stage == 'local' ? inputs.db.host : 'localhost';
-  const port = stage == 'local' ? inputs.db.port : inputs.db.port;
-  return {
-    dbUrl: `postgres://${inputs.db.username}:${inputs.db.password}@${host}:${port}/main${stage}`,
-    dbTestUrl: `postgres://${inputs.db.username}:${inputs.db.password}@${host}:${port}/test${stage}`
-  };
-}
+//const useDbProxy = (inputs: {
+//db: { username: string, password: string, host: string, port: number }, proxy: { host: string, port: number }
+//}) => {
+//const { stage } = useGlobals();
+//const host = stage == 'local' ? inputs.db.host : 'localhost';
+//const port = stage == 'local' ? inputs.db.port : inputs.proxy.port;
+//return {
+//dbUrl: `postgres://${inputs.db.username}:${inputs.db.password}@${host}:${port}/main${stage}`,
+//dbTestUrl: `postgres://${inputs.db.username}:${inputs.db.password}@${host}:${port}/test${stage}`
+//};
+//}
 
 const useGenerator = async (inputs: {
   dbUrl: string,
@@ -55,26 +46,12 @@ const useMigrator = async (inputs: {
   RDSServiceId: number,
   dbUrl: string,
   dbTestUrl: string,
-  db: {
-    host: string,
-    port: number,
-  },
   migrations: {
     dir: string,
     databaseJsonPath: string,
   },
-  proxy: {
-    host: string,
-    port: number
-  }
+  tunnel: Tunnel
 }) => {
-  const { stage } = useGlobals();
-
-  const rdshost = stage != 'local' ? inputs.db.host : '';
-  const proxyhost = stage != 'local' ? inputs.proxy.host : '';
-  const localPort = stage != 'local' ? inputs.proxy.port : 0;
-
-  const tunnelargs = stage == 'local' ? ['-s', 'vars'] : ['-s', 'tunnel', `${localPort}`, rdshost, `${inputs.db.port}`, proxyhost];
 
   await useShell({
     cwd: `${__dirname}/generator`,
@@ -85,17 +62,21 @@ const useMigrator = async (inputs: {
   });
 
   await useShell({
-    command: 'yarn',
+    ...inputs.tunnel({
+      command: 'sh',
+      args: ['seed', inputs.dbUrl, `${inputs.RDSServiceId}`]
+    }),
     cwd: __dirname,
-    args: [...tunnelargs, 'sh', 'seed', inputs.dbUrl, `${inputs.RDSServiceId}`],
     dependsOn: [`${__dirname}/generator/**/*.scm`, inputs.ledgerPath],
     env: { DB: inputs.dbUrl }
   });
 
   await useShell({
-    command: 'yarn',
+    ...inputs.tunnel({
+      command: 'yarn',
+      args: ['-s', 'db-migrate', 'up', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath]
+    }),
     cwd: __dirname,
-    args: [...tunnelargs, 'yarn', '-s', 'db-migrate', 'up', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath],
     dependsOn: [`${__dirname}/generator/**/*.scm`, inputs.ledgerPath],
     env: { DB: inputs.dbUrl }
   });
@@ -107,9 +88,9 @@ const useMigrator = async (inputs: {
         env: { DB: inputs.dbUrl },
         desc: 'seed the database',
         commands: [
-          { command: 'yarn', args: [...tunnelargs, 'sh', 'seed', inputs.dbUrl, `${inputs.RDSServiceId}`] },
-          { command: 'yarn', args: [...tunnelargs, 'yarn', '-s', 'db-migrate', 'up', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath] }
-        ]
+          { command: 'sh', args: ['seed', inputs.dbUrl, `${inputs.RDSServiceId}`] },
+          { command: 'yarn', args: ['-s', 'db-migrate', 'up', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath] }
+        ].map(inputs.tunnel)
       },
       wipetest: {
         env: {
@@ -118,26 +99,30 @@ const useMigrator = async (inputs: {
           GENDIR: __dirname
         },
         desc: 'wipes test databases',
-        commands: [{ command: 'yarn', args: [...tunnelargs, './wipetest', '2>&1'] }]
+        commands: [
+          { command: './wipetest', args: ['2>&1'] }
+        ].map(inputs.tunnel)
       },
       up: {
         env: { DB: inputs.dbUrl },
         desc: 'transitions the database to the lastest migration',
         commands: [
-          { command: 'yarn', args: [...tunnelargs, 'yarn', '-s', 'db-migrate', 'up', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath] }
-        ]
+          { command: 'yarn', args: ['-s', 'db-migrate', 'up', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath] }
+        ].map(inputs.tunnel)
       },
       down: {
         env: { DB: inputs.dbUrl },
         desc: 'transitions the database to its previous migration',
         commands: [
-          { command: 'yarn', args: [...tunnelargs, 'yarn', '-s', 'db-migrate', 'down', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath] }
-        ]
+          { command: 'yarn', args: ['-s', 'db-migrate', 'down', '--migrations-dir', inputs.migrations.dir, '--config', inputs.migrations.databaseJsonPath] }
+        ].map(inputs.tunnel)
       },
       shell: {
         stdio: 'inherit',
         desc: 'opens a shell to the database',
-        commands: [{ command: 'yarn', args: [...tunnelargs, 'pgcli', inputs.dbUrl] }]
+        commands: [
+          { command: 'yarn', args: ['pgcli', inputs.dbUrl] }
+        ].map(inputs.tunnel)
       }
     }
   });
@@ -146,9 +131,9 @@ const useMigrator = async (inputs: {
 };
 
 export const useGen = (inputs: {
+  username: string,
+  password: string,
   db: {
-    username: string,
-    password: string,
     host: string,
     port: number
   },
@@ -157,19 +142,21 @@ export const useGen = (inputs: {
     port: number
   },
   RDSServiceId: number,
-  ledgerPath: string
-}) => createModule(__dirname, async () => {
-
-  const { configurationDir } = useGlobals();
+  ledgerPath: string,
+  tunnel: Tunnel
+}) => createModule('cf-gen', async () => {
+  const { stage, configurationDir } = useGlobals();
 
   const ledgerPath = inputs.ledgerPath.startsWith('/') ? inputs.ledgerPath : `${configurationDir}/${inputs.ledgerPath}`;
   if (!fs.existsSync(ledgerPath))
     throw new Error(`ledger file not found, looked in '${ledgerPath}'`);
 
-  const proxy = useDbProxy({
-    db: inputs.db,
-    proxy: inputs.proxy
-  });
+  const proxyhost = stage == 'local' ? inputs.db.host : 'localhost';
+  const proxyport = stage == 'local' ? inputs.db.port : inputs.proxy.port;
+  const proxy = {
+    dbUrl: `postgres://${inputs.username}:${inputs.password}@${proxyhost}:${proxyport}/main${stage}`,
+    dbTestUrl: `postgres://${inputs.username}:${inputs.password}@${proxyhost}:${proxyport}/test${stage}`
+  };
 
   const gen = await useGenerator({
     dbUrl: proxy.dbUrl,
@@ -183,14 +170,13 @@ export const useGen = (inputs: {
     dbUrl: proxy.dbUrl,
     dbTestUrl: proxy.dbTestUrl,
     RDSServiceId: inputs.RDSServiceId,
-    db: {
-      host: inputs.db.host,
-      port: inputs.db.port
-    },
     ledgerPath,
     migrations: gen.migrations,
-    proxy: inputs.proxy
+    tunnel: inputs.tunnel
   });
 
-  return proxy;
+  return {
+    dbUrl: `postgres://${inputs.username}:${inputs.password}@${inputs.db.host}:${inputs.db.port}/main${stage}`,
+    dbTestUrl: `postgres://${inputs.username}:${inputs.password}@${inputs.db.host}:${inputs.db.port}/test${stage}`
+  };
 });

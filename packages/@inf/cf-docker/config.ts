@@ -26,7 +26,7 @@ export const useDocker = <R extends Outputs>(inputs: {
     image: string,
     environment?: string[]
   },
-}) => createModule(__dirname, async () => {
+}) => createModule('cf-docker', async () => {
   const localname = `${path.basename(__dirname)}${inputs.id ? `--${inputs.id}` : ''}`;
 
   const tmpdir = useTempDir(inputs.id);

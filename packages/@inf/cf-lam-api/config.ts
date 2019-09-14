@@ -3,8 +3,8 @@ import { vars } from '@inf/hookops/vars';
 import { useLam } from '@inf/cf-lam/config';
 import { pathTransformer } from '@inf/core';
 
-export const useLamApi = (inputs: {
-  rootDir: string,
+export const useLamApi = async (inputs: {
+  _deprecatedAlias?: string,
   id: string,
   accountId: string,
   dependsOn?: string[],
@@ -20,16 +20,16 @@ export const useLamApi = (inputs: {
     filepath: string,
     entrypoint: string,
   }
-}) => createModule(__dirname, async () => {
-  const { stage } = useGlobals();
+}) => {
+  const { stage, currentModuleDir } = useGlobals();
 
-  const transformPath = pathTransformer(__dirname, inputs.rootDir);
+  const transformPath = pathTransformer(__dirname, currentModuleDir);
 
   const result = await useLam({
     rootDir: __dirname,
 
     id: inputs.id,
-    alias: 'api',
+    alias: inputs._deprecatedAlias,
     dependsOn: inputs.dependsOn && inputs.dependsOn.map(transformPath),
     handlers: {
       auth: {
@@ -131,4 +131,4 @@ export const useLamApi = (inputs: {
   });
 
   return result;
-});
+};

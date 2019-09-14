@@ -5,7 +5,7 @@ export const useCDN = (inputs: {
   SiteCertificateArn: string,
   Domain: string,
   HostedZoneId: string
-}) => createModule(__dirname, async () => {
+}) => createModule('cf-cdn', async () => {
   const { stage } = useGlobals();
 
   await useCloudFormation({

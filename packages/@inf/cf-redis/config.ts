@@ -1,7 +1,7 @@
 import { createModule, useGlobals } from '@inf/hookops';
 import { useDocker } from '@inf/cf-docker/config';
 
-export const useRedis = () => createModule(__dirname, async () => {
+export const useRedis = () => createModule('cf-redis', async () => {
   const { stage } = useGlobals();
   if (stage == 'local') {
     const redis = await useDocker({

@@ -27,7 +27,7 @@ type Scripts = {
 const _initialized: { [_: string]: boolean } = {};
 
 export const useScriptRegistry = (id: string, scripts: Scripts) => {
-  const { hookOpsDir, currentRootDir } = useGlobals();
+  const { hookOpsDir, currentModuleDir } = useGlobals();
 
   const missingVars = [] as string[];
   entries(scripts.rules).forEach(([k, v]) =>
@@ -65,17 +65,17 @@ export const useScriptRegistry = (id: string, scripts: Scripts) => {
       prev = JSON.parse(fs.readFileSync(tmpfile, { encoding: 'utf8' }));
     } catch {
       console.warn(`corrupt script dectected '${tmpfile}', replacing`);
-      const json = { ...scripts, cwd: scripts.cwd || currentRootDir };
+      const json = { ...scripts, cwd: scripts.cwd || currentModuleDir };
       fs.writeFileSync(tmpfile, JSON.stringify(json, null, 2), { encoding: 'utf8' });
     }
     if (prev) {
       const env = prev.env && scripts.env && { ...prev.env, ...scripts.env };
-      const cwd = scripts.cwd || prev.cwd || currentRootDir;
+      const cwd = scripts.cwd || prev.cwd || currentModuleDir;
       const next = { ...scripts, cwd, env, rules: { ...prev.rules, ...scripts.rules } };
       fs.writeFileSync(tmpfile, JSON.stringify({ ...prev, ...next }, null, 2), { encoding: 'utf8' });
     }
   } else {
-    const json = { ...scripts, cwd: scripts.cwd || currentRootDir };
+    const json = { ...scripts, cwd: scripts.cwd || currentModuleDir };
     fs.writeFileSync(tmpfile, JSON.stringify(json, null, 2), { encoding: 'utf8' });
     _initialized[tmpfile] = true;
   }

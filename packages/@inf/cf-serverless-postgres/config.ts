@@ -8,7 +8,7 @@ export const usePostgres = (inputs: {
   MasterUserPassword: string,
   MinCapacity: number,
   MaxCapacity: number,
-}) => createModule(__dirname, async () => {
+}) => createModule('cf-serverless-postgres', async () => {
   const { stage } = useGlobals();
 
   if (stage == 'local') {

@@ -122,7 +122,7 @@ export const useCloudFormation = async<R>(inputs: {
   defaultOutputs?: { [_ in keyof R]: string }
 }): Promise<{ [_ in keyof R]: string }> => {
 
-  const { stage, currentRootDir } = useGlobals();
+  const { stage, currentModuleDir: currentModuleDir } = useGlobals();
 
   useUniqueIdAssertion('cloudformation', inputs.id);
 
@@ -141,7 +141,7 @@ export const useCloudFormation = async<R>(inputs: {
     }, [inputs.cfyamlpath]);
 
     return await useCache(async () => {
-      const absRootDir = path.resolve(currentRootDir);
+      const absRootDir = path.resolve(currentModuleDir);
       const cfpath = inputs.cfyamlpath.startsWith('/') ? inputs.cfyamlpath : `${absRootDir}/${inputs.cfyamlpath}`;
       if (!fs.existsSync(cfpath)) {
         throw new Error(`invalid cloudformation id '${inputs.id}' - ${cfpath} not found`);

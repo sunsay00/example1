@@ -3,7 +3,7 @@ import { useCloudFormation } from '@inf/hooks';
 
 export const useCert = (inputs: {
   Domain: string,
-}) => createModule(__dirname, async () => {
+}) => createModule('cf-cert', async () => {
   return await useCloudFormation({
     id: 'cf-cert',
     cfyamlpath: `${__dirname}/cf.yaml`,

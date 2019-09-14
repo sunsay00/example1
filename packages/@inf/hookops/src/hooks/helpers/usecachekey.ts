@@ -29,9 +29,9 @@ const getCallerPath = () => {
 }
 
 export const useCacheKey = async <T>(fn: (cachekey: string) => Promise<T>) => {
-  const { configurationDir, currentRootDir } = useGlobals();
+  const { configurationDir, currentModuleDir } = useGlobals();
 
-  const relpath = path.relative(configurationDir, currentRootDir);
+  const relpath = path.relative(configurationDir, currentModuleDir);
 
   _stack[_stack.length - 1].frameCount = _stack[_stack.length - 1].frameCount + 1;
   _stack.push({ frameCount: 0 });

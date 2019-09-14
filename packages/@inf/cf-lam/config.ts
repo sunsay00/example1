@@ -96,7 +96,7 @@ export const useLam = async <R>(inputs: {
 
   startCommands?: StartCommand[],
 }): Promise<{ [_ in keyof R]: string }> => {
-  const { stage, configurationDir, currentRootDir } = useGlobals();
+  const { stage, configurationDir } = useGlobals();
 
   const tmpdir = useTempDir(inputs.id);
 
@@ -323,14 +323,6 @@ module.exports = {
     startCmds.push({ command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s sls offline'"`, '"tsc -w -p tsconfig.sls.json"'] });
 
   const rules = {
-    test: {
-      cwd: tmpdir,
-      desc: 'run tests',
-      commands: [
-        { command: 'yarn', args: ['-s', 'x', 'gen', 'wipetest'] },
-        { command: 'yarn', args: ['-s', 'vars', 'yarn', '-s', 'test', '2>&1'] }
-      ]
-    },
     ...(startCmds.length && {
       start: {
         cwd: tmpdir,

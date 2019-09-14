@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { useGlobals } from './hooks/useglobals';
+import { useUniqueIdAssertion } from './hooks/useuniqueidassertion';
 
 export type Outputs = { [_: string]: string | number | boolean };
 export type ConfigRecord<R extends Outputs> = { rootDir: string, run: (use: UseFn) => Promise<R> };
@@ -16,7 +17,7 @@ const _rootstate = {
   config: undefined as {
     verbose: boolean,
     force: boolean,
-    currentRootDir: string | undefined,
+    currentModuleDir: string | undefined,
     configurationDir: string,
     hookOpsDir: string,
     stage: string,
@@ -42,12 +43,15 @@ const getCallerRootPath = (stack: string | undefined) => {
   return '';
 }
 
-export const createModule = <R extends Outputs>(rootDir: string, run: () => Promise<R>) => {
+export const createModule = <R extends Outputs>(moduleid: string, run: () => Promise<R>) => {
   const stack = new Error().stack;
-  console.assert(rootDir, path.dirname(getCallerRootPath(stack)));
+  const rootDir = path.dirname(getCallerRootPath(stack));
+  useUniqueIdAssertion('module', moduleid);
   if (!fs.existsSync(`${rootDir}/package.json`))
     throw new Error('createModule may only be invoked in a script that resides in a directory that contains a package.json file');
-  return useGlobals().use(({ rootDir, run }));
+  if (!_rootstate.config || !_rootstate.config.use)
+    throw new Error('createModule must be invoked within a configuration context');
+  return _rootstate.config.use(({ rootDir, run }));
 }
 
 export const rootstate = {
