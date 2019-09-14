@@ -77,14 +77,14 @@ export const rootstate = {
 
 export { vartools } from './vartools';
 
-export { useGlobals } from './hooks/useglobals';
-export { useUniqueIdAssertion } from './hooks/useuniqueidassertion';
-export { useMemo } from './hooks/usememo';
-export { useEffect } from './hooks/useeffect';
-export { useClean } from './hooks/useclean';
-export { useTempDir } from './hooks/usetempdir';
-export { useShell } from './hooks/useshell';
-export { useDependsOn } from './hooks/usedependson';
-export { useLineInFile } from './hooks/uselineinfile';
-export { useScriptRegistry } from './hooks/usescriptregistry';
-export { useCache } from './hooks/usecache';
+export * from './hooks/useglobals';
+export * from './hooks/useuniqueidassertion';
+export * from './hooks/usememo';
+export * from './hooks/useeffect';
+export * from './hooks/useclean';
+export * from './hooks/usetempdir';
+export * from './hooks/useshell';
+export * from './hooks/usedependson';
+export * from './hooks/uselineinfile';
+export * from './hooks/usescriptregistry';
+export * from './hooks/usecache';

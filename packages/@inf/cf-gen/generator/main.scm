@@ -77,10 +77,10 @@
           (save (cachestore-generate api) "../back/api/src/api/stores/cachestore.ts")
           (save (rdsstore-generate api) "../back/api/src/api/stores/rdsstore.ts")
           (save (types-generate api) "../back/api/src/types/models.ts")
-          (save (types-generate api) "../front/mobileapp/src/types/models.ts")
+          ;(save (types-generate api) "../front/mobileapp/src/types/models.ts")
           ; WIP (save (types-generate api) "../front/webapp/src/types/models.ts")
 
-          (save (apollobindings-generate-index api #f) "../front/mobileapp/src/components/hocs/models/index.ts")
+          ;(save (apollobindings-generate-index api #f) "../front/mobileapp/src/components/hocs/models/index.ts")
           ; WIP (save (apollobindings-generate-index api #f) "../front/webapp/src/components/hocs/models/index.ts")
 
           ; WIP (map (lambda (name)

@@ -55,15 +55,15 @@
       (define api (schema->api schema)) ; prev-api + delta-api = api
       (print "\n---- [ GENERATING API VERSION: v" vnum " ] ----")
 
-      (define (get-path s) (string-append output-dir s))
+      (define (get-path s) (string-append output-dir "/" s))
 
       (define last? (= (+ i 1) (length schemas)))
       (if last?
         (begin 
-          (save (types-generate api) (get-path "../front/mobileapp/src/types/models.ts"))
+          (save (types-generate api) (get-path "types/models.ts"))
           ; WIP (save (types-generate api) "../front/webapp/src/types/models.ts")
 
-          (save (apollobindings-generate-index api #f) (get-path "../front/mobileapp/src/components/hocs/models/index.ts"))
+          (save (apollobindings-generate-index api #f) (get-path "models/index.ts"))
           ; WIP (save (apollobindings-generate-index api #f) "../front/webapp/src/components/hocs/models/index.ts")
 
           ; WIP (map (lambda (name)

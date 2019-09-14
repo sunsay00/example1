@@ -54,3 +54,4 @@ buck-out/
 /ios/Pods/
 android/app/src/main/assets/fonts
 _vars.ts
+src/_gen

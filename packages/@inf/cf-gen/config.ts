@@ -34,7 +34,7 @@ const useGenerator = async (inputs: {
         cwd: `${__dirname}/generator`,
         env: { LEDGER_PATH: inputs.ledgerPath },
         desc: 'generates frontend-bindings',
-        commands: [{ command: 'make', args: ['OUTPUT_PATH={{flags:outputdir}}', 'configure.client'] }],
+        commands: [{ command: 'make', args: ['OUTPUT_PATH={{flags:outdir}}', 'configure.client'] }],
         flags: {
           outdir: {
             desc: 'output directory',

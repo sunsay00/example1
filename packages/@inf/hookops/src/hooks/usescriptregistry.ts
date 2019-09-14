@@ -4,30 +4,34 @@ import { useGlobals } from './useglobals';
 import { useClean } from './useclean';
 import { useUniqueIdAssertion } from './useuniqueidassertion';
 
-type StdioOptions = 'pipe' | 'ignore' | 'inherit';
+export type StdioOptions = 'pipe' | 'ignore' | 'inherit';
 
-type Scripts = {
+export type ScriptFlag = {
+  desc: string,
+  shortcut: string,
+  default?: string
+}
+
+export type ScriptRule = {
+  stdio?: StdioOptions,
+  cwd?: string,
+  env?: { [_: string]: string }
+  desc?: string,
+  deps?: string[],
+  commands?: {
+    command: string,
+    args?: string[]
+  }[],
+  flags?: {
+    [_: string]: ScriptFlag
+  }
+};
+
+export type Scripts = {
   cwd?: string,
   env?: { [_: string]: string },
   rules: {
-    [_: string]: {
-      stdio?: StdioOptions,
-      cwd?: string,
-      env?: { [_: string]: string }
-      desc?: string,
-      deps?: string[],
-      commands?: {
-        command: string,
-        args?: string[]
-      }[],
-      flags?: {
-        [_: string]: {
-          desc: string,
-          shortcut: string,
-          default?: string
-        }
-      }
-    }
+    [_: string]: ScriptRule
   }
 }
 

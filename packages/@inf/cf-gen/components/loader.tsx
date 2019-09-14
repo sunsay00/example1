@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+/*import * as React from 'react';
 import { Root } from '../hooks/useroot';
 import { TryAgain } from './tryagain';
 import * as UI from '@inf/core-ui';
@@ -118,7 +119,6 @@ class Loader<R> extends React.Component<Props<R>, State<R>> {
     Root.incrementRequestCount();
     const sub = this._query || (await this._data.promise()).subscription;
     this._query = sub;
-    /*
     this._subscription = sub.subscribe({
       next: (value: ApolloQueryResult<R>) => {
         this._wakeableTimeout = undefined;
@@ -139,7 +139,6 @@ class Loader<R> extends React.Component<Props<R>, State<R>> {
         console.warn('loader complete');
       },
     });
-    */
   }
 
   componentWillUnmount() {
@@ -206,3 +205,4 @@ class Loader<R> extends React.Component<Props<R>, State<R>> {
 }
 
 export default Loader;
+*/
