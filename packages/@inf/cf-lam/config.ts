@@ -287,7 +287,7 @@ module.exports = {
       "webpack-cli": "3.3.6",
       "concurrently": "4.1.2",
       "nodemon": "1.19.2",
-      "serverless-offline": "5.10.1",
+      "serverless-offline": "5.11.0",
       ...(devDependencies || {}),
     }
   }
