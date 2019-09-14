@@ -4,7 +4,7 @@ import { createModule, useGlobals, vartools, useDependsOn, useCache } from '@inf
 
 export const useAwsInfo = (inputs: {
   rootEnv: string
-}) => createModule('cf-awsinfo', async () => {
+}) => createModule(async () => {
 
   const { stage } = useGlobals();
 

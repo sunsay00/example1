@@ -6,7 +6,7 @@ export const useCognito = (inputs: {
   InvitationEmailSubject: string,
   VerificationEmailSubject: string,
   FromEmail: string,
-}) => createModule('cf-cognito', async () => {
+}) => createModule(async () => {
   const { stage } = useGlobals();
 
   const ret = await useCloudFormation({

@@ -16,7 +16,7 @@ export const useSpot = (inputs: {
   subnet: string,
   shellUser: string,
   volumeSizeInGB: number,
-}) => createModule('cf-spot', async () => {
+}) => createModule(async () => {
   const { stage } = useGlobals();
 
   const ec2 = new AWS.EC2({

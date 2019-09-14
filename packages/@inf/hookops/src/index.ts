@@ -43,10 +43,10 @@ const getCallerRootPath = (stack: string | undefined) => {
   return '';
 }
 
-export const createModule = <R extends Outputs>(moduleid: string, run: () => Promise<R>) => {
+export const createModule = <R extends Outputs>(run: () => Promise<R>) => {
   const stack = new Error().stack;
   const rootDir = path.dirname(getCallerRootPath(stack));
-  useUniqueIdAssertion('module', moduleid);
+  //useUniqueIdAssertion('module', moduleid);
   if (!fs.existsSync(`${rootDir}/package.json`))
     throw new Error('createModule may only be invoked in a script that resides in a directory that contains a package.json file');
   if (!_rootstate.config || !_rootstate.config.use)

@@ -144,7 +144,7 @@ export const useGen = (inputs: {
   RDSServiceId: number,
   ledgerPath: string,
   tunnel: Tunnel
-}) => createModule('cf-gen', async () => {
+}) => createModule(async () => {
   const { stage, configurationDir } = useGlobals();
 
   const ledgerPath = inputs.ledgerPath.startsWith('/') ? inputs.ledgerPath : `${configurationDir}/${inputs.ledgerPath}`;

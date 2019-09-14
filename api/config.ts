@@ -13,7 +13,7 @@ export const useApi = async (inputs: {
   dbUrl: string,
   dbTestUrl: string,
   tunnel: Tunnel
-}) => createModule('cf-lam-api', async () => {
+}) => createModule(async () => {
 
   const id = 'api';
 
