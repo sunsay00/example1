@@ -45,7 +45,7 @@
         (+ i 1))
       0 (reverse schemas))))
 
-(define (run ledger)
+(define (run ledger output-dir)
   (let ((schemas (generate-schemas #t ledger)))
     (let ((i 0) (schema (if (= (length schemas) 1) (car schemas) (error "invalid schema"))))
       (define v (version-name-floor (schema->version schema)))
@@ -55,32 +55,15 @@
       (define api (schema->api schema)) ; prev-api + delta-api = api
       (print "\n---- [ GENERATING API VERSION: v" vnum " ] ----")
 
-      ;(pp (schema->delta-api schema))
-
-      (save (typedefs-generate api) "../back/api/src/api/resolver/" v "/typedefs.ts")
-      (save (resolvers-generate api) "../back/api/src/api/resolver/" v "/resolvers.ts")
-      (save (mappers-generate prev-api delta-api vnum) "../back/api/src/api/mapper/mapper_" v ".ts")
-      (save (mappers-generate-index api vnum) "../back/api/src/api/mapper/index.ts")
+      (define (get-path s) (string-append output-dir s))
 
       (define last? (= (+ i 1) (length schemas)))
       (if last?
         (begin 
-          (save (service-interfaces-generate api) "../back/api/src/types/serviceinterfaces.ts")
-
-          (map (lambda (name)
-                 (save (services-generate name api) "../back/api/src/api/services/basic/" (lower name) "service.ts"))
-               (map model->name (api->models api)))
-
-          (save (mockstores-generate api) "../back/api/src/api/__tests__/mocks/mockstore.ts")
-          ;(save (playbackstores-generate api) "../back/api/src/api/__tests__/mocks/playbackstore.ts")
-          (save (store-interfaces-generate api) "../back/api/src/types/storeinterfaces.ts")
-          (save (cachestore-generate api) "../back/api/src/api/stores/cachestore.ts")
-          (save (rdsstore-generate api) "../back/api/src/api/stores/rdsstore.ts")
-          (save (types-generate api) "../back/api/src/types/models.ts")
-          (save (types-generate api) "../front/mobileapp/src/types/models.ts")
+          (save (types-generate api) (get-path "../front/mobileapp/src/types/models.ts"))
           ; WIP (save (types-generate api) "../front/webapp/src/types/models.ts")
 
-          (save (apollobindings-generate-index api #f) "../front/mobileapp/src/components/hocs/models/index.ts")
+          (save (apollobindings-generate-index api #f) (get-path "../front/mobileapp/src/components/hocs/models/index.ts"))
           ; WIP (save (apollobindings-generate-index api #f) "../front/webapp/src/components/hocs/models/index.ts")
 
           ; WIP (map (lambda (name)
@@ -92,21 +75,12 @@
             ;(save output "../front/webapp/src/__integrations__/tools/componentfixtures.tsx")
             ;(save output "../front/mobileapp/src/__integrations__/tools/componentfixtures.tsx"))
 
-          (let ((output (gqlqueries-generate-fixtures api)))
-            (save output "../back/api/src/api/__tests__/fixtures/index.ts"))
-
-          (let ((output (connectors-generate api)))
-            (save output "../back/api/src/api/connectors.ts"))
-
           ;(let ((output (version-generate vnum)))
-            ;(save output "../back/api/src/tools/version.ts")
             ;(save output "../front/styleguide/src/stories/hocs/version.ts")
             ;(save output "../front/mobileapp/src/tools/version.ts")
             ;(save output "../front/webapp/src/tools/version.ts"))
 
           (define configs '(
-                            ;("../back/api/src/api/config.ts" api)
-                            ;("../back/api/src/auth/config.ts" auth)
                             ;("../back/resize/src/config.ts" resize)
                             ;("../back/postconfirm/src/config.ts" postconfirm)
                             ;("../back/usersync/src/config.ts" usersync)
@@ -232,10 +206,10 @@
 ;(state-monad)
 
 (define args (command-line-arguments))
-(if (not (= (length args) 1))
-  (display "usage <path-to-ledger.scm>\n")
+(if (not (= (length args) 2))
+  (display "usage <path-to-ledger.scm> <output-dir>\n")
   (begin
     (load-relative (car args))
-    (define entire-api (run ledger))
+    (define entire-api (run ledger (cadr args)))
     (run-sub entire-api ledger)))
 

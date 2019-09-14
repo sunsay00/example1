@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as colors from 'colors/safe';
 import { useClean } from './src/hooks/useclean';
-import { Outputs, ConfigRecord, rootstate, createModule } from '.';
+import { Outputs, ConfigRecord, rootstate } from '.';
 
 const error = (msg: string, id?: number) => console.error(`[CONF] ${colors.red(`error: ${msg}${id ? ` (${id})` : ''}`)}`);
 const log = (msg: string) => console.log(`[CONF] ${colors.grey(msg)} `);

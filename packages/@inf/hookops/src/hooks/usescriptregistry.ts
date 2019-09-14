@@ -19,7 +19,14 @@ type Scripts = {
       commands?: {
         command: string,
         args?: string[]
-      }[]
+      }[],
+      flags?: {
+        [_: string]: {
+          desc: string,
+          shortcut: string,
+          default?: string
+        }
+      }
     }
   }
 }

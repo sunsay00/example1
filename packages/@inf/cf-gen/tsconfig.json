@@ -14,6 +14,7 @@
     "./back/**/*",
     "./front/**/*",
     "./tools/**/*",
+    "./hooks/**/*",
     "./components/**/*",
     "index.ts",
     "types.ts",

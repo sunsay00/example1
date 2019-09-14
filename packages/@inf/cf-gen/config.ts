@@ -27,8 +27,20 @@ const useGenerator = async (inputs: {
       generate: {
         cwd: `${__dirname}/generator`,
         env: { LEDGER_PATH: inputs.ledgerPath },
-        desc: 'generates migrations, back-end-bindings, and front-end-bindings',
+        desc: 'generates migrations, and backend-bindings',
         commands: [{ command: 'make', args: ['configure'] }]
+      },
+      generateclient: {
+        cwd: `${__dirname}/generator`,
+        env: { LEDGER_PATH: inputs.ledgerPath },
+        desc: 'generates frontend-bindings',
+        commands: [{ command: 'make', args: ['OUTPUT_PATH={{flags:outputdir}}', 'configure.client'] }],
+        flags: {
+          outdir: {
+            desc: 'output directory',
+            shortcut: 'o'
+          }
+        }
       }
     }
   });

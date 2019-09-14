@@ -11,9 +11,10 @@ import { useCognito } from '@inf/cf-cognito/config';
 import { useGen } from '@inf/cf-gen/config';
 import { useCDN } from '@inf/cf-cdn/config';
 
-import { useSite } from './site/config';
 import { useLamTest } from './cf-lam-test/config';
 import { useApi } from './api/config';
+import { useSite } from './site/config';
+import { useMobile } from './mobile/config';
 
 const ROOT_ENV = './.env';
 const LEDGER_PATH = './ledger.scm';
@@ -28,6 +29,13 @@ const configuration: Configuration = {
   configure: async () => {
 
     const aws = await useAwsInfo({ rootEnv: ROOT_ENV });
+
+    const cog = await useCognito({
+      Domain: vars.DOMAIN,
+      InvitationEmailSubject: `Welcome To ${vars.NICE_NAME}`,
+      VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
+      FromEmail: `verification@${vars.NICE_NAME}`
+    });
 
     const cert = await useCert({ Domain: vars.DOMAIN });
 
@@ -68,13 +76,6 @@ const configuration: Configuration = {
       tunnel
     });
 
-    const cog = await useCognito({
-      Domain: vars.DOMAIN,
-      InvitationEmailSubject: `Welcome To ${vars.NICE_NAME}`,
-      VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
-      FromEmail: `verification@${vars.NICE_NAME}`
-    });
-
     await useCDN({
       SiteCertificateArn: cert.CertificateArn,
       Domain: vars.DOMAIN,
@@ -107,6 +108,16 @@ const configuration: Configuration = {
       dbUrl: gen.dbUrl,
       securityGroupIds: [aws.SecurityGroup_default],
       subnetIds: [aws.Subnet1, aws.Subnet2],
+    });
+
+    await useMobile({
+      graphqlEndpoint: endpoints.api,
+      region: vars.AWS_REGION,
+      cognito: {
+        identityPoolId: vars.STAGE == 'local' ? 'us-east-1:744bb2da-6b84-4150-ba40-5f6c00d79e87' : cog.CognitoIdentityPoolId,
+        userPoolId: vars.STAGE == 'local' ? 'us-east-1_vaHQ7ND3L' : cog.UserPoolId,
+        clientId: vars.STAGE == 'local' ? '5aeqscghjc8lguth4f6qosc8d7' : cog.MobileUserPoolClientId,
+      }
     });
   }
 };

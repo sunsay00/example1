@@ -15,10 +15,15 @@ import { Drawer } from './screens/drawer';
 import { Home } from './screens/home';
 import { StyleGuide } from './screens/styleguide';
 import { ExampleKeyboardAccessoryView } from './components/examplekeyboardaccessoryview';
+import vars from './_vars';
 
 const config = {
   WEBSOCKET_ENDPOINT: undefined,
-  GRAPHQL_ENDPOINT: '',
+  GRAPHQL_ENDPOINT: vars.GRAPHQL_ENDPOINT,
+  AWS_REGION: vars.AWS_REGION,
+  IDENTITY_POOL_ID: vars.IDENTITY_POOL_ID,
+  USER_POOL_ID: vars.USER_POOL_ID,
+  CLIENT_ID: vars.CLIENT_ID
 };
 
 const Tabs = (initialRouteName: string) => createBottomTabNavigator({
