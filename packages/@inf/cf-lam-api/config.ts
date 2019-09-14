@@ -1,4 +1,4 @@
-import { createModule, useGlobals, useScriptRegistry, vartools } from '@inf/hookops';
+import { useGlobals, useScriptRegistry, vartools } from '@inf/hookops';
 import { vars } from '@inf/hookops/vars';
 import { useLam } from '@inf/cf-lam/config';
 import { pathTransformer } from '@inf/core';
@@ -111,7 +111,9 @@ export const useLamApi = async (inputs: {
         desc: 'makes a web request to api endpoint',
         commands: [{
           command: 'yarn',
-          args: ['-s', 'vars', 'curl', '-s', '-H', `'Authorization: Bearer FIXME'`, '-H', `'Content-Type: application/json'`, '-d', '"hello world"', result.api]
+          args: [
+            '-s', 'vars', 'curl', '-s', '-H', `'Authorization: Bearer FIXME'`, '-H', `'Content-Type: application/json'`, '-d', '"hello world"',
+            result.api]
         }]
       },
       ['request.guest']: {

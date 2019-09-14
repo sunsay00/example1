@@ -1,4 +1,4 @@
-import { Configuration, useGlobals } from '@inf/hookops';
+import { Configuration } from '@inf/hookops';
 import { useTunnel } from '@inf/hooks';
 import { vars } from '@inf/hookops/vars';
 
@@ -75,15 +75,13 @@ const configuration: Configuration = {
       FromEmail: `verification@${vars.NICE_NAME}`
     });
 
-    await useSite();
-
     await useCDN({
       SiteCertificateArn: cert.CertificateArn,
       Domain: vars.DOMAIN,
       HostedZoneId: aws.HostedZoneId,
     });
 
-    await useApi({
+    const endpoints = await useApi({
       accountId: vars.AWS_ACCOUNT_ID,
       cognitoUserPoolId: cog.UserPoolId,
       securityGroupIds: [aws.SecurityGroup_default],
@@ -93,6 +91,16 @@ const configuration: Configuration = {
       dbUrl: gen.dbUrl,
       dbTestUrl: gen.dbTestUrl,
       tunnel
+    });
+
+    await useSite({
+      graphqlEndpoint: endpoints.api,
+      region: vars.AWS_REGION,
+      cognito: {
+        identityPoolId: vars.STAGE == 'local' ? 'us-east-1:744bb2da-6b84-4150-ba40-5f6c00d79e87' : cog.CognitoIdentityPoolId,
+        userPoolId: vars.STAGE == 'local' ? 'us-east-1_vaHQ7ND3L' : cog.UserPoolId,
+        clientId: vars.STAGE == 'local' ? '1djqk831709slrd9olr4q0qh7d' : cog.WebUserPoolClientId,
+      }
     });
 
     await useLamTest({

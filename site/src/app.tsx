@@ -4,10 +4,15 @@ import * as Web from '@inf/gatsby-theme-web-ui';
 import { AccountProvider, useAccount } from '@inf/cf-cognito';
 import { ApolloProvider, ApolloResolvers } from '@inf/apollo';
 import { Auth } from './components/auth';
+import vars from './_vars';
 
 const config = {
   WEBSOCKET_ENDPOINT: undefined,
-  GRAPHQL_ENDPOINT: '',
+  GRAPHQL_ENDPOINT: vars.GRAPHQL_ENDPOINT,
+  AWS_REGION: vars.AWS_REGION,
+  IDENTITY_POOL_ID: vars.IDENTITY_POOL_ID,
+  USER_POOL_ID: vars.USER_POOL_ID,
+  CLIENT_ID: vars.CLIENT_ID
 };
 
 const Layout = (props: { children?: React.ReactNode }) => {
@@ -51,7 +56,12 @@ const resolvers: ApolloResolvers = {
 }
 export const App = (props: { children?: React.ReactNode }) =>
   <Web.Root>{overlays =>
-    <AccountProvider region="us-east-1">
+    <AccountProvider
+      region={config.AWS_REGION}
+      identityPoolId={config.IDENTITY_POOL_ID}
+      userPoolId={config.USER_POOL_ID}
+      clientId={config.CLIENT_ID}
+    >
       <ApolloProvider
         authorization="Guest"
         websocketEndpoint={config.WEBSOCKET_ENDPOINT}
@@ -64,4 +74,4 @@ export const App = (props: { children?: React.ReactNode }) =>
         </UI.AssertSingleton>
       </ApolloProvider>
     </AccountProvider>}
-  </Web.Root>
+  </Web.Root >

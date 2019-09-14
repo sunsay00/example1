@@ -404,7 +404,7 @@ module.exports = {
       dirty = true;
     }, [fromEntries(entries(inputs.handlers).map(([k, v]) => [k, v.vars || {}]))])
 
-    return await useCache(async () => {
+    const ret: { [_ in keyof R]: string } = await useCache(async () => {
       await useShell({ command: 'yarn', args: ['-s', 'install', '--prefer-offline'], cwd: tmpdir });
       await useShell({ command: 'rm', args: ['-f', 'build/tsconfig.tsbuildinfo'], cwd: tmpdir });
       await useShell({ command: 'tsc', args: ['-p', 'tsconfig.sls.json'], cwd: tmpdir });
@@ -413,15 +413,14 @@ module.exports = {
       for (let p of entries(inputs.handlers).map(([_, v]) => v.filepath))
         await useShell({ command: 'cp', args: [`build/_${path.basename(p.replace(/(.ts$)/, '.js'))}`, `build/${p.replace(/(.ts$)/, '.js')}`], cwd: tmpdir });
 
-      const ret = await useShell({
+      return await useShell({
         command: 'yarn',
         args: ['-s', 'vars', 'yarn', '-s', 'sls', 'deploy', '--no-confirm'],
         cwd: tmpdir,
         outputMatchers: buildOutputMatchers(inputs.handlers),
       });
-
-      return ret;
     }, dirty);
+    return ret;
   } else {
     await useShell({
       command: 'yarn',
@@ -429,12 +428,13 @@ module.exports = {
       dependsOn: inputs.dependsOn && inputs.dependsOn.map(transformPath),
       cwd: tmpdir
     });
+
+    const buildDefaultReturns = (stage: string, handlers: { [_ in keyof R]: Handler }) =>
+      fromEntries(entries(handlers).filter(([k, v]) => !!v.events).map<[keyof R, string][]>(([k, v]) =>
+        v.events!.map(e => [k, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : ''])).flat());
+
+    return buildDefaultReturns(stage, inputs.handlers);
   }
 
-  const buildDefaultReturns = (stage: string, handlers: { [_ in keyof R]: Handler }) =>
-    fromEntries(entries(handlers).filter(([k, v]) => !!v.events).map<[keyof R, string][]>(([k, v]) =>
-      v.events!.map(e => [k, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : ''])).flat());
-
-  return buildDefaultReturns(stage, inputs.handlers);
 };
 

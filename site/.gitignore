@@ -54,3 +54,4 @@ typings/
 yarn-debug.log*
 yarn-error.log
 yarn-error.log*
+_vars.ts

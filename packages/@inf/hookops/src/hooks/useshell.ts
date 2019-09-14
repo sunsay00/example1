@@ -14,7 +14,7 @@ export const useShell = async <R>(inputs: {
   env?: { [_: string]: string },
   cwd?: string,
   outputMatchers?: { [_ in keyof R]: RegExp }
-}) => {
+}): Promise<{ [_ in keyof R]: string }> => {
   const { verbose } = useGlobals();
 
   let dirty = false;
