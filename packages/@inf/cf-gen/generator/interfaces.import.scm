@@ -1,4 +1,4 @@
-(module interfaces (service-interfaces-generate store-interfaces-generate types-generate interface-imports)
+(module interfaces (service-interfaces-generate store-interfaces-generate types-generate types-generate-client interface-imports)
   (import scheme chicken data-structures tools signatures)
   (require-extension srfi-13 srfi-1)
 
@@ -87,6 +87,18 @@
                (list (type->name type) "Data")))
            (remove (lambda (t) (typedef-disabled? t 'frontend-interfaces)) (api->typedefs api)))
       (map (lambda (type) (type->name type)) (api->inputdefs api))))
+
+  (define (types-generate-client api)
+    (let*
+      ((ind 1)
+       (expr (list
+               "// this file has been automatically generated, do not modify"
+               "\n"
+               "\nimport { IUserContext, Cursored, Cursorize, Point } from '../tools/types';"
+               (map (lambda (type) (list (datatype-emit ind api type #f))) (remove (lambda (t) (typedef-disabled? t 'frontend-interfaces)) (api->typedefs api)))
+               (map (lambda (type) (list (type-emit ind api #f type #f))) (remove (lambda (t) (typedef-disabled? t 'frontend-interfaces)) (api->typedefs api)))
+               (map (lambda (type) (list (type-emit ind api #t type #f))) (api->inputdefs api)))))
+      (smoosh expr)))
 
   (define (types-generate api)
     (let*
