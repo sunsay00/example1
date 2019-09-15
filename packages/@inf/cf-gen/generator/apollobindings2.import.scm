@@ -303,7 +303,7 @@
               "\nimport { ObservableQuery, ApolloQueryResult } from 'apollo-client';"
               "\nimport gql from 'graphql-tag';"
               "\nimport * as M from '../types/models';"
-              "\nimport { Paginated } from '../tools/types';"
+              "\nimport { Paginated, Point } from '../tools/types';"
               "\nimport Loader from '../tools/loader';"
               "\nimport { Root } from '../tools/useroot';"
               "\n"

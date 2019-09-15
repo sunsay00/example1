@@ -1,5 +1,5 @@
 import { createModule, useShell, useGlobals } from '@inf/hookops';
-import { useVarsWriter } from '@inf/hooks';
+import { useVarsWriter, useGitIgnore } from '@inf/hooks';
 
 export const useSite = (inputs: {
   graphqlEndpoint: string
@@ -10,7 +10,14 @@ export const useSite = (inputs: {
     clientId: string
   }
 }) => createModule(async () => {
-  const { stage } = useGlobals();
+  const { stage, configurationDir, currentModuleDir } = useGlobals();
+
+  await useShell({
+    command: 'yarn',
+    dependsOn: [`${configurationDir}/ledger.scm`],
+    args: ['-s', 'x', 'gen', 'generateclient', '-o', `${currentModuleDir}/src/_gen`]
+  });
+  useGitIgnore(currentModuleDir, ['src/_gen']);
 
   useVarsWriter('ts', __dirname, {
     GRAPHQL_ENDPOINT: inputs.graphqlEndpoint,

@@ -12,14 +12,6 @@ export const useMobile = (inputs: {
 }) => createModule(async () => {
   const { configurationDir, currentModuleDir } = useGlobals();
 
-  await useShell({
-    command: 'yarn',
-    dependsOn: [`${configurationDir}/ledger.scm`],
-    args: ['-s', 'x', 'gen', 'generateclient', '-o', `${currentModuleDir}/src/_gen`]
-  });
-
-  useGitIgnore(currentModuleDir, ['src/_gen']);
-
   useVarsWriter('ts', currentModuleDir, {
     GRAPHQL_ENDPOINT: inputs.graphqlEndpoint,
     AWS_REGION: inputs.region,

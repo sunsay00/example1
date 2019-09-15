@@ -5,7 +5,7 @@ import * as UI from '@inf/core-ui';
 import { createCanceler } from './canceler';
 import { ApolloError, ApolloQueryResult, ObservableQuery } from 'apollo-client';
 import { AsyncStorage } from 'react-native';
-import { LoadResult } from '../../models';
+import { LoadResult } from '../models';
 import { createGetter, Getter } from './creategetter';
 import { print } from 'graphql/language/printer';
 import { WakeableTimeout } from './useretrywaker';
@@ -35,7 +35,7 @@ type State<R> = {
 
 class Loader<R> extends React.Component<Props<R>, State<R>> {
   private _c = createCanceler();
-  private _subscription?: Subscription;
+  //private _subscription?: Subscription;
   private _timer?: number;
   private _wakeableTimeout?: WakeableTimeout;
   private _query?: ObservableQuery<R>;
@@ -118,6 +118,7 @@ class Loader<R> extends React.Component<Props<R>, State<R>> {
     Root.incrementRequestCount();
     const sub = this._query || (await this._data.promise()).subscription;
     this._query = sub;
+    /*
     this._subscription = sub.subscribe({
       next: (value: ApolloQueryResult<R>) => {
         this._wakeableTimeout = undefined;
@@ -138,6 +139,7 @@ class Loader<R> extends React.Component<Props<R>, State<R>> {
         console.warn('loader complete');
       },
     });
+    */
   }
 
   componentWillUnmount() {
