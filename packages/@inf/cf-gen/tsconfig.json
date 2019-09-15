@@ -18,7 +18,8 @@
     "./components/**/*",
     "index.ts",
     "types.ts",
-    "model.ts"
+    "model.ts",
+    "client.ts"
   ],
   "exclude": [
     "./lib"

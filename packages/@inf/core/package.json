@@ -5,12 +5,14 @@
   "main": "./lib/index.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/graphql": "14.2.2",
     "@types/aws-lambda": "8.10.31",
     "@types/node": "12.6.8",
     "@types/jsonwebtoken": "7.2.0",
     "@types/node-fetch": "1.6.7"
   },
   "dependencies": {
+    "graphql": "14.3.1",
     "aws-sdk": "2.507.0",
     "aws-lambda": "0.1.2",
     "runtypes": "4.0.0",

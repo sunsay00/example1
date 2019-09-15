@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as UI from '@inf/core-ui';
 import * as Web from '@inf/gatsby-theme-web-ui';
-import { AccountProvider, useAccount } from '@inf/cf-cognito';
+import { AccountProvider, useAccount, AccountConsumer } from '@inf/cf-cognito';
 import { ApolloProvider, ApolloResolvers } from '@inf/apollo';
 import { Auth } from './components/auth';
 import vars from './_vars';
@@ -62,16 +62,20 @@ export const App = (props: { children?: React.ReactNode }) =>
       userPoolId={config.USER_POOL_ID}
       clientId={config.CLIENT_ID}
     >
-      <ApolloProvider
-        authorization="Guest"
-        websocketEndpoint={config.WEBSOCKET_ENDPOINT}
-        graphqlEndpoint={config.GRAPHQL_ENDPOINT}
-        resolvers={resolvers}
-      >
-        <UI.AssertSingleton fn={App}>
-          <Layout>{props.children}</Layout>
-          {overlays}
-        </UI.AssertSingleton>
-      </ApolloProvider>
-    </AccountProvider>}
+      <AccountConsumer>{account => {
+        const authorization = account && account.user && `Bearer ${account.user.tokens.idToken}` || 'Guest';
+        return <ApolloProvider
+          authorization={authorization}
+          websocketEndpoint={config.WEBSOCKET_ENDPOINT}
+          graphqlEndpoint={config.GRAPHQL_ENDPOINT}
+          resolvers={resolvers}
+        >
+          <UI.AssertSingleton fn={App}>
+            <Layout>{props.children}</Layout>
+            {overlays}
+          </UI.AssertSingleton>
+        </ApolloProvider>
+      }}</AccountConsumer>
+    </AccountProvider>
+  }
   </Web.Root >

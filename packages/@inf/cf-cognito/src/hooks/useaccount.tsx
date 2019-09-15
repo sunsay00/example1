@@ -36,6 +36,8 @@ const _account: Account | undefined = new Account(UI.AsyncStorage);
 
 const AccountContext = React.createContext<ContextValue | undefined>(undefined);
 
+export const AccountConsumer = AccountContext.Consumer;
+
 export const useAccount = () => {
   const toast = UI.useToast();
   const ctx = useContext(AccountContext);

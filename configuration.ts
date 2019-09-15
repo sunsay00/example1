@@ -30,12 +30,20 @@ const configuration: Configuration = {
 
     const aws = await useAwsInfo({ rootEnv: ROOT_ENV });
 
-    const cog = await useCognito({
+    const cognito = await useCognito({
       Domain: vars.DOMAIN,
       InvitationEmailSubject: `Welcome To ${vars.NICE_NAME}`,
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
       FromEmail: `verification@${vars.NICE_NAME}`
     });
+
+    // local uses dev cognito credentials
+    const cog = vars.STAGE != 'local' ? cognito : {
+      CognitoIdentityPoolId: 'us-east-1:744bb2da-6b84-4150-ba40-5f6c00d79e87',
+      UserPoolId: 'us-east-1_vaHQ7ND3L',
+      MobileUserPoolClientId: '5aeqscghjc8lguth4f6qosc8d7',
+      WebUserPoolClientId: '1djqk831709slrd9olr4q0qh7d'
+    };
 
     const cert = await useCert({ Domain: vars.DOMAIN });
 
@@ -98,9 +106,9 @@ const configuration: Configuration = {
       graphqlEndpoint: endpoints.api,
       region: vars.AWS_REGION,
       cognito: {
-        identityPoolId: vars.STAGE == 'local' ? 'us-east-1:744bb2da-6b84-4150-ba40-5f6c00d79e87' : cog.CognitoIdentityPoolId,
-        userPoolId: vars.STAGE == 'local' ? 'us-east-1_vaHQ7ND3L' : cog.UserPoolId,
-        clientId: vars.STAGE == 'local' ? '1djqk831709slrd9olr4q0qh7d' : cog.WebUserPoolClientId,
+        identityPoolId: cog.CognitoIdentityPoolId,
+        userPoolId: cog.UserPoolId,
+        clientId: cog.WebUserPoolClientId,
       }
     });
 
@@ -114,9 +122,9 @@ const configuration: Configuration = {
       graphqlEndpoint: endpoints.api,
       region: vars.AWS_REGION,
       cognito: {
-        identityPoolId: vars.STAGE == 'local' ? 'us-east-1:744bb2da-6b84-4150-ba40-5f6c00d79e87' : cog.CognitoIdentityPoolId,
-        userPoolId: vars.STAGE == 'local' ? 'us-east-1_vaHQ7ND3L' : cog.UserPoolId,
-        clientId: vars.STAGE == 'local' ? '5aeqscghjc8lguth4f6qosc8d7' : cog.MobileUserPoolClientId,
+        identityPoolId: cog.CognitoIdentityPoolId,
+        userPoolId: cog.UserPoolId,
+        clientId: cog.MobileUserPoolClientId,
       }
     });
   }

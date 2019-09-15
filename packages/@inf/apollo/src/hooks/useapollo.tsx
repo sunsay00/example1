@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { AsyncStorage } from '@inf/core-ui';
-import { ApolloProvider as Apollo } from 'react-apollo-hooks';
+import { ApolloProvider as Apollo, useApolloClient } from 'react-apollo-hooks';
 import { ApolloClient, Resolvers } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { persistCache } from 'apollo-cache-persist';
@@ -11,6 +11,7 @@ import { onError } from 'apollo-link-error';
 import { getMainDefinition } from 'apollo-utilities';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { setContext } from 'apollo-link-context';
+import * as UI from '@inf/core-ui';
 
 export type ApolloResolvers = Resolvers;
 
@@ -38,23 +39,14 @@ const concatWebSocket = (link: ApolloLink, websocketEndpoint: string | undefined
   }, wsLink, link);
 }
 
-const useAuthLink = (authorization: string) => {
+const ApolloContext = React.createContext<() => (ApolloClient<object> | undefined)>(() => undefined);
 
-  const [authLink, setAuthLink] = React.useState(setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization } })));
-
-  React.useEffect(() => {
-    setAuthLink(setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization } })));
-  }, [authorization]);
-
-  return authLink;
-}
-
-const ApolloContext = React.createContext<ApolloClient<unknown> | undefined>(undefined);
+export const ApolloConsumer = ApolloContext.Consumer;
 
 export const useApollo = () => {
-  const ctx = React.useContext(ApolloContext);
-  if (!ctx) throw new Error('invalid apollo context');
-  return ctx;
+  const client = useApolloClient();
+  if (!client) throw new Error('invalid apollo context');
+  return client;
 }
 
 export const ApolloProvider = (props: {
@@ -64,13 +56,15 @@ export const ApolloProvider = (props: {
   children?: React.ReactNode,
   resolvers?: ApolloResolvers | ApolloResolvers[],
 }) => {
-  const [client, setClient] = React.useState<ApolloClient<unknown> | undefined>(undefined);
-
-  const authLink = useAuthLink(props.authorization);
+  const [client, setClient] = React.useState<ApolloClient<object> | undefined>(undefined);
+  const busyRef = React.useRef(false);
 
   React.useEffect(() => {
+    if (busyRef.current) return;
+    busyRef.current = true;
     createCache().then(cache => {
       const httpLink = new HttpLink({ uri: props.graphqlEndpoint });
+      const authLink = setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization: props.authorization } }));
       setClient(new ApolloClient({
         link: ApolloLink.from([
           onError(({ graphQLErrors, networkError }) => {
@@ -79,21 +73,20 @@ export const ApolloProvider = (props: {
                 console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`));
             if (networkError)
               console.error(`[Network error]: ${networkError}`);
-            debugger;
+            //debugger;
           }),
           concatWebSocket(authLink.concat(httpLink), props.websocketEndpoint),
         ]),
         cache,
         resolvers: props.resolvers
       }));
-    }).catch(console.error);
-  }, [authLink, props.graphqlEndpoint, props.websocketEndpoint, props.resolvers]);
+    }).catch(console.error).finally(() => busyRef.current = false);
+  }, [props.authorization, props.graphqlEndpoint, props.websocketEndpoint, props.resolvers]);
 
+  if (UI.useSSR()) return null;
   if (!client) return null;
 
   return (
-    <ApolloContext.Provider value={client}>
-      <Apollo client={client}>{props.children}</Apollo>
-    </ApolloContext.Provider>
+    <Apollo client={client}>{props.children}</Apollo>
   );
 }

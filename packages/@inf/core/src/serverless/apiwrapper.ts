@@ -15,7 +15,7 @@ export const apiWrapper = (params: {
   headers: { [_: string]: string },
   query: string,
   variables: { [_: string]: string },
-  user: UserContext) => Promise<{ errors?: readonly GraphQLError[], data?: ExecutionResult<unknown> }>
+  user: UserContext) => Promise<{ errors?: readonly GraphQLError[], data?: ExecutionResult<unknown> | null }>
 ) => domainWrapper(async (event: APIGatewayProxyEvent, context: Context) => {
 
   context.callbackWaitsForEmptyEventLoop = false; // let's not wait around for event loop to empty out

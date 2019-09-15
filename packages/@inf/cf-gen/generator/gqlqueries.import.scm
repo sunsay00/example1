@@ -72,7 +72,7 @@
           (rettype (method->return-type method)))
       (list
         "\n  query " (params-emit params) " {"
-        "\n    " (model->name model) name " " (inner-params-emit params)
+        "\n    " (model->name model) name " " (inner-params-emit params) " @connection(key: \"" (model->name model) "\")"
         (if (native-type? (base-type rettype))
           (if (array? rettype)
             (let ((child-type (array->type rettype)))

@@ -82,7 +82,7 @@ const processAuthRequest = (stage: string, event: CustomAuthorizerEvent, tokenIs
   }
   // reject the jwt if it's not an 'Identity Token'
   if (decodedJwt.payload['token_use'] !== 'id') {
-    console.log('provided token is not and identity token');
+    console.log('provided token is not a valid identity token');
     next(null, generateUnauthorizedPolicy(event.methodArn, 401, 'Unauthorized'));
     return;
   }
