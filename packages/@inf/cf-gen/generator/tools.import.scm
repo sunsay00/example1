@@ -1,6 +1,6 @@
 (module tools (
                downcase method->description method->params method->defaults-assq method->params-assq param->default
-               param->default-or param-default?  make-param param->specs-assq specs->assq
+               param->default-or param-default?  make-param param->specs-assq specs->assq model->foreign
                param-primary-key? param->specs param->value model->typedef models-assq model->api
                first-up first-down map-queries map-mutations make-specs typedef-assq typedef-assq!
                method->return-type method->name model->all-methods method->mode get? set?
@@ -298,6 +298,26 @@
   (define (typedef->params-assq typedef param-name)
     (let ((params (typedef->params typedef)))
       (assq param-name (map (lambda (p) (list (param->name p) p)) params))))
+  (define (typedef->foreign entire-api api typedef)
+    (define (lookup-model-prop-type api model-name prop-name)
+      (let ((result (api->models-assq api model-name)))
+        (if (not result) (list '() '())
+          (let ((model (cadr result)))
+            (let ((result2 (model->props-assq model prop-name)))
+              (if (not result2) (list '() '())
+                (let ((param (cadr result2)))
+                  (list (param->type param) (param->specs param)))))))))
+    (remove
+      null?
+      (map (lambda (param)
+             (let ((ff (param->foreign-field param)))
+               (let* ((prop-type+specs (lookup-model-prop-type api (foreign-field->fmodel entire-api ff) (foreign-field->fkey ff)))
+                      (prop-type (car prop-type+specs))
+                      (specs (cadr prop-type+specs)))
+                 (if (eq? (foreign-field->fkey ff) 'sub) '()
+                   (if (null? prop-type) (error "foreign-field does not exist")
+                     ff)))))
+           (filter param-foreign-field? (typedef->params typedef)))))
   (define (typedef->params+foreign entire-api api typedef)
     (define (lookup-model-prop-type api model-name prop-name)
       (let ((result (api->models-assq api model-name)))
@@ -404,6 +424,9 @@
   (define (model->hidden-props model)
     (let ((props (model->props+foreign model)))
       (remove (compose not param-hidden?) props)))
+  (define (model->foreign model)
+    (if (not (model-typedef? model)) (list)
+      (typedef->foreign (model->api model) (model->api model) (model->typedef model))))
 
   ; api
   (define (api->scalars api) (filter scalar? api))

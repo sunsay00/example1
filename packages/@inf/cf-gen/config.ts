@@ -133,7 +133,7 @@ const useMigrator = async (inputs: {
         stdio: 'inherit',
         desc: 'opens a shell to the database',
         commands: [
-          { command: 'yarn', args: ['pgcli', inputs.dbUrl] }
+          { command: 'pgcli', args: [inputs.dbUrl] }
         ].map(inputs.tunnel)
       }
     }

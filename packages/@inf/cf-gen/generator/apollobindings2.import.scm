@@ -1,5 +1,5 @@
 (module apollobindings2 (apollobindings-generate-index apollobindings-generate-index-client)
-  (import scheme chicken data-structures tools signatures typedefs gqlqueries matchable)
+  (import scheme chicken data-structures tools signatures typedefs gqlqueries matchable functional)
   (require-extension srfi-13 srfi-1)
 
   (define (gen-update-code model method method-ref)
@@ -66,7 +66,47 @@
       (else
         (list "{ after: null, count: null }"))))
 
+  (define (member/M vars)
+    (doM
+      (s <- (state-get))
+      (return (member (->string (sort (map symbol->string vars) string<?)) s))))
+
+  (define (append/M vars)
+    (doM
+      (prev <- (state-get))
+      (if/m (member/M vars)
+            (return)
+            (doM
+              (state-set (cons (->string (sort (map symbol->string vars) string<?)) prev))
+              (s <- (state-get))
+              (print/M s)
+              (return)))))
+
+  (define (gen-update-vars/M model method)
+    (doM
+      (if (eq? (method->name method) 'FindMine)
+        (doM
+          (append/M '(sub))
+          (return (list ", variables: { sub: result.sub  }")))
+        (let ((ffs (model->foreign model)))
+          (if (null? ffs)
+            (doM
+              (if/m (member/M '())
+                    (return '())
+                    (doM (append/M '()) (return ""))))
+            (let ((fffs (filter (lambda (ff) (member (foreign-field->key ff) (map param->name (method->params method)))) ffs)))
+              (if (null? fffs)
+                (doM
+                  (if/m (member/M '())
+                        (return '())
+                        (doM (append/M '()) (return ""))))
+                (let ((vars (map foreign-field->key fffs)))
+                  (doM
+                    (append/M vars)
+                    (return (list ", variables: { " (intersperse (map (lambda (ff) (list (foreign-field->key ff) ": result." (foreign-field->name ff) "." (foreign-field->fkey ff))) fffs) ", ") " }")))))))))))
+
   (define (gen-update mode model method storybook?)
+
     (let* ((methods (filter (lambda (method)
                               (and (get? method)
                                    (or (method-serviceonly? method) (method-apionly? method))))
@@ -82,6 +122,7 @@
           (list "\n    update: (proxy: any, mutationResult: any) => {"
                 "\n      const result = mutationResult.data." model-name mode ";"
                 "\n      if (!result) return;"
+
                 ;(if (zero? (length methodnames-to-update)) (list)
                 ;  (intersperse
                 ;    (map (lambda (name)
@@ -99,35 +140,38 @@
                 ;               "\n      }"
                 ;               )))
                 ;         methodnames-to-update) "\n"))
+
                 (if (zero? (length methodnames-to-update/array)) (list)
-                  (intersperse
-                    (map (lambda (name)
-                           (let ((query-name (list (model->name model) name "Query")))
-                             (list
-                               "\n      try {"
-                               "\n        const data" name " = proxy.readQuery({ query: " query-name " });"
-                               (cond
-                                 ((eq? (command->cmdtype model method mode) 'update)
-                                  (list
-                                    "\n        data" name "." model-name name ".items[result.id] = { ...data" name "." model-name name ".items[result.id], ...result };"))
-                                 ((eq? (command->cmdtype model method mode) 'delete)
-                                  (list
-                                    "\n        data" name "." model-name name ".items = data" name "." model-name name ".items.filter((i: any) => i.id != result.id);"))
-                                 ((eq? (command->cmdtype model method mode) 'create)
-                                  (list
-                                    (if (method-ascending? method)
-                                      (list "\n        data" name "." model-name name ".items.unshift(result);")
-                                      (list "\n        data" name "." model-name name ".items.push(result);")) 
-                                    ))
-                                 (else (error "unknown gen-update mode in apollobindings2 " mode)))
-                               "\n        proxy.writeQuery({ query: " query-name ", data: data" name " });"
-                               "\n      } catch (err) {"
-                               (if storybook?
-                                 (list "\n        console.log('cache not updated " model-name "." name "');")
-                                 (list "\n        if (process.env.NODE_ENV != 'test') console.log('cache not updated " model-name "." name "');"))
-                               "\n      }"
-                               )))
-                         (list (car methodnames-to-update/array))) "\n"))
+                    (state-run
+                      (mapM (lambda (name)
+                              (doM
+                                (query-name <- (return (list (model->name model) name "Query")))
+                                (variables <- (gen-update-vars/M model (cdr (assq name method-lookup))))
+                                (return (if (null? variables) (list) (list
+                                          "\n      try {"
+                                          "\n        const data = proxy.readQuery({ query: " query-name variables " });"
+                                          (cond
+                                            ((eq? (command->cmdtype model method mode) 'update)
+                                             (list
+                                               "\n        data." model-name name ".items[result.id] = { ...data." model-name name ".items[result.id], ...result };"))
+                                            ((eq? (command->cmdtype model method mode) 'delete)
+                                             (list
+                                               "\n        data." model-name name ".items = data." model-name name ".items.filter((i: any) => i.id != result.id);"))
+                                            ((eq? (command->cmdtype model method mode) 'create)
+                                             (list
+                                               (if (method-ascending? method)
+                                                 (list "\n        data." model-name name ".items.unshift(result);")
+                                                 (list "\n        data." model-name name ".items.push(result);")) 
+                                               ))
+                                            (else (error "unknown gen-update mode in apollobindings2 " mode)))
+                                          "\n        proxy.writeQuery({ query: " query-name ", data" variables " });"
+                                          "\n      } catch (err) {"
+                                          (if storybook?
+                                            (list "\n        console.log('cache not updated " model-name "." name " ', err);")
+                                            (list "\n        if (process.env.NODE_ENV != 'test') console.log('cache not updated " model-name "." name " ', err);"))
+                                          "\n      }"
+                                          )))))
+                            methodnames-to-update/array)))
                 "\n    },")
           ))))
 

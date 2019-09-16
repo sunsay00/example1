@@ -66,13 +66,19 @@
                           (remove param-hidden? (typedef->params (model->typedef model)))) " ")
         "\n              }")))
 
+  (define (connection-directive model method)
+    (let* ((foreign-keys (map foreign-field->key (model->foreign model)))
+           (foreign-keys-sub (if (eq? (method->name method) 'FindMine) (cons 'sub foreign-keys) foreign-keys))
+           (filters (filter (lambda (name) (member name (map param->name (method->params method)))) foreign-keys-sub)))
+        (list " @connection(key: \"" (model->name model) "\"" (if (null? filters) "" (list ", filter: [" (intersperse (map (lambda (f) (list "\"" f "\"")) filters) ", ") "]")) ")")))
+
   (define (gql-query-emit model method)
     (let ((name (method->name method))
           (params (graphql-params model method))
           (rettype (method->return-type method)))
       (list
         "\n  query " (params-emit params) " {"
-        "\n    " (model->name model) name " " (inner-params-emit params) " @connection(key: \"" (model->name model) "\")"
+        "\n    " (model->name model) name " " (inner-params-emit params) (connection-directive model method)
         (if (native-type? (base-type rettype))
           (if (array? rettype)
             (let ((child-type (array->type rettype)))

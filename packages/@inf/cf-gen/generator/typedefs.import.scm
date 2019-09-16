@@ -58,7 +58,7 @@
 
   (define (graphql-params model method)
     (map (lambda (param) (convert-to-input-param (model->api model) param))
-         (remove (lambda (param) (member (param->name param) '(__fields sub $ctx)))
+         (remove (lambda (param) (member (param->name param) (if (eq? (method->name method) 'FindMine) '(__fields $ctx) '(__fields sub $ctx))))
                  (service-signature-params model method))))
 
   (define (graphql-field api param name-tf-fn)

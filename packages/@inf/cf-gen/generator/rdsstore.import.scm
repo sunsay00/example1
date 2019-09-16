@@ -96,109 +96,114 @@
       (let* ((query (sqlresult->query sqlresult))
              (params (sqlresult->params sqlresult))
              (cursor (sqlresult->cursor sqlresult)))
-        (list "\n  async " (store-sig-emit model method) " {"
-              (match cmd
-                     (`(command (update (= (at ,elements ',elementIndex) ,element)) (where (= id 'id)))
-                       (set-update-element model method query params))
-                     (`(command (update (= ,elements (push ,element))) (where (= id 'id)))
-                       (set-update-element model method query params))
-                     (`(command (update . ,ss) (where ,w) (return . ,rs))
-                       (list
-                         "\n    const query = " query ";"
-                         "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
-                         "\n    const result = await this._client.query(query, " params ");"
-                         "\n    if (result.rows.length != 1) {"
-                         "\n      return undefined;"
-                         "\n    } else {"
-                         "\n      const row = result.rows[0] as Dict<any>;"
-                         "\n      return {"
-                         (emit-dynamic-return-fields (+ ind 2) model method)
-                         "\n      };"
-                         "\n    }"
-                         "\n  }"))
-                     (`(command (delete) . ,rest)
-                       (list
-                         "\n    const query = " query ";"
-                         "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
-                         "\n    const result = await this._client.query(query, " params ");"
-                         "\n    if (result.rows.length != 1) {"
-                         "\n      return undefined;"
-                         "\n    } else {"
-                         "\n      const row = result.rows[0] as Dict<any>;"
-                         "\n      return {"
-                         (emit-dynamic-return-fields (+ ind 2) model method)
-                         "\n      };"
-                         "\n    }"
-                         "\n  }"))
-                     (`(command (insert . ,vs) (on . ,os) (return . ,rs))
-                       (list
-                         "\n    // @ts-ignore"
-                         "\n    const $now = this.now();"
-                         "\n    const query = " query ";"
-                         "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
-                         "\n    const result = await this._client.query(query, " params ");"
-                         "\n    if (result.rows.length != 1) {"
-                         "\n      throw new Error('failed to create " model-name "');"
-                         "\n    } else {"
-                         "\n      const row = result.rows[0] as Dict<any>;"
-                         "\n      return {"
-                         (emit-dynamic-return-fields (+ ind 2) model method)
-                         "\n      };"
-                         "\n    }"
-                         "\n  }"))
-                     (`(command (insert . ,vs) (on . ,os) (update . ,ss) (return . ,rs))
-                       (list
-                         "\n    // @ts-ignore"
-                         "\n    const $now = this.now();"
-                         "\n    const query = " query ";"
-                         "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
-                         "\n    const result = await this._client.query(query, " params ");"
-                         "\n    if (result.rows.length != 1) {"
-                         "\n      throw new Error('failed to create " model-name "');"
-                         "\n    } else {"
-                         "\n      const row = result.rows[0] as Dict<any>;"
-                         "\n      return {"
-                         (emit-dynamic-return-fields (+ ind 2) model method)
-                         "\n      };"
-                         "\n    }"
-                         "\n  }"))
-                     (`(command (insert . ,vs) (return . ,rs))
-                       (list
-                         "\n    // @ts-ignore"
-                         "\n    const $now = this.now();"
-                         "\n    const query = " query ";"
-                         "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
-                         "\n    const result = await this._client.query(query, " params ");"
-                         "\n    if (result.rows.length != 1) {"
-                         "\n      throw new Error('failed to create " model-name "');"
-                         "\n    } else {"
-                         "\n      const row = result.rows[0] as Dict<any>;"
-                         "\n      return {"
-                         (emit-dynamic-return-fields (+ ind 2) model method)
-                         "\n      };"
-                         "\n    }"
-                         "\n  }"))
-                     ((or `(command (select . ,ss) (where (= id 'id)))
-                          `(command (select . ,ss) (where (= uniqueName 'uniqueName)))
-                          `(command (select . ,ss) (where (= chatIdentity 'chatIdentity)))
-                          `(command (select . ,ss) (where (= parentId 'parentId)))
-                          `(command (select . ,ss) (where (and (= id 'id) (= sub $sub))))
-                          `(command (select . ,ss) (where (= sub 'sub))))
-                      (get-select-one model ind query params))
-                     (`(command (select . ,ss) (where (in ,x ',xs)))
-                       (get-select-in model method ind query params cursor xs))
-                     ((or `(command (select . ,ss))
-                          `(command (select . ,ss) (where (= sub $sub))))
-                      (get-select model method ind query params cursor))
-                     ((or `(command (select . ,ss) (where ,?))
-                          `(command (select . ,ss) (groupby . ,?))
-                          `(command (select . ,ss) (orderby . ,?)))
-                      (get-select model method ind query params cursor))
-                     (`(command (select . ,ss) (where ,?) (orderby . ,??))
-                       (get-select model method ind query params cursor))
-                     (`(command (select . ,ss) (where ,?w) (groupby . ,?g))
-                      (get-select model method ind query params cursor))
-                     (_ (error "(rdsstore.import.d) no rds match for" cmd)))))))
+        (if (eq? (method->name method) 'FindMine)
+          (list "\n  async " (store-sig-emit model method) " {"
+                "\n    if ($ctx.sub != sub) throw new Error(`sub mismatch: ${$ctx.sub} != ${sub}`);"
+                "\n      return this." (model->name model) "Find($ctx, after, count);"
+                "\n  }")
+          (list "\n  async " (store-sig-emit model method) " {"
+                (match cmd
+                       (`(command (update (= (at ,elements ',elementIndex) ,element)) (where (= id 'id)))
+                         (set-update-element model method query params))
+                       (`(command (update (= ,elements (push ,element))) (where (= id 'id)))
+                         (set-update-element model method query params))
+                       (`(command (update . ,ss) (where ,w) (return . ,rs))
+                         (list
+                           "\n    const query = " query ";"
+                           "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
+                           "\n    const result = await this._client.query(query, " params ");"
+                           "\n    if (result.rows.length != 1) {"
+                           "\n      return undefined;"
+                           "\n    } else {"
+                           "\n      const row = result.rows[0] as Dict<any>;"
+                           "\n      return {"
+                           (emit-dynamic-return-fields (+ ind 2) model method)
+                           "\n      };"
+                           "\n    }"
+                           "\n  }"))
+                       (`(command (delete) . ,rest)
+                         (list
+                           "\n    const query = " query ";"
+                           "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
+                           "\n    const result = await this._client.query(query, " params ");"
+                           "\n    if (result.rows.length != 1) {"
+                           "\n      return undefined;"
+                           "\n    } else {"
+                           "\n      const row = result.rows[0] as Dict<any>;"
+                           "\n      return {"
+                           (emit-dynamic-return-fields (+ ind 2) model method)
+                           "\n      };"
+                           "\n    }"
+                           "\n  }"))
+                       (`(command (insert . ,vs) (on . ,os) (return . ,rs))
+                         (list
+                           "\n    // @ts-ignore"
+                           "\n    const $now = this.now();"
+                           "\n    const query = " query ";"
+                           "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
+                           "\n    const result = await this._client.query(query, " params ");"
+                           "\n    if (result.rows.length != 1) {"
+                           "\n      throw new Error('failed to create " model-name "');"
+                           "\n    } else {"
+                           "\n      const row = result.rows[0] as Dict<any>;"
+                           "\n      return {"
+                           (emit-dynamic-return-fields (+ ind 2) model method)
+                           "\n      };"
+                           "\n    }"
+                           "\n  }"))
+                       (`(command (insert . ,vs) (on . ,os) (update . ,ss) (return . ,rs))
+                         (list
+                           "\n    // @ts-ignore"
+                           "\n    const $now = this.now();"
+                           "\n    const query = " query ";"
+                           "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
+                           "\n    const result = await this._client.query(query, " params ");"
+                           "\n    if (result.rows.length != 1) {"
+                           "\n      throw new Error('failed to create " model-name "');"
+                           "\n    } else {"
+                           "\n      const row = result.rows[0] as Dict<any>;"
+                           "\n      return {"
+                           (emit-dynamic-return-fields (+ ind 2) model method)
+                           "\n      };"
+                           "\n    }"
+                           "\n  }"))
+                       (`(command (insert . ,vs) (return . ,rs))
+                         (list
+                           "\n    // @ts-ignore"
+                           "\n    const $now = this.now();"
+                           "\n    const query = " query ";"
+                           "\n    if (process.env.VERBOSE && this._stage != 'test' && this._stage != 'production') console.log(`${query}`);"
+                           "\n    const result = await this._client.query(query, " params ");"
+                           "\n    if (result.rows.length != 1) {"
+                           "\n      throw new Error('failed to create " model-name "');"
+                           "\n    } else {"
+                           "\n      const row = result.rows[0] as Dict<any>;"
+                           "\n      return {"
+                           (emit-dynamic-return-fields (+ ind 2) model method)
+                           "\n      };"
+                           "\n    }"
+                           "\n  }"))
+                       ((or `(command (select . ,ss) (where (= id 'id)))
+                            `(command (select . ,ss) (where (= uniqueName 'uniqueName)))
+                            `(command (select . ,ss) (where (= chatIdentity 'chatIdentity)))
+                            `(command (select . ,ss) (where (= parentId 'parentId)))
+                            `(command (select . ,ss) (where (and (= id 'id) (= sub $sub))))
+                            `(command (select . ,ss) (where (= sub 'sub))))
+                        (get-select-one model ind query params))
+                       (`(command (select . ,ss) (where (in ,x ',xs)))
+                         (get-select-in model method ind query params cursor xs))
+                       ((or `(command (select . ,ss))
+                            `(command (select . ,ss) (where (= sub $sub))))
+                        (get-select model method ind query params cursor))
+                       ((or `(command (select . ,ss) (where ,?))
+                            `(command (select . ,ss) (groupby . ,?))
+                            `(command (select . ,ss) (orderby . ,?)))
+                        (get-select model method ind query params cursor))
+                       (`(command (select . ,ss) (where ,?) (orderby . ,??))
+                         (get-select model method ind query params cursor))
+                       (`(command (select . ,ss) (where ,?w) (groupby . ,?g))
+                         (get-select model method ind query params cursor))
+                       (_ (error "(rdsstore.import.d) no rds match for" cmd))))))))
 
   (define (map-type-fields api type fn)
     (map (lambda (t)
