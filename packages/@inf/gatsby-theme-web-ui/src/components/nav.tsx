@@ -187,18 +187,18 @@ export const NavLayout = (props: { navHeight?: number, children?: React.ReactNod
   }, [numChildren]);
   return (
     <NavLayoutContext.Provider value={{ height, opened, setOpened, setNumChildren, animHeight, navHeight }}>
-      <View style={{ minWidth: 300, marginHorizontal: 32, flex: 1, minHeight: '100vh' }}>
+      <View style={{ minWidth: 300, marginHorizontal: 0, flex: 1, minHeight: '100vh', backgroundColor: rgba(Colors.black, .03) }}>
         <Breakable
           renderSmall={children => <>
-            {props.renderNavBar && props.renderNavBar()}
-            <View key={1} style={{ flex: 1 }}>{children}</View>
+            <View key={2} style={{ marginHorizontal: 32 }}>{props.renderNavBar && props.renderNavBar()}</View>
+            <View key={1} style={{ flex: 1, marginHorizontal: 32 }}>{children}</View>
           </>}
           renderMedium={children => <>
-            <View key={1} style={{ marginTop: height, marginBottom: -height }}>{children}</View>
-            {props.renderNavBar && props.renderNavBar()}
+            <View key={1} style={{ marginTop: height, marginBottom: -height, marginHorizontal: 32 }}>{children}</View>
+            <View key={2} style={{ marginHorizontal: 32 }}>{props.renderNavBar && props.renderNavBar()}</View>
           </>}
         >
-          <View style={{ backgroundColor: rgba(Colors.black, .03), marginHorizontal: -32, paddingHorizontal: 32, flexGrow: 1 }}>
+          <View style={{ marginHorizontal: -32, paddingHorizontal: 32, flexGrow: 1 }}>
             {props.children}
           </View>
         </Breakable>
