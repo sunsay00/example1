@@ -1,4 +1,4 @@
-import { createShared } from '../tools/createshared';
+import { createShared } from '../tools_/createshared';
 import { entries } from '@inf/common';
 //import Root from '../root';
 import { useShared } from './useshared';
@@ -36,7 +36,7 @@ class RetryWaker {
 
 const sharedRetryWaker = createShared<RetryWaker>('RetryWaker');
 
-const _setWakeableTimeout = (fn: (shouldResetDuration: boolean) => void, msecs: number = 0, debugName: string = ''): number => {
+const _setWakeableTimeout = (fn: (shouldResetDuration: boolean) => void, msecs: number = 0, debugName: string = ''): any => {
   VERBOSE && console.log(`setForcibleTimeout ${msecs} [${debugName}]`);
   const current = sharedRetryWaker.value();
   if (current == undefined) {

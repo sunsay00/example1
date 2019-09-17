@@ -1,4 +1,4 @@
-import { IUserContext } from '../types';
+import { IUserContext } from '.';
 
 export type Group = 'guests' | 'testers' | 'buyers' | 'sales' | 'dealership' | 'admins' | '__postconfirm__';
 

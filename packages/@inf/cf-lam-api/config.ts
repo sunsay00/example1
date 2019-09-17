@@ -3,7 +3,7 @@ import { vars } from '@inf/hookops/vars';
 import { useLam } from '@inf/cf-lam/config';
 import { pathTransformer } from '@inf/core';
 
-export const useLamApi = async (inputs: {
+export const useLamApi = async (props: {
   _deprecatedAlias?: string,
   id: string,
   accountId: string,
@@ -28,9 +28,9 @@ export const useLamApi = async (inputs: {
   const result = await useLam({
     rootDir: __dirname,
 
-    id: inputs.id,
-    alias: inputs._deprecatedAlias,
-    dependsOn: inputs.dependsOn && inputs.dependsOn.map(transformPath),
+    id: props.id,
+    alias: props._deprecatedAlias,
+    dependsOn: props.dependsOn && props.dependsOn.map(transformPath),
     handlers: {
       auth: {
         packageJsonPath: `${__dirname}/package.json`,
@@ -40,18 +40,18 @@ export const useLamApi = async (inputs: {
       },
       api: {
         vars: {
-          UserPoolId: inputs.cognitoUserPoolId,
+          UserPoolId: props.cognitoUserPoolId,
           AWS_REGION: vars.AWS_REGION,
-          DB_URL: inputs.apiHandler.dbUrl,
-          DB_TEST_URL: inputs.apiHandler.dbTestUrl,
+          DB_URL: props.apiHandler.dbUrl,
+          DB_TEST_URL: props.apiHandler.dbTestUrl,
         },
-        packageJsonPath: transformPath(inputs.apiHandler.packageJsonPath),
-        filepath: inputs.apiHandler.filepath,
-        entrypoint: inputs.apiHandler.entrypoint,
+        packageJsonPath: transformPath(props.apiHandler.packageJsonPath),
+        filepath: props.apiHandler.filepath,
+        entrypoint: props.apiHandler.entrypoint,
         environment: {
           STAGE: stage,
-          MASTER_USERNAME: vartools.expand(inputs.MasterUsername),
-          MASTER_USER_PASSWORD: vartools.expand(inputs.MasterUserPassword)
+          MASTER_USERNAME: vartools.expand(props.MasterUsername),
+          MASTER_USER_PASSWORD: vartools.expand(props.MasterUserPassword)
         },
         events: [{
           http: {
@@ -64,12 +64,12 @@ export const useLamApi = async (inputs: {
       },
     },
     slsVpc: {
-      securityGroupIds: inputs.securityGroupIds,
-      subnetIds: inputs.subnetIds,
+      securityGroupIds: props.securityGroupIds,
+      subnetIds: props.subnetIds,
     },
     slsIamRoleStatements: [{
       Effect: 'Allow',
-      Resource: [`arn:aws:cognito-idp:${vars.AWS_REGION}:${inputs.accountId}:userpool/${inputs.cognitoUserPoolId}`],
+      Resource: [`arn:aws:cognito-idp:${vars.AWS_REGION}:${props.accountId}:userpool/${props.cognitoUserPoolId}`],
       Action: [
         'cognito-idp:AdminCreateUser',
         'cognito-idp:AdminDeleteUser',
@@ -105,7 +105,7 @@ export const useLamApi = async (inputs: {
     ]
   });
 
-  useScriptRegistry(inputs.id, {
+  useScriptRegistry(props.id, {
     rules: {
       ['request.api']: {
         desc: 'makes a web request to api endpoint',

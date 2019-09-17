@@ -7,7 +7,7 @@ import { useCache } from './usecache';
 import { useGlobals } from './useglobals';
 import { vartools } from '..';
 
-export const useShell = async <R>(inputs: {
+export const useShell = async <R>(props: {
   command: string,
   args: string[],
   dependsOn?: string[],
@@ -21,16 +21,16 @@ export const useShell = async <R>(inputs: {
 
   await useDependsOn(async () => {
     dirty = true;
-  }, inputs.dependsOn);
+  }, props.dependsOn);
 
   return await useCache(async () => {
     return await new Promise<{ [_ in keyof R]: string }>((resolve, reject) => {
-      const cwdEnabled = !inputs.command.startsWith('.') && !inputs.command.startsWith('/') && inputs.cwd;
-      const cwd2 = cwdEnabled && inputs.cwd ? inputs.cwd : path.dirname(inputs.command);
-      const cmd = cwdEnabled ? inputs.command : path.basename(inputs.command);
-      verbose && console.log(colors.gray(`${colors.blue('shell:')} ${cmd} ${inputs.args.join(' ')} (cwd=${cwd2})`));
-      const args = inputs.args.map(vartools.expand);
-      const env = { ...process.env, ...fromEntries(entries(inputs.env || {}).map(([k, s]) => [k, vartools.expand(s)])) };
+      const cwdEnabled = !props.command.startsWith('.') && !props.command.startsWith('/') && props.cwd;
+      const cwd2 = cwdEnabled && props.cwd ? props.cwd : path.dirname(props.command);
+      const cmd = cwdEnabled ? props.command : path.basename(props.command);
+      verbose && console.log(colors.gray(`${colors.blue('shell:')} ${cmd} ${props.args.join(' ')} (cwd=${cwd2})`));
+      const args = props.args.map(vartools.expand);
+      const env = { ...process.env, ...fromEntries(entries(props.env || {}).map(([k, s]) => [k, vartools.expand(s)])) };
       const proc = spawn(cmd, args, { env, cwd: cwd2 });
       let buffer = '';
       proc.stdout.on('data', data => {
@@ -50,8 +50,8 @@ export const useShell = async <R>(inputs: {
           reject(new Error(`shell failed - exited with ${code}`));
         } else {
           const json: Partial<{ [_ in keyof R]: string }> = {};
-          if (inputs.outputMatchers) {
-            entries(inputs.outputMatchers).forEach(([k, v]) => {
+          if (props.outputMatchers) {
+            entries(props.outputMatchers).forEach(([k, v]) => {
               const match = v.exec(buffer);
               if (!match || match.length <= 1)
                 throw new Error(`output for '${k}' had no match`);

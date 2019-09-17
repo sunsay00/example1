@@ -1,5 +1,5 @@
-import { IStore, IUsersPartialService } from '@inf/cf-gen';
-import * as M from '@inf/cf-gen/model';
+import * as M from '../../_gen';
+import { IStore, IUsersPartialService } from '../../_gen';
 import { UserContext } from '../types';
 import NotificationManager from '../tools/notificationmanager';
 

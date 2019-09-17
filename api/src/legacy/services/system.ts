@@ -1,7 +1,8 @@
 //import Chat from '../chat';
 import { inviteUser, adminDeleteUser, adminConfirmSignUp, adminAddUserToGroup, adminListUsers } from '../tools/awsclient';
-import { Cursorize, IStore, ISystemsService } from '@inf/cf-gen';
-import * as M from '@inf/cf-gen/model';
+import { Cursorize } from '@inf/cf-gen';
+import { IStore, ISystemsService } from '../../_gen';
+import * as M from '../../_gen';
 import { UserContext } from '../types';
 import NotificationManager from '../tools/notificationmanager';
 

@@ -71,7 +71,7 @@ const PackageJsonRecord = RT.Partial({
   devDependencies: RT.Dictionary(RT.String)
 });
 
-export const useLam = async <R>(inputs: {
+export const useLam = async <R>(props: {
   rootDir: string,
 
   id: string,
@@ -98,16 +98,16 @@ export const useLam = async <R>(inputs: {
 }): Promise<{ [_ in keyof R]: string }> => {
   const { stage, configurationDir } = useGlobals();
 
-  const tmpdir = useTempDir(inputs.id);
+  const tmpdir = useTempDir(props.id);
 
-  const transformPath = pathTransformer(configurationDir, inputs.rootDir);
+  const transformPath = pathTransformer(configurationDir, props.rootDir);
 
-  entries(inputs.handlers).forEach(([_, v]) => {
+  entries(props.handlers).forEach(([_, v]) => {
     if (v.vars)
-      useVarsWriter('ts', inputs.rootDir, v.vars);
+      useVarsWriter('ts', props.rootDir, v.vars);
   });
 
-  const { dependencies, devDependencies } = entries(inputs.handlers).reduce((acc, [_, v]) => {
+  const { dependencies, devDependencies } = entries(props.handlers).reduce((acc, [_, v]) => {
     try {
       const relPackageJsonPath = transformPath(v.packageJsonPath);
       const packagejson = JSON.parse(fs.readFileSync(relPackageJsonPath, { encoding: 'utf8' }));
@@ -122,14 +122,14 @@ export const useLam = async <R>(inputs: {
     } catch (err) {
       throw new Error('failed to parse package.json');
     }
-  }, { dependencies: inputs.packageDependencies || {}, devDependencies: inputs.packageDevDependencies || {} });
+  }, { dependencies: props.packageDependencies || {}, devDependencies: props.packageDevDependencies || {} });
 
   const maybePush = <T>(x: T | T[], r?: T[]): T[] =>
     Array.isArray(x) ? (r ? [...x, ...r] : x) : (r ? [x, ...r] : [x]);
 
 
   const makeHandler = (k: keyof R, v: Handler) => {
-    const packageJsonPath = v.packageJsonPath.startsWith('/') ? v.packageJsonPath : path.resolve(`${inputs.rootDir}/${v.packageJsonPath}`);
+    const packageJsonPath = v.packageJsonPath.startsWith('/') ? v.packageJsonPath : path.resolve(`${props.rootDir}/${v.packageJsonPath}`);
     const relpath = path.relative(configurationDir, path.dirname(path.resolve(packageJsonPath)));
     if (stage == 'local')
       return `./build/${relpath}/${v.filepath.replace(/(.ts$)/, '')}.${v.entrypoint}`;
@@ -139,31 +139,31 @@ export const useLam = async <R>(inputs: {
 
   // generate serverless.yml
   const lam = {
-    service: inputs.alias || `${path.basename(inputs.rootDir)}${inputs.id ? `--${inputs.id}` : ''}`,
+    service: props.alias || `${path.basename(props.rootDir)}${props.id ? `--${props.id}` : ''}`,
     provider: {
       name: 'aws',
       runtime: 'nodejs10.x',
       stage,
       region: vars.AWS_REGION,
-      vpc: inputs.slsVpc,
-      iamRoleStatements: inputs.slsIamRoleStatements,
+      vpc: props.slsVpc,
+      iamRoleStatements: props.slsIamRoleStatements,
     },
     package: {
-      include: maybePush(entries(inputs.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), inputs.slsIncludes),
-      exclude: maybePush('**/*', inputs.slsExcludes)
+      include: maybePush(entries(props.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), props.slsIncludes),
+      exclude: maybePush('**/*', props.slsExcludes)
     },
-    functions: fromEntries(entries(inputs.handlers).map(([k, v]) => [k, {
+    functions: fromEntries(entries(props.handlers).map(([k, v]) => [k, {
       handler: makeHandler(k, v),
       environment: v.environment,
       events: v.events
     }])),
     //plugins: stage == 'local' ? ['serverless-offline', ...(inputs.slsPlugins || [])] : inputs.slsPlugins,
-    ...(stage == 'local' ? { plugins: ['serverless-offline', ...(inputs.slsPlugins || [])] } : (inputs.slsPlugins ? { plugins: inputs.slsPlugins } : {}))
+    ...(stage == 'local' ? { plugins: ['serverless-offline', ...(props.slsPlugins || [])] } : (props.slsPlugins ? { plugins: props.slsPlugins } : {}))
   };
   if (!SLSConfigRecord.guard(lam))
     throw new Error('invalid sls configuration');
 
-  const dirnames = entries(inputs.handlers).map(([k, v]) => ({
+  const dirnames = entries(props.handlers).map(([k, v]) => ({
     dirname: path.dirname(transformPath(v.packageJsonPath)),
     filename: v.filepath
   }));
@@ -215,7 +215,7 @@ module.exports = {
     filename: '_[name].js',
     libraryTarget: 'this'
   },
-  ${inputs.webpackIgnore ? `plugins: [new webpack.IgnorePlugin(/${inputs.webpackIgnore.source}/)],` : ''}
+  ${props.webpackIgnore ? `plugins: [new webpack.IgnorePlugin(/${props.webpackIgnore.source}/)],` : ''}
   module: {},
   optimization: {
     minimize: process.env.NODE_ENV == 'production',
@@ -252,14 +252,15 @@ module.exports = {
       'build',
       'node_modules',
       ...rootDirs.map(invReldir => [
-        `${invReldir}/__tests__/**/*.ts`
+        `${invReldir}/__tests__/**/*.ts`,
+        `${invReldir}/**/__tests__/**/*.ts`,
       ]).flat(),
     ]
   };
 
   // generate package.json
   const packagejson = {
-    "name": `@inf/tmp-${path.basename(inputs.rootDir)}${inputs.id ? `.${inputs.id}` : ''}`,
+    "name": `@inf/tmp-${path.basename(props.rootDir)}${props.id ? `.${props.id}` : ''}`,
     "version": "0.0.1",
     "main": "index.js",
     "license": "MIT",
@@ -316,8 +317,8 @@ module.exports = {
 
   // generate makefile
   const startCmds: StartCommand[] = [];
-  if (inputs.startCommands)
-    inputs.startCommands.forEach(c => startCmds.push(c));
+  if (props.startCommands)
+    props.startCommands.forEach(c => startCmds.push(c));
 
   if (startCmds.length == 0)
     startCmds.push({ command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s sls offline'"`, '"tsc -w -p tsconfig.sls.json"'] });
@@ -330,14 +331,14 @@ module.exports = {
         commands: startCmds,
       }
     } || {}),
-    ...fromEntries(entries(inputs.handlers).map(([k, v]) =>
+    ...fromEntries(entries(props.handlers).map(([k, v]) =>
       [[[`invoke.${k}`, {
         cwd: tmpdir,
         desc: 'invokes lambda function',
         commands: stage == 'local' ?
           [{
             command: `${path.relative(tmpdir, __dirname)}/bin/invokelocallambda`,
-            args: [vars.AWS_REGION, `${inputs.id}-local-${k}`]
+            args: [vars.AWS_REGION, `${props.id}-local-${k}`]
           }] :
           [{
             command: 'yarn',
@@ -345,7 +346,7 @@ module.exports = {
           }]
       }]]] as const
     ).flat().flat()),
-    ...(stage == 'local' ? {} : fromEntries(entries(inputs.handlers).map(([k]) => [`logs.${k}`, {
+    ...(stage == 'local' ? {} : fromEntries(entries(props.handlers).map(([k]) => [`logs.${k}`, {
       cwd: tmpdir,
       desc: 'tails out log messages',
       commands: [{ command: 'yarn', args: ['-s', 'vars', 'sls', 'logs', '-s', vars.STAGE, '-f', k, '-t', '-r', vars.AWS_REGION] }]
@@ -359,7 +360,7 @@ module.exports = {
         { command: 'tsc', args: ['-p', 'tsconfig.sls.json'] },
         { command: 'yarn', args: ['-s', 'webpack', '--config', `${tmpdir}/webpack.config.js`] },
         { command: 'mkdir', args: ['-p', 'build/src'] },
-        ...entries(inputs.handlers).map(([_, v]) =>
+        ...entries(props.handlers).map(([_, v]) =>
           ({ command: 'cp', args: [`build/_${path.basename(v.filepath.replace(/(.ts$)/, '.js'))}`, `build/${v.filepath.replace(/(.ts$)/, '.js')}`] }))]
     },
     deploy: {
@@ -370,7 +371,7 @@ module.exports = {
     ['.PHONY']: { deps: ['build', 'deploy'] }
   };
 
-  useScriptRegistry(inputs.id, { rules });
+  useScriptRegistry(props.id, { rules });
 
   fs.writeFileSync(`${tmpdir}/serverless.yml`, yamljs.stringify(lam, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
   fs.writeFileSync(`${tmpdir}/webpack.config.js`, webpackconf, { encoding: 'utf8' });
@@ -398,11 +399,11 @@ module.exports = {
 
     await useDependsOn(async () => {
       dirty = true;
-    }, inputs.dependsOn && inputs.dependsOn.map(transformPath));
+    }, props.dependsOn && props.dependsOn.map(transformPath));
 
     await useEffect(async () => {
       dirty = true;
-    }, [fromEntries(entries(inputs.handlers).map(([k, v]) => [k, v.vars || {}]))])
+    }, [fromEntries(entries(props.handlers).map(([k, v]) => [k, v.vars || {}]))])
 
     const ret: { [_ in keyof R]: string } = await useCache(async () => {
       await useShell({ command: 'yarn', args: ['-s', 'install', '--prefer-offline'], cwd: tmpdir });
@@ -410,14 +411,14 @@ module.exports = {
       await useShell({ command: 'tsc', args: ['-p', 'tsconfig.sls.json'], cwd: tmpdir });
       await useShell({ command: 'yarn', args: ['-s', 'webpack', '--config', `${tmpdir}/webpack.config.js`], cwd: tmpdir });
       await useShell({ command: 'mkdir', args: ['-p', 'build/src'], cwd: tmpdir });
-      for (let p of entries(inputs.handlers).map(([_, v]) => v.filepath))
+      for (let p of entries(props.handlers).map(([_, v]) => v.filepath))
         await useShell({ command: 'cp', args: [`build/_${path.basename(p.replace(/(.ts$)/, '.js'))}`, `build/${p.replace(/(.ts$)/, '.js')}`], cwd: tmpdir });
 
       return await useShell({
         command: 'yarn',
         args: ['-s', 'vars', 'yarn', '-s', 'sls', 'deploy', '--no-confirm'],
         cwd: tmpdir,
-        outputMatchers: buildOutputMatchers(inputs.handlers),
+        outputMatchers: buildOutputMatchers(props.handlers),
       });
     }, dirty);
     return ret;
@@ -425,7 +426,7 @@ module.exports = {
     await useShell({
       command: 'yarn',
       args: ['-s', 'install', '--prefer-offline'],
-      dependsOn: inputs.dependsOn && inputs.dependsOn.map(transformPath),
+      dependsOn: props.dependsOn && props.dependsOn.map(transformPath),
       cwd: tmpdir
     });
 
@@ -433,7 +434,7 @@ module.exports = {
       fromEntries(entries(handlers).filter(([k, v]) => !!v.events).map<[keyof R, string][]>(([k, v]) =>
         v.events!.map(e => [k, stage == 'local' ? `http://0.0.0.0:3000/${e.http.path}` : ''])).flat());
 
-    return buildDefaultReturns(stage, inputs.handlers);
+    return buildDefaultReturns(stage, props.handlers);
   }
 
 };

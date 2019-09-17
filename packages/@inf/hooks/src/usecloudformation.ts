@@ -5,7 +5,7 @@ import { entries, fromEntries } from '@inf/common';
 import { useUniqueIdAssertion, useGlobals, useDependsOn, useCache, vartools } from '@inf/hookops';
 import { vars } from '@inf/hookops/vars';
 
-const expandInputVars = (inputs: { [_: string]: string | number | string[] }): { [_: string]: string | number | string[] } => {
+const expandInputVars = (props: { [_: string]: string | number | string[] }): { [_: string]: string | number | string[] } => {
   const expand = (x: string | number | string[]) => {
     if (typeof x == 'string') {
       return vartools.expand(x);
@@ -15,7 +15,7 @@ const expandInputVars = (inputs: { [_: string]: string | number | string[] }): {
       return x.map(vartools.expand);
     }
   }
-  return fromEntries(entries(inputs).map(([k, v]) => [k, expand(v)]));
+  return fromEntries(entries(props).map(([k, v]) => [k, expand(v)]));
 }
 
 const down = async (cf: AWS.CloudFormation, StackName: string) => {

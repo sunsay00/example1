@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shared } from '../tools/createshared';
-import { createCanceler } from '../tools/canceler';
+import { Shared } from '../tools_/createshared';
+import { createCanceler } from '../tools_/canceler';
 
 type UpdateFn<R> = (ctorFn: () => Promise<R>, dtorFn?: ((t: R) => Promise<void>) | undefined) => Promise<boolean> | undefined | boolean;
 

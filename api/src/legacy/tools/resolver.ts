@@ -1,11 +1,9 @@
-import { createResolver } from '@inf/cf-gen';
+import { ICacheClient, IDBClient, createResolver } from '../../_gen';
 import NotificationManager from './notificationmanager';
 import UsersService from '../services/users';
 import SellersService from '../services/sellers';
 import SystemService from '../services/system';
 import DeviceListsService from '../services/devicelists';
-
-import { ICacheClient, IDBClient } from '@inf/cf-gen';
 
 export const createDefaultResolver = (params: {
   stage: string,

@@ -1,7 +1,7 @@
 import { createModule, useGlobals } from '@inf/hookops';
 import { useCloudFormation } from '@inf/hooks';
 
-export const useCognito = (inputs: {
+export const useCognito = (props: {
   Domain: string,
   InvitationEmailSubject: string,
   VerificationEmailSubject: string,
@@ -13,7 +13,7 @@ export const useCognito = (inputs: {
     id: 'cf-cognito',
     cfyamlpath: `${__dirname}/cf.yaml`,
     inputs: {
-      ...inputs,
+      ...props,
       Stage: stage
     },
     defaultOutputs: {

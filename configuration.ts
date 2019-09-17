@@ -62,7 +62,7 @@ const configuration: Configuration = {
 
     const proxy = { host: spot.host, port: 54321 };
 
-    await useRedis();
+    await useRedis({});
 
     const postgres = await usePostgres({
       DatabaseName: 'main',
@@ -72,7 +72,7 @@ const configuration: Configuration = {
       MaxCapacity: 2,
     });
 
-    const tunnel = useTunnel({ target: postgres, proxy });
+    const tunnelProps = { target: postgres, proxy };
 
     const gen = await useGen({
       username: vars.MASTER_USERNAME,
@@ -81,7 +81,7 @@ const configuration: Configuration = {
       proxy,
       RDSServiceId: ServiceIds.RDS,
       ledgerPath: LEDGER_PATH,
-      tunnel
+      tunnelProps
     });
 
     await useCDN({
@@ -99,7 +99,8 @@ const configuration: Configuration = {
       MasterUserPassword: vars.MASTER_USER_PASSWORD,
       dbUrl: gen.dbUrl,
       dbTestUrl: gen.dbTestUrl,
-      tunnel
+      tunnelProps,
+      genProps: gen.props
     });
 
     await useSite({
@@ -109,7 +110,8 @@ const configuration: Configuration = {
         identityPoolId: cog.CognitoIdentityPoolId,
         userPoolId: cog.UserPoolId,
         clientId: cog.WebUserPoolClientId,
-      }
+      },
+      genProps: gen.props
     });
 
     await useLamTest({

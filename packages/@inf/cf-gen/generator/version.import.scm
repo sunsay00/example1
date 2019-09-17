@@ -4,7 +4,7 @@
 
   (define (emit vnum)
     (list 
-      "// this file has been automatically generated, do not modify\n"
+      "// this file has been automatically generated versions, do not modify\n"
       "\nexport default '" (inexact->exact vnum) "';"))
 
   (define (version-generate vnum) 

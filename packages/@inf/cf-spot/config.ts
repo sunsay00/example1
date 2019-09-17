@@ -5,7 +5,7 @@ import { createModule, useEffect, useMemo, useGlobals, useShell } from '@inf/hoo
 import { vars } from '@inf/hookops/vars';
 import { useVarsWriter, useCloudFormation } from '@inf/hooks';
 
-export const useSpot = (inputs: {
+export const useSpot = (props: {
   id: string,
   vpcId: string,
   availabilityZone: string,
@@ -29,33 +29,33 @@ export const useSpot = (inputs: {
     return { host: '' };
 
   } else {
-    if (!fs.existsSync(inputs.pubKey.path))
+    if (!fs.existsSync(props.pubKey.path))
       throw new Error('public key not found');
 
     await useEffect(async () => {
       const keys = await ec2.describeKeyPairs({
-        Filters: [{ Name: 'key-name', Values: [inputs.pubKey.name] }]
+        Filters: [{ Name: 'key-name', Values: [props.pubKey.name] }]
       }).promise();
 
       if (keys.KeyPairs && keys.KeyPairs.length == 0) {
         await ec2.importKeyPair({
-          KeyName: inputs.pubKey.name,
-          PublicKeyMaterial: fs.readFileSync(inputs.pubKey.path),
+          KeyName: props.pubKey.name,
+          PublicKeyMaterial: fs.readFileSync(props.pubKey.path),
         }).promise();
       }
-    }, [inputs.pubKey.name, inputs.pubKey.path]);
+    }, [props.pubKey.name, props.pubKey.path]);
 
-    const spotid = `cf-spot--${inputs.id}`;
+    const spotid = `cf-spot--${props.id}`;
 
     const spot = await useCloudFormation({
       id: spotid,
       cfyamlpath: `${__dirname}/cf.yaml`,
       inputs: {
-        VpcId: inputs.vpcId,
-        AvailabilityZone: inputs.availabilityZone,
+        VpcId: props.vpcId,
+        AvailabilityZone: props.availabilityZone,
         Stage: stage,
-        VolumeSize: inputs.volumeSizeInGB,
-        VolumeTagName: inputs.pubKey.name,
+        VolumeSize: props.volumeSizeInGB,
+        VolumeTagName: props.pubKey.name,
       },
       defaultOutputs: {
         SecurityGroupId: '',
@@ -69,18 +69,18 @@ export const useSpot = (inputs: {
         ID: spotid,
         STAGE: stage,
         AWS_REGION: vars.AWS_REGION,
-        BID_PRICE: `${inputs.bidPrice}`,
-        PREBOOT_IMAGE_ID: inputs.prebootImageId,
-        INSTANCE_TYPE: inputs.instanceType,
-        PUB_KEY: inputs.pubKey.name,
-        SUBNET: inputs.subnet,
-        AVAILABILITY_ZONE: inputs.availabilityZone,
+        BID_PRICE: `${props.bidPrice}`,
+        PREBOOT_IMAGE_ID: props.prebootImageId,
+        INSTANCE_TYPE: props.instanceType,
+        PUB_KEY: props.pubKey.name,
+        SUBNET: props.subnet,
+        AVAILABILITY_ZONE: props.availabilityZone,
         SECURITY_GROUP: spot.SecurityGroupId,
         VOLUME_ID: spot.VolumeId,
         SPOT_ML_INSTANCE_PROFILE_NAME: spot.InstanceProfileName,
-        SHELL_USER: inputs.shellUser
+        SHELL_USER: props.shellUser
       });
-    }, [stage, vars.AWS_REGION, inputs, spot, spotid]);
+    }, [stage, vars.AWS_REGION, props, spot, spotid]);
 
     const publicdnsname = await useMemo(async () => {
       const { instanceId } = await useShell({
@@ -105,6 +105,6 @@ export const useSpot = (inputs: {
       return publicdnsname;
     }, []);
 
-    return { host: `${inputs.shellUser}@${publicdnsname}` }
+    return { host: `${props.shellUser}@${publicdnsname}` }
   }
 });

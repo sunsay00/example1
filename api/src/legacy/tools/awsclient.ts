@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
 import vars from '../../_vars';
-import { ICacheClient } from '@inf/cf-gen';
-import * as M from '@inf/cf-gen/model';
+import { ICacheClient } from '../../_gen';
+import * as M from '../../_gen';
 
 let _sns: AWS.SNS | undefined = undefined;
 let _cisp: AWS.CognitoIdentityServiceProvider;

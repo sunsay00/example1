@@ -1,7 +1,7 @@
 import { createModule, useGlobals } from '@inf/hookops';
 import { useCloudFormation } from '@inf/hooks';
 
-export const useCDN = (inputs: {
+export const useCDN = (props: {
   SiteCertificateArn: string,
   Domain: string,
   HostedZoneId: string
@@ -12,9 +12,9 @@ export const useCDN = (inputs: {
     id: 'cf-cdn',
     cfyamlpath: `${__dirname}/cf.yaml`,
     inputs: {
-      SiteCertificateArn: inputs.SiteCertificateArn,
-      Domain: inputs.Domain,
-      HostedZoneId: inputs.HostedZoneId,
+      SiteCertificateArn: props.SiteCertificateArn,
+      Domain: props.Domain,
+      HostedZoneId: props.HostedZoneId,
       Stage: stage
     }
   });

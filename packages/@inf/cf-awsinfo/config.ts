@@ -2,13 +2,13 @@ import * as AWS from 'aws-sdk';
 import { vars } from '@inf/hookops/vars';
 import { createModule, useGlobals, vartools, useDependsOn, useCache } from '@inf/hookops';
 
-export const useAwsInfo = (inputs: {
+export const useAwsInfo = (props: {
   rootEnv: string
 }) => createModule(async () => {
 
   const { stage } = useGlobals();
 
-  const props = {
+  const ret = {
     AWS_REGION: vars.AWS_REGION,
     VPC_ID: 'LOCAL_UNDEFINED',
     HostedZoneId: 'LOCAL_UNDEFINED',
@@ -20,13 +20,13 @@ export const useAwsInfo = (inputs: {
   };
 
   if (stage == 'local') {
-    return props;
+    return ret;
   } else {
     let dirty = false;
 
     await useDependsOn(async () => {
       dirty = true;
-    }, [inputs.rootEnv]);
+    }, [props.rootEnv]);
 
     return await useCache(async () => {
       const cfg = {
@@ -37,36 +37,36 @@ export const useAwsInfo = (inputs: {
       const ec2 = new AWS.EC2({ apiVersion: '2016-11-15', ...cfg });
       const route53 = new AWS.Route53({ apiVersion: '2013-04-01', ...cfg });
 
-      const ret = await ec2.describeVpcs({}).promise();
-      console.assert(ret.Vpcs.length != 0);
-      const VPC_ID = ret.Vpcs[0].VpcId;
+      const result = await ec2.describeVpcs({}).promise();
+      console.assert(result.Vpcs.length != 0);
+      const VPC_ID = result.Vpcs[0].VpcId;
 
       const data = await ec2.describeSubnets({
         Filters: [{ Name: 'vpc-id', Values: [VPC_ID] }]
       }).promise();
 
-      props['AWS_REGION'] = vars.AWS_REGION;
-      props['VPC_ID'] = VPC_ID;
+      ret['AWS_REGION'] = vars.AWS_REGION;
+      ret['VPC_ID'] = VPC_ID;
 
       const subnets = data.Subnets.sort((a, b) => a.AvailabilityZone.localeCompare(b.AvailabilityZone));
-      subnets.forEach((s, i) => props[`Subnet${i + 1}`] = s.SubnetId);
-      subnets.forEach((s, i) => props[`AvailabilityZone${i + 1}`] = s.AvailabilityZone);
+      subnets.forEach((s, i) => ret[`Subnet${i + 1}`] = s.SubnetId);
+      subnets.forEach((s, i) => ret[`AvailabilityZone${i + 1}`] = s.AvailabilityZone);
 
       const zones = await route53.listHostedZonesByName().promise();
       const zone = zones.HostedZones.find(z => z.Name == `${vars.DOMAIN}.`);
       if (zone) {
         const split = zone.Id.split('/');
         if (split.length == 3) {
-          props['HostedZoneId'] = split[split.length - 1];
+          ret['HostedZoneId'] = split[split.length - 1];
         }
       }
-      if (!props['HostedZoneId'])
+      if (!ret['HostedZoneId'])
         throw new Error(`failed to determine hostedzone for '${vars.DOMAIN}'`);
 
       const sgs = await ec2.describeSecurityGroups({}).promise();
-      sgs.SecurityGroups.map(sg => props[`SecurityGroup_${sg.GroupName}`] = sg.GroupId);
+      sgs.SecurityGroups.map(sg => ret[`SecurityGroup_${sg.GroupName}`] = sg.GroupId);
 
-      return props;
+      return ret;
     }, dirty);
   }
 });

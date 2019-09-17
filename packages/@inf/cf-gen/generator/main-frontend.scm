@@ -53,7 +53,7 @@
       (define prev-api (schema->prev-api schema))
       (define delta-api (schema->delta-api schema))
       (define api (schema->api schema)) ; prev-api + delta-api = api
-      (print "\n---- [ GENERATING API VERSION: v" vnum " ] ----")
+      (print "\n---- [ GENERATING FRONTENT VERSION: v" vnum " ] ----")
 
       (define (get-path s) (string-append output-dir "/" s))
 
@@ -211,5 +211,6 @@
   (begin
     (load-relative (car args))
     (define entire-api (run ledger (cadr args)))
-    (run-sub entire-api ledger)))
+    ;(run-sub entire-api ledger)
+  ))
 

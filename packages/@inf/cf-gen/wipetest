@@ -28,4 +28,4 @@ psql -c "CREATE DATABASE test${STAGE}" ${DB}
 
 ${GENDIR}/seed ${DB_TEST} 0
 
-cd "$GENDIR" && DB=${DB_TEST} yarn -s db-migrate up --migrations-dir ${GENDIR}/infra/postgres/migrations --config ${GENDIR}/database.json
+cd "$GENDIR" && DB=${DB_TEST} yarn -s db-migrate up --migrations-dir ${MIGRATIONS_DIR} --config ${DATABASE_JSON_PATH}

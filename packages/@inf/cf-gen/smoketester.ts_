@@ -1,4 +1,6 @@
-import { IStore, IUserContext, ICacheClient, IDBClient } from '../types';
+import { ICacheClient, IDBClient } from '../_gen';
+import { IUserContext } from '.';
+import { IStore } from './types/storeinterfaces';
 
 export const runCacheStoreSmokeTests = async <C extends IUserContext>(store: IStore<C>, client: ICacheClient) => {
   await client.del(['check:test-key']);

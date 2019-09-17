@@ -15,9 +15,10 @@ import * as UI from '@inf/core-ui';
 
 export type ApolloResolvers = Resolvers;
 
-const createCache = async () => {
+const createCache = async (disableCache: boolean) => {
   const cache = new InMemoryCache();
-  await persistCache({ cache, storage: AsyncStorage as any });
+  if (!disableCache)
+    await persistCache({ cache, storage: AsyncStorage as any });
   return cache;
 }
 
@@ -50,6 +51,7 @@ export const useApollo = () => {
 }
 
 export const ApolloProvider = (props: {
+  disableCache?: boolean,
   authorization: string,
   websocketEndpoint: string | undefined,
   graphqlEndpoint: string,
@@ -62,7 +64,7 @@ export const ApolloProvider = (props: {
   React.useEffect(() => {
     if (busyRef.current) return;
     busyRef.current = true;
-    createCache().then(cache => {
+    createCache(props.disableCache || true).then(cache => {
       const httpLink = new HttpLink({ uri: props.graphqlEndpoint });
       const authLink = setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization: props.authorization } }));
       setClient(new ApolloClient({

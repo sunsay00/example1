@@ -2,7 +2,7 @@ import { createModule, useGlobals } from '@inf/hookops';
 import { useCloudFormation } from '@inf/hooks';
 import { useDocker } from '@inf/cf-docker/config';
 
-export const usePostgres = (inputs: {
+export const usePostgres = (props: {
   DatabaseName: string,
   MasterUsername: string,
   MasterUserPassword: string,
@@ -18,8 +18,8 @@ export const usePostgres = (inputs: {
         ports: ['5432:5432'],
         image: 'mdillon/postgis:9.6-alpine',
         environment: [
-          `POSTGRES_USER=${inputs.MasterUsername}`,
-          `POSTGRES_PASSWORD=${inputs.MasterUserPassword}`,
+          `POSTGRES_USER=${props.MasterUsername}`,
+          `POSTGRES_PASSWORD=${props.MasterUserPassword}`,
           `POSTGRES_DB=mainlocal`
         ]
       },
@@ -35,11 +35,11 @@ export const usePostgres = (inputs: {
       id: 'cf-serverless-postgres',
       cfyamlpath: `${__dirname}/cf.yaml`,
       inputs: {
-        DatabaseName: inputs.DatabaseName,
-        MasterUsername: inputs.MasterUsername,
-        MasterUserPassword: inputs.MasterUserPassword,
-        MinCapacity: inputs.MinCapacity,
-        MaxCapacity: inputs.MaxCapacity,
+        DatabaseName: props.DatabaseName,
+        MasterUsername: props.MasterUsername,
+        MasterUserPassword: props.MasterUserPassword,
+        MinCapacity: props.MinCapacity,
+        MaxCapacity: props.MaxCapacity,
         Stage: stage
       },
       defaultOutputs: {

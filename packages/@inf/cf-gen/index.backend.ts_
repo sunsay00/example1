@@ -1,52 +1,73 @@
-import * as M from './back/api/src/types/serviceinterfaces';
-import { IStore } from './back/api/src/types/storeinterfaces';
+import RDSStore from './api/stores/rdsstore';
+import CacheStore from './api/stores/cachestore';
+import { createServiceMapper, MappedServices } from './api/mapper';
+import { QueryParam, QueryResult } from '@inf/cf-gen';
+import { Resolver } from './resolver';
 
-export { IStore } from './back/api/src/types/storeinterfaces';
-export { ITestingService } from './tools/testingservice';
+import { IStore } from './types/storeinterfaces';
+import { IUserContext } from '.';
+import * as M from './types/serviceinterfaces';
+import Mapper from './api/mapper';
 
-export type JSONValue = string | number | boolean | JSONObject | JSONArray;
-export type JSONObject = { [_: string]: JSONValue; }
-export interface JSONArray extends Array<JSONValue> { }
-
-export type Variables = { [_: string]: JSONValue | undefined; }
-
-export type Dict<T> = {
-  [_: string]: T | undefined;
-  [_: number]: T | undefined;
-}
-
-export type Cursorize = {
-  cursor?: string,
-};
-
-export type Cursored<T> = {
-  cursor?: string,
-  data: T,
-}
-
-export type Point = {
-  lon: number,
-  lat: number,
-};
+export { IStore } from './types/storeinterfaces';
+export * from './types/serviceinterfaces';
 
 export type IUserContext = {
   sub: string,
   groups?: string[],
 };
 
-export type Paginated<T> = {
-  cursor?: string,
-  items: T[],
+export type INotificationManager<C extends IUserContext> = {
+  dispatchDeckFactories(store: IStore<C>, sub: string, action: string, obj: M.DeckFactory): Promise<void>,
+  dispatchDecks(store: IStore<C>, sub: string, action: string, obj: M.Deck): Promise<void>,
+  dispatchCommentLists(store: IStore<C>, sub: string, action: string, obj: M.CommentList): Promise<void>,
+  dispatchDealerships(store: IStore<C>, sub: string, action: string, obj: M.Dealership): Promise<void>,
+  dispatchCarInventories(store: IStore<C>, sub: string, action: string, obj: M.CarInventory): Promise<void>,
+  dispatchSellers(store: IStore<C>, sub: string, action: string, obj: M.Seller): Promise<void>,
+  dispatchNotes(store: IStore<C>, sub: string, action: string, obj: M.Note): Promise<void>,
+  dispatchCarInfos(store: IStore<C>, sub: string, action: string, obj: M.CarInfo): Promise<void>,
 };
 
-export type QueryResult = {
-  command: string;
-  rowCount: number;
-  oid: number;
-  rows: any[];
-}
+export type ITestingService<C extends IUserContext> = {
+  adminAuthorized(user: IUserContext, fields: string[], mapper: Mapper<C>, arg: string): Promise<string>;
+  authorized(user: IUserContext, fields: string[], mapper: Mapper<C>, arg: string): Promise<string>;
+  unauthorized(user: IUserContext, fields: string[], mapper: Mapper<C>, arg: string): Promise<string>;
+};
 
-export type QueryParam = object | number | string | undefined;
+export const createCachedResolver = <C extends IUserContext>(
+  stage: string,
+  notifications: INotificationManager<C>,
+  cache: ICacheClient,
+  db: IDBClient,
+  services: MappedServices<C>,
+  onPreResolve?: () => Promise<void>,
+  onPostResolve?: () => Promise<void>,
+) => {
+  const store = new RDSStore(stage, db);
+  return new Resolver(
+    stage,
+    store,
+    createServiceMapper(notifications, new CacheStore(store, cache), services),
+    onPreResolve,
+    onPostResolve);
+};
+
+export const createResolver = <C extends IUserContext>(params: {
+  stage: string,
+  notifications: INotificationManager<C>,
+  db: IDBClient,
+  services: MappedServices<C>,
+  onPreResolve?: () => Promise<void>,
+  onPostResolve?: () => Promise<void>,
+}) => {
+  const store = new RDSStore(params.stage, params.db);
+  return new Resolver(
+    params.stage,
+    store,
+    createServiceMapper(params.notifications, store, params.services),
+    params.onPreResolve,
+    params.onPostResolve);
+}
 
 export type IDBClient = {
   query(query: string, params: QueryParam[]): Promise<QueryResult>;
@@ -95,15 +116,4 @@ export type ICacheClient = {
   geoadd(key: string, values: { lon: number, lat: number, value: string }[]): Promise<void>;
   georadius(key: string, lon: number, lat: number, radius: number, unit: 'm' | 'km' | 'ft' | 'mi', options?: { count: number }): Promise<(string | [string, string | [string, string]])[]>;
   multi(): IMultiCacheClient;
-};
-
-export type INotificationManager<C extends IUserContext> = {
-  dispatchDeckFactories(store: IStore<C>, sub: string, action: string, obj: M.DeckFactory): Promise<void>,
-  dispatchDecks(store: IStore<C>, sub: string, action: string, obj: M.Deck): Promise<void>,
-  dispatchCommentLists(store: IStore<C>, sub: string, action: string, obj: M.CommentList): Promise<void>,
-  dispatchDealerships(store: IStore<C>, sub: string, action: string, obj: M.Dealership): Promise<void>,
-  dispatchCarInventories(store: IStore<C>, sub: string, action: string, obj: M.CarInventory): Promise<void>,
-  dispatchSellers(store: IStore<C>, sub: string, action: string, obj: M.Seller): Promise<void>,
-  dispatchNotes(store: IStore<C>, sub: string, action: string, obj: M.Note): Promise<void>,
-  dispatchCarInfos(store: IStore<C>, sub: string, action: string, obj: M.CarInfo): Promise<void>,
 };

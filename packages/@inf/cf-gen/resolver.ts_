@@ -1,10 +1,13 @@
 import { graphql, GraphQLSchema } from 'graphql';
 import { makeExecutableSchema } from 'graphql-tools';
-import typeDefs from '../back/api/src/api/resolver/v1/typedefs';
-import resolvers from '../back/api/src/api/resolver/v1/resolvers';
-import Mapper from '../back/api/src/api/mapper';
-import { IUserContext, Variables, ITestingService, IStore } from '../types';
-import { grant } from '../tools/grant';
+import typeDefs from './api/resolver/v1/typedefs';
+import resolvers from './api/resolver/v1/resolvers';
+import Mapper from './api/mapper';
+import { Variables } from '@inf/cf-gen';
+import { IUserContext } from '.';
+import { IStore } from './types/storeinterfaces';
+import { ITestingService } from '.';
+import { grant } from './grant';
 
 class TestingService implements ITestingService<IUserContext> {
 

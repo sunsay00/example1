@@ -18,7 +18,7 @@ const DockerRecord = RT.Record({
   }))),
 });
 
-export const useDocker = <R extends Outputs>(inputs: {
+export const useDocker = <R extends Outputs>(props: {
   id: string,
   outputs: R
   service: {
@@ -27,11 +27,11 @@ export const useDocker = <R extends Outputs>(inputs: {
     environment?: string[]
   },
 }) => createModule(async () => {
-  const localname = `${path.basename(__dirname)}${inputs.id ? `--${inputs.id}` : ''}`;
+  const localname = `${path.basename(__dirname)}${props.id ? `--${props.id}` : ''}`;
 
-  const tmpdir = useTempDir(inputs.id);
+  const tmpdir = useTempDir(props.id);
 
-  useScriptRegistry(`docker-${inputs.id}`, {
+  useScriptRegistry(`docker-${props.id}`, {
     cwd: tmpdir,
     rules: {
       up: {
@@ -51,9 +51,9 @@ export const useDocker = <R extends Outputs>(inputs: {
       services: {
         [localname]: {
           container_name: localname,
-          ports: inputs.service.ports,
-          image: inputs.service.image,
-          ...(inputs.service.environment && { environment: inputs.service.environment.map(vartools.convertToShell) } || {})
+          ports: props.service.ports,
+          image: props.service.image,
+          ...(props.service.environment && { environment: props.service.environment.map(vartools.convertToShell) } || {})
         }
       }
     };
@@ -66,7 +66,7 @@ export const useDocker = <R extends Outputs>(inputs: {
     } else {
       fs.writeFileSync(`${tmpdir}/docker-compose.yml`, yamljs.stringify(dockerServices, Number.MAX_SAFE_INTEGER, 2), { encoding: 'utf8' });
     }
-  }, [inputs.outputs, localname, inputs.service.image, inputs.service.ports, inputs.service.environment || []]);
+  }, [props.outputs, localname, props.service.image, props.service.ports, props.service.environment || []]);
 
   await useShell({
     command: 'docker-compose',
@@ -75,5 +75,5 @@ export const useDocker = <R extends Outputs>(inputs: {
     cwd: tmpdir,
   });
 
-  return inputs.outputs;
+  return props.outputs;
 });

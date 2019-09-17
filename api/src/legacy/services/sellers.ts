@@ -1,6 +1,7 @@
 import { adminEnableDisableUser } from '../tools/awsclient';
-import { IStore, Point, Cursorize, Dict, ISellersPartialService } from '@inf/cf-gen';
-import * as M from '@inf/cf-gen/model';
+import { Point, Cursorize, Dict } from '@inf/cf-gen';
+import * as M from '../../_gen';
+import { IStore, ISellersPartialService } from '../../_gen';
 import { UserContext } from '../types';
 import NotificationManager from '../tools/notificationmanager';
 

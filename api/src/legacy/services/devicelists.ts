@@ -1,6 +1,7 @@
-import { IStore, Cursorize, IDeviceListsPartialService } from '@inf/cf-gen';
+import { Cursorize } from '@inf/cf-gen';
+import { IStore, IDeviceListsPartialService } from '../../_gen';
 import NotificationManager from '../tools/notificationmanager';
-import * as M from '@inf/cf-gen/model';
+import * as M from '../../_gen';
 import { UserContext } from '../types';
 
 export default class DeviceListsService implements IDeviceListsPartialService<UserContext> {

@@ -1,9 +1,10 @@
 import { useLamApi } from '@inf/cf-lam-api/config';
-import { createModule, useTempDir, useScriptRegistry, useGlobals } from '@inf/hookops';
+import { createModule, useTempDir, useScriptRegistry } from '@inf/hookops';
 import { vars } from '@inf/hookops/vars';
-import { useVarsWriter, Tunnel } from '@inf/hooks';
+import { useBackendGen, GenProps } from '@inf/cf-gen/config';
+import { useVarsWriter, TunnelProps, useTunnel } from '@inf/hooks';
 
-export const useApi = async (inputs: {
+export const useApi = async (props: {
   accountId: string,
   cognitoUserPoolId: string,
   securityGroupIds: string[],
@@ -12,12 +13,15 @@ export const useApi = async (inputs: {
   MasterUserPassword: string,
   dbUrl: string,
   dbTestUrl: string,
-  tunnel: Tunnel
+  tunnelProps: TunnelProps,
+  genProps: GenProps,
 }) => createModule(async () => {
 
   const id = 'api';
 
   const tmpdir = useTempDir(id);
+
+  const tunnel = useTunnel(props.tunnelProps);
 
   useScriptRegistry(id, {
     rules: {
@@ -26,32 +30,37 @@ export const useApi = async (inputs: {
         desc: 'run tests',
         commands: [
           { command: 'yarn', args: ['-s', 'x', 'db', 'wipetest'] },
-          inputs.tunnel({ command: 'yarn', args: ['-s', 'vars', 'yarn', '-s', 'test', '2>&1'] })
+          tunnel({ command: 'yarn', args: ['-s', 'vars', 'yarn', '-s', 'test', '2>&1'] })
         ]
       }
     }
   });
 
+  await useBackendGen({
+    id,
+    genProps: props.genProps
+  });
+
   useVarsWriter('ts', __dirname, {
-    DB_URL: inputs.dbUrl,
-    DB_TEST_URL: inputs.dbTestUrl,
+    DB_URL: props.dbUrl,
+    DB_TEST_URL: props.dbTestUrl,
     AWS_REGION: vars.AWS_REGION,
-    UserPoolId: inputs.cognitoUserPoolId
+    UserPoolId: props.cognitoUserPoolId
   });
 
   return await useLamApi({
     id,
     _deprecatedAlias: 'api',
     dependsOn: ['./package.json', './src/**/*.ts', './config.ts'],
-    accountId: inputs.accountId,
-    cognitoUserPoolId: inputs.cognitoUserPoolId,
-    securityGroupIds: inputs.securityGroupIds,
-    subnetIds: inputs.subnetIds,
-    MasterUsername: inputs.MasterUsername,
-    MasterUserPassword: inputs.MasterUserPassword,
+    accountId: props.accountId,
+    cognitoUserPoolId: props.cognitoUserPoolId,
+    securityGroupIds: props.securityGroupIds,
+    subnetIds: props.subnetIds,
+    MasterUsername: props.MasterUsername,
+    MasterUserPassword: props.MasterUserPassword,
     apiHandler: {
-      dbUrl: inputs.dbUrl,
-      dbTestUrl: inputs.dbTestUrl,
+      dbUrl: props.dbUrl,
+      dbTestUrl: props.dbTestUrl,
       packageJsonPath: './package.json',
       filepath: 'src/api.ts',
       entrypoint: 'handler',

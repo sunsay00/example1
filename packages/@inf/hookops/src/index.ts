@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { JSONObject } from '@inf/common';
 import { useGlobals } from './hooks/useglobals';
 import { useUniqueIdAssertion } from './hooks/useuniqueidassertion';
 
-export type Outputs = { [_: string]: string | number | boolean };
+export type Outputs = JSONObject;// { [_: string]: string | number | boolean };
 export type ConfigRecord<R extends Outputs> = { rootDir: string, run: (use: UseFn) => Promise<R> };
 type UseFn = <R extends Outputs>(record: ConfigRecord<R>) => Promise<R>;
 

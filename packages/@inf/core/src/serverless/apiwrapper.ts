@@ -95,7 +95,7 @@ export const apiWrapper = (params: {
     username: payload.username,
   };
 
-  if (process.env.NODE_ENV === 'local') {
+  if (process.env.STAGE === 'local') {
     console.log('[GRAPHQL-REQUEST]');
     console.log('  QUERY:', json.query);
     console.log('  VARIABLES:', json.variables);

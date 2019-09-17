@@ -1,7 +1,7 @@
 import { WatchQueryOptions, ObservableQuery, MutationOptions, ApolloClient } from 'apollo-client';
 import { FetchResult } from 'apollo-link';
 
-import { keepTrying } from '../hooks/useretrywaker';
+import { keepTrying } from '../hooks_/useretrywaker';
 
 export const Root = ({
   mutate: <T>(options: MutationOptions<T>): Promise<FetchResult<T>> => {

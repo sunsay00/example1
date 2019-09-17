@@ -1,6 +1,6 @@
 import AWSClient from './awsclient';
-import { INotificationManager, IStore, ICacheClient } from '@inf/cf-gen';
-import * as M from '@inf/cf-gen/model';
+import { IStore, ICacheClient, INotificationManager } from '../../_gen';
+import * as M from '../../_gen';
 import { UserContext } from '../types';
 
 export default class NotificationManager implements INotificationManager<UserContext> {
