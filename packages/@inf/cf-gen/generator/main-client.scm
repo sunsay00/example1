@@ -60,10 +60,10 @@
       (define last? (= (+ i 1) (length schemas)))
       (if last?
         (begin 
-          (save (types-generate-client api) (get-path "types/models.ts"))
+          (save (types-generate-client api) (get-path "types.ts"))
           ; WIP (save (types-generate api) "../front/webapp/src/types/models.ts")
 
-          (save (apollobindings-generate-index-client api #t) (get-path "models/index.ts"))
+          (save (apollobindings-generate-index-client api #t) (get-path "models.ts"))
           ; WIP (save (apollobindings-generate-index api #f) "../front/webapp/src/components/hocs/models/index.ts")
 
           ; WIP (map (lambda (name)

@@ -94,7 +94,7 @@
        (expr (list
                "// this file has been automatically generated, do not modify"
                "\n"
-               "\nimport { IUserContext, Cursored, Cursorize, Point } from '../tools/types';"
+               "\nimport { IUserContext, Cursored, Cursorize, Point } from '@inf/cf-gen/types';"
                (map (lambda (type) (list (datatype-emit ind api type #f))) (remove (lambda (t) (typedef-disabled? t 'frontend-interfaces)) (api->typedefs api)))
                (map (lambda (type) (list (type-emit ind api #f type #f))) (remove (lambda (t) (typedef-disabled? t 'frontend-interfaces)) (api->typedefs api)))
                (map (lambda (type) (list (type-emit ind api #t type #f))) (api->inputdefs api)))))

@@ -78,8 +78,6 @@
             (return)
             (doM
               (state-set (cons (->string (sort (map symbol->string vars) string<?)) prev))
-              (s <- (state-get))
-              (print/M s)
               (return)))))
 
   (define (gen-update-vars/M model method)
@@ -358,7 +356,7 @@
                    (list "\n" (default-query ind model method storybook?)))))
              methods)
         "\n"
-        (map (lambda (method) (loaders-emit ind model method)) queries)
+        ;(map (lambda (method) (loaders-emit ind model method)) queries)
         "\n"
         )))
 
@@ -369,13 +367,11 @@
               "\n"
               "\nimport { ObservableQuery, ApolloQueryResult, ApolloClient, ApolloError } from 'apollo-client';"
               "\nimport gql from 'graphql-tag';"
-              "\nimport * as M from '../types/models';"
-              "\nimport { Paginated, Point } from '../tools/types';"
-              "\nimport Loader from '../tools/loader';"
-              "\nimport { Root } from '../tools/useroot';"
+              "\nimport * as M from './types';"
               "\nimport { useQuery, useMutation } from '@apollo/react-hooks';"
               "\nimport { QueryResult } from '@apollo/react-common';"
               "\nimport { ExecutionResult } from 'graphql';"
+              "\nimport { Paginated, Point } from '@inf/cf-gen/types';"
               "\n"
               "\nexport type LoadResult<R> = {"
               "\n  subscription: ObservableQuery<R>,"

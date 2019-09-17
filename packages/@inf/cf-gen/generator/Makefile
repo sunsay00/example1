@@ -5,5 +5,5 @@ configure:
 
 configure.client:
 	cd $(ROOT_DIR) && csi -s $(ROOT_DIR)/main-client.scm $(LEDGER_PATH) $(OUTPUT_PATH)
-	cp -r $(ROOT_DIR)/../client-tools $(OUTPUT_PATH)/tools
+	#cp -r $(ROOT_DIR)/../client-tools $(OUTPUT_PATH)/tools
 
