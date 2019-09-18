@@ -39,6 +39,10 @@ export const useLamApi = async (props: {
         environment: { STAGE: stage }
       },
       api: {
+        vpc: {
+          securityGroupIds: props.securityGroupIds,
+          subnetIds: props.subnetIds,
+        },
         vars: {
           UserPoolId: props.cognitoUserPoolId,
           AWS_REGION: vars.AWS_REGION,
@@ -63,42 +67,40 @@ export const useLamApi = async (props: {
         }]
       },
     },
-    slsVpc: {
-      securityGroupIds: props.securityGroupIds,
-      subnetIds: props.subnetIds,
+    sls: {
+      iamRoleStatements: [{
+        Effect: 'Allow',
+        Resource: [`arn:aws:cognito-idp:${vars.AWS_REGION}:${props.accountId}:userpool/${props.cognitoUserPoolId}`],
+        Action: [
+          'cognito-idp:AdminCreateUser',
+          'cognito-idp:AdminDeleteUser',
+          'cognito-idp:AdminConfirmSignUp',
+          'cognito-idp:AdminAddUserToGroup',
+          'cognito-idp:AdminDisableUser',
+          'cognito-idp:AdminEnableUser',
+          'cognito-idp:ListUsers',
+          'cognito-idp:AdminUpdateUserAttributes',
+          'cognito-idp:AdminGetUser'
+        ]
+      }, {
+        Effect: 'Allow',
+        Action: [
+          's3:ListBucket',
+          's3:PutObject',
+          's3:PutObjectAcl',
+          's3:AbortMultipartUpload',
+          's3:GetObject',
+          's3:GetObjectAcl',
+          's3:ListBucketMultipartUploads',
+          's3:ListMultipartUploadParts',
+          's3:AbortMultipartUpload'
+        ],
+        Resource: [
+          `arn:aws:s3:::uploads-${stage}-${vars.AWS_REGION}`,
+          `arn:aws:s3:::uploads-${stage}-${vars.AWS_REGION}/*`
+        ]
+      }],
     },
-    slsIamRoleStatements: [{
-      Effect: 'Allow',
-      Resource: [`arn:aws:cognito-idp:${vars.AWS_REGION}:${props.accountId}:userpool/${props.cognitoUserPoolId}`],
-      Action: [
-        'cognito-idp:AdminCreateUser',
-        'cognito-idp:AdminDeleteUser',
-        'cognito-idp:AdminConfirmSignUp',
-        'cognito-idp:AdminAddUserToGroup',
-        'cognito-idp:AdminDisableUser',
-        'cognito-idp:AdminEnableUser',
-        'cognito-idp:ListUsers',
-        'cognito-idp:AdminUpdateUserAttributes',
-        'cognito-idp:AdminGetUser'
-      ]
-    }, {
-      Effect: 'Allow',
-      Action: [
-        's3:ListBucket',
-        's3:PutObject',
-        's3:PutObjectAcl',
-        's3:AbortMultipartUpload',
-        's3:GetObject',
-        's3:GetObjectAcl',
-        's3:ListBucketMultipartUploads',
-        's3:ListMultipartUploadParts',
-        's3:AbortMultipartUpload'
-      ],
-      Resource: [
-        `arn:aws:s3:::uploads-${stage}-${vars.AWS_REGION}`,
-        `arn:aws:s3:::uploads-${stage}-${vars.AWS_REGION}/*`
-      ]
-    }],
     webpackIgnore: /^pg-native$/,
     startCommands: [
       { command: 'yarn', args: ['-s', 'concurrently', '--kill-others', `"nodemon --watch ./build --exec 'yarn -s vars yarn -s serverless offline --host 0.0.0.0 --stage ${vars.STAGE} --skipCacheInvalidation true'"`, '"tsc -w -p tsconfig.sls.json"'] }

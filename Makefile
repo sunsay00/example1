@@ -7,7 +7,8 @@ vars:
 	@yarn -s vars -V
 
 install:
-	@yarn -s vars yarn -s configure up -v
+	@tsc -b && \
+		yarn -s vars yarn -s configure up -v
 force:
 	@yarn -s vars yarn -s configure up -v -f
 

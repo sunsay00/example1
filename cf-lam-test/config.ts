@@ -21,9 +21,11 @@ export const useLamTest = (inputs: {
       }
     },
     webpackIgnore: /^pg-native$/,
-    slsVpc: {
-      securityGroupIds: inputs.securityGroupIds,
-      subnetIds: inputs.subnetIds
+    sls: {
+      vpc: {
+        securityGroupIds: inputs.securityGroupIds,
+        subnetIds: inputs.subnetIds
+      }
     }
   });
 });

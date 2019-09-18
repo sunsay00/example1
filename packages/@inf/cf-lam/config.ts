@@ -34,6 +34,10 @@ const SLSConfigRecord = RT.Record({
   functions: RT.Dictionary(RT.Record({
     handler: RT.String,
   }).And(RT.Partial({
+    vpc: RT.Record({
+      securityGroupIds: RT.Array(RT.String),
+      subnetIds: RT.Array(RT.String)
+    }),
     environment: RT.Dictionary(RT.String),
     events: RT.Array(RT.Record({
       http: RT.Record({
@@ -64,6 +68,7 @@ export type Handler = {
   entrypoint: string
   environment?: SLSFunction['environment'],
   events?: SLSFunction['events']
+  vpc?: SLSVpc,
 };
 
 const PackageJsonRecord = RT.Partial({
@@ -83,11 +88,14 @@ export const useLam = async <R>(props: {
 
   handlers: { [_ in keyof R]: Handler },
 
-  slsVpc?: SLSVpc,
-  slsIamRoleStatements?: SLSIamRoleStatement[]
-  slsIncludes?: string[],
-  slsExcludes?: string[],
-  slsPlugins?: string[],
+  sls: {
+    timeoutInSec?: number,
+    vpc?: SLSVpc,
+    iamRoleStatements?: SLSIamRoleStatement[]
+    includes?: string[],
+    excludes?: string[],
+    plugins?: string[]
+  },
 
   webpackIgnore?: RegExp,
 
@@ -143,22 +151,24 @@ export const useLam = async <R>(props: {
     provider: {
       name: 'aws',
       runtime: 'nodejs10.x',
+      timeout: props.sls.timeoutInSec || 6,
       stage,
       region: vars.AWS_REGION,
-      vpc: props.slsVpc,
-      iamRoleStatements: props.slsIamRoleStatements,
+      ...(props.sls.vpc && { vpc: props.sls.vpc } || {}),
+      iamRoleStatements: props.sls.iamRoleStatements,
     },
     package: {
-      include: maybePush(entries(props.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), props.slsIncludes),
-      exclude: maybePush('**/*', props.slsExcludes)
+      include: maybePush(entries(props.handlers).map(([_, v]) => `build/${v.filepath.replace(/(.ts$)/, '.js')}`), props.sls.includes),
+      exclude: maybePush('**/*', props.sls.excludes)
     },
     functions: fromEntries(entries(props.handlers).map(([k, v]) => [k, {
       handler: makeHandler(k, v),
       environment: v.environment,
-      events: v.events
+      events: v.events,
+      ...(v.vpc && { vpc: v.vpc } || {})
     }])),
     //plugins: stage == 'local' ? ['serverless-offline', ...(inputs.slsPlugins || [])] : inputs.slsPlugins,
-    ...(stage == 'local' ? { plugins: ['serverless-offline', ...(props.slsPlugins || [])] } : (props.slsPlugins ? { plugins: props.slsPlugins } : {}))
+    ...(stage == 'local' ? { plugins: ['serverless-offline', ...(props.sls.plugins || [])] } : (props.sls.plugins ? { plugins: props.sls.plugins } : {}))
   };
   if (!SLSConfigRecord.guard(lam))
     throw new Error('invalid sls configuration');
