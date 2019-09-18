@@ -27,7 +27,7 @@ const Layout = (props: { children?: React.ReactNode }) => {
           <Web.NavLink to="#services">Services</Web.NavLink>
           <Web.NavLink to="#contact">Contact</Web.NavLink>
           <Web.NavLink to="/styleguide/">Styleguide</Web.NavLink>
-          <Web.NavLink >Disabled</Web.NavLink>
+          <Web.NavLink disabled={!user} to="/tests/">Tests</Web.NavLink>
           <Web.NavLink disabled={loading} onPress={() => {
             if (user) logOut();
             else setCurrent(<Auth onLogInComplete={() => setCurrent(null)} />);
@@ -79,4 +79,4 @@ export const App = (props: { children?: React.ReactNode }) =>
       }}</AccountConsumer>
     </AccountProvider>
   }
-  </Web.Root >
+  </Web.Root>

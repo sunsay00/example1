@@ -49,7 +49,7 @@ export default () => {
                   <UI.View key={i}>
                     <UI.View style={{ padding: 16, flexDirection: 'row', borderColor: UI.Colors.lightGray, borderTopWidth: i == 0 ? 0 : 1 }}>
                       <UI.View style={{ flex: 1, flexDirection: 'column' }}>
-                        {Object.entries(factory).map(([k, v], i) =>
+                        {Object.entries(factory).filter(([k]) => ['name', 'description', 'location'].includes(k)).map(([k, v], i) =>
                           <UI.View key={i} style={{ flexDirection: 'row' }}>
                             <UI.Text size="xxs" style={{ flex: 1, flexWrap: 'wrap' }}>{k}</UI.Text>
                             <UI.Text size="xxs" style={{ flex: 1, flexWrap: 'wrap' }}>{JSON.stringify(v)}</UI.Text>
@@ -58,7 +58,7 @@ export default () => {
                       <UI.Button size="sm" onPress={() => removeDeckFactory({ id: factory.id })}>Delete</UI.Button>
                     </UI.View>
                     <UI.View style={{ padding: 16, flexDirection: 'row' }}>
-                      <UI.Button secondary onPress={() => createDeck({
+                      <UI.Button size="sm" secondary onPress={() => createDeck({
                         factoryId: factory.id,
                         cards: [],
                         expiresAt: new Date(),
@@ -70,7 +70,7 @@ export default () => {
                           {deck.map((item, i) => (
                             <UI.View key={i} style={{ padding: 16, flexDirection: 'row', borderColor: UI.Colors.lightGray, borderLeftWidth: i == 0 ? 0 : 1 }}>
                               <UI.View style={{ flex: 1, flexDirection: 'column' }}>
-                                {Object.entries(item).map(([k, v], i) =>
+                                {Object.entries(item).filter(([k]) => ['user', 'cards', 'title', 'description'].includes(k)).map(([k, v], i) =>
                                   <UI.View key={i} style={{ flexDirection: 'row' }}>
                                     <UI.Text size="xxs" style={{ maxWidth: 96, flex: 1, flexWrap: 'wrap', overflow: 'hidden' }}>{k}</UI.Text>
                                     <UI.Spacer />
@@ -80,12 +80,12 @@ export default () => {
                               </UI.View>
                               <UI.Spacer />
                               <UI.View>
-                                <UI.Button size="sm" onPress={() => updateDeck({
+                                <UI.Button size="xs" onPress={() => updateDeck({
                                   ...item,
                                   description: item.description == 'wakka' ? 'blakka' : 'wakka',
                                 })}>Update</UI.Button>
                                 <UI.Spacer />
-                                <UI.Button size="sm" onPress={() => removeDeck({ id: item.id })}>Delete</UI.Button>
+                                <UI.Button size="xs" onPress={() => removeDeck({ id: item.id })}>Delete</UI.Button>
                               </UI.View>
                             </UI.View>))}
                         </UI.ScrollView>}

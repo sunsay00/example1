@@ -122,7 +122,7 @@ export const NavLink = (props: {
     );
   }
 
-  if (props.to) {
+  if (props.to && !props.disabled) {
     const to = props.to;
     const rel = document.location.href.replace(/^(?:\/\/|[^\/]+)*/, '');
     if (props.to.startsWith('#') && rel.startsWith('/#')) {
@@ -194,7 +194,7 @@ export const NavLayout = (props: { navHeight?: number, children?: React.ReactNod
             <View key={1} style={{ flex: 1, marginHorizontal: 32 }}>{children}</View>
           </>}
           renderMedium={children => <>
-            <View key={1} style={{ marginTop: height, marginBottom: -height, marginHorizontal: 32 }}>{children}</View>
+            <View key={1} style={{ marginTop: height, paddingBottom: -height, marginHorizontal: 32 }}>{children}</View>
             <View key={2} style={{ marginHorizontal: 32 }}>{props.renderNavBar && props.renderNavBar()}</View>
           </>}
         >
