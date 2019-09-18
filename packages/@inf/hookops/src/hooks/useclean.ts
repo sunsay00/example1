@@ -3,11 +3,11 @@ import * as fs from 'fs';
 import { unlinkRecursiveSync } from '@inf/core';
 
 let _cleanerclear: { [_: string]: boolean } | undefined = undefined;
-export const useClean = (paths?: string[]) => {
+export const useClean = (paths: string[]) => {
 
   const trashpath = path.resolve(`/tmp/.hookops.trash`);
 
-  paths && paths.forEach(p => {
+  paths.forEach(p => {
     const abs = path.resolve(p);
     if (_cleanerclear == undefined) {
       //if (fs.existsSync(trashpath))
@@ -31,7 +31,7 @@ export const useClean = (paths?: string[]) => {
           p.match(/.+\/\.tmp\/?$/) ||
           p.match(/.+\/\.scripts\/?$/) ||
           p.match(/.+\/tmp\/?$/) ||
-          p.match(/.+\/_gen\./) ||
+          p.match(/.+\/_gen\/?$/) ||
           p.match(/.+\/_vars\./) ||
           p.match(/.+\/_outputs\./) ||
           p.match(/.+\/\.inputs\/?$/) ||

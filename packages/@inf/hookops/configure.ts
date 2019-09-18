@@ -72,7 +72,7 @@ const main = async (event: string, verbose: boolean, force: boolean) => {
 
   if (event == 'clean') {
 
-    useClean().clean();
+    useClean([]).clean();
 
   } else if (event == 'up') {
 

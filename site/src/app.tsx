@@ -65,7 +65,6 @@ export const App = (props: { children?: React.ReactNode }) =>
       <AccountConsumer>{account => {
         const authorization = account && account.user && `Bearer ${account.user.tokens.idToken}` || 'Guest';
         return <ApolloProvider
-          disableCache
           authorization={authorization}
           websocketEndpoint={config.WEBSOCKET_ENDPOINT}
           graphqlEndpoint={config.GRAPHQL_ENDPOINT}

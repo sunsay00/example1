@@ -1,7 +1,6 @@
 import * as fs from 'fs';
-import { createModule, useShell, useScriptRegistry, useGlobals } from '@inf/hookops';
-import { useGitIgnore } from '@inf/hooks';
-import { TunnelProps, useTunnel } from '@inf/hooks';
+import { createModule, useShell, useScriptRegistry, useGlobals, useClean } from '@inf/hookops';
+import { useGitIgnore, TunnelProps, useTunnel } from '@inf/hooks';
 
 export type GenProps = {
   ledgerPath: string,
@@ -206,6 +205,8 @@ export const useFrontendGen = async (props: {
   });
 
   useGitIgnore(currentModuleDir, ['src/_gen']);
+
+  useClean([`${currentModuleDir}/src/_gen`])
 }
 
 export const useBackendGen = async (props: {
@@ -234,4 +235,6 @@ export const useBackendGen = async (props: {
   });
 
   useGitIgnore(currentModuleDir, ['src/_gen']);
+
+  useClean([`${currentModuleDir}/src/_gen`])
 }
