@@ -4,7 +4,10 @@
     "composite": true,
     "jsx": "react",
     "lib": [
-      "es6"
+      "es6",
+      "es2017",
+      "es2018",
+      "es2019"
     ],
     "moduleResolution": "node",
     "noEmit": true,
@@ -16,5 +19,8 @@
       "./src",
       "./__tests__"
     ]
-  }
+  },
+  "exclude": [
+    "config.ts"
+  ]
 }

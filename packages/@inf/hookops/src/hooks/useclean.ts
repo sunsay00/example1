@@ -31,6 +31,7 @@ export const useClean = (paths?: string[]) => {
           p.match(/.+\/\.tmp\/?$/) ||
           p.match(/.+\/\.scripts\/?$/) ||
           p.match(/.+\/tmp\/?$/) ||
+          p.match(/.+\/_gen\./) ||
           p.match(/.+\/_vars\./) ||
           p.match(/.+\/_outputs\./) ||
           p.match(/.+\/\.inputs\/?$/) ||

@@ -74,7 +74,7 @@ export const ApolloProvider = (props: {
               graphQLErrors.map(({ message, path }) =>
                 console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`));
             if (networkError)
-              console.error(`[Network error]: ${networkError}`);
+              console.error(`[Network error]: ${networkError} ${props.graphqlEndpoint}`);
             //debugger;
           }),
           concatWebSocket(authLink.concat(httpLink), props.websocketEndpoint),

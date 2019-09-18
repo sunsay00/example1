@@ -127,7 +127,8 @@ const configuration: Configuration = {
         identityPoolId: cog.CognitoIdentityPoolId,
         userPoolId: cog.UserPoolId,
         clientId: cog.MobileUserPoolClientId,
-      }
+      },
+      genProps: gen.props
     });
   }
 };

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as UI from '@inf/core-ui';
 import * as Mobile from '@inf/mobile-ui';
-import { AccountProvider } from '@inf/cf-cognito';
+import { AccountProvider, AccountConsumer } from '@inf/cf-cognito';
 import {
   createSwitchNavigator, createDrawerNavigator, createBottomTabNavigator, createAppContainer,
   createStackNavigator, createTabBarIcon, createNavWrapper,
@@ -63,16 +63,27 @@ const Layout = createAppContainer(createNavWrapper(
 
 export const App = (props: {}) =>
   <Mobile.Root>{overlays =>
-    <AccountProvider region="us-east-1">
-      <ApolloProvider
-        authorization="Guest"
-        websocketEndpoint={config.WEBSOCKET_ENDPOINT}
-        graphqlEndpoint={config.GRAPHQL_ENDPOINT}
-      >
-        <UI.AssertSingleton fn={App}>
-          <Layout />
-          {overlays}
-        </UI.AssertSingleton>
-      </ApolloProvider>
+    <AccountProvider
+      region={config.AWS_REGION}
+      identityPoolId={config.IDENTITY_POOL_ID}
+      userPoolId={config.USER_POOL_ID}
+      clientId={config.CLIENT_ID}
+    >
+      <AccountConsumer>{account => {
+        const authorization = account && account.user && `Bearer ${account.user.tokens.idToken}` || 'Guest';
+        return (
+          <ApolloProvider
+            authorization={authorization}
+            websocketEndpoint={config.WEBSOCKET_ENDPOINT}
+            graphqlEndpoint={config.GRAPHQL_ENDPOINT}
+          >
+            <UI.AssertSingleton fn={App}>
+              <Layout />
+              {overlays}
+            </UI.AssertSingleton>
+          </ApolloProvider>
+        );
+      }}
+      </AccountConsumer>
     </AccountProvider>}
   </Mobile.Root>

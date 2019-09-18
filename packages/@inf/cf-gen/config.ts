@@ -191,7 +191,6 @@ export const useGen = (props: {
 });
 
 export const useFrontendGen = async (props: {
-  id: string,
   genProps: GenProps
 }) => {
   const { configurationDir, currentModuleDir } = useGlobals();

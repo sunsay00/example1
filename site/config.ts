@@ -15,7 +15,6 @@ export const useSite = (props: {
   const { stage } = useGlobals();
 
   await useFrontendGen({
-    id: 'site',
     genProps: props.genProps
   });
 
