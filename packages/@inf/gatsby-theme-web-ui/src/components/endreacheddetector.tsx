@@ -11,9 +11,9 @@ export const EndReachedDetector = (props: {
   React.useEffect(() => {
     const fn = debounce((e: Event) => {
       if (!divRef.current) return;
-      const { bottom } = divRef.current.getBoundingClientRect();
+      const rc = divRef.current.getBoundingClientRect();
       const threshold = props.onEndReachedThreshold || 0;
-      if (bottom * threshold < window.innerHeight)
+      if (rc.bottom * threshold < window.innerHeight)
         props.onEndReached && props.onEndReached();
     }, 500);
     window.addEventListener('scroll', fn);

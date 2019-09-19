@@ -185,11 +185,17 @@ export default class AWSClient {
     return ret.MessageId;
   }
   unregisterDevice = async (endpoint: string): Promise<void> => {
+    if (endpoint == 'mock-endpoint')
+      return;
+
     await getSns(this._region).deleteEndpoint({
       EndpointArn: endpoint,
     }).promise();
   }
   registerDevice = async (userAgent: string, endpoint: string | undefined, deviceToken: string, customUserData: string): Promise<string> => {
+    if (process.env.STAGE == 'local' && userAgent == 'web')
+      return 'mock-endpoint';
+
     let endpointArn = endpoint;
 
     let updateNeeded = false;

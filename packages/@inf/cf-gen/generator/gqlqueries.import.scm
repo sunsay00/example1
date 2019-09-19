@@ -1,4 +1,4 @@
-(module gqlqueries (gql-proxy-query-emit gql-query-emit gql-mutation-emit gqlqueries-generate-fixtures)
+(module gqlqueries (gql-proxy-query-emit gql-query-emit gql-mutation-emit gqlqueries-generate-fixtures gql-result-params-emit)
   (import scheme chicken data-structures tools signatures typedefs)
   (require-extension srfi-13 srfi-1)
 
@@ -72,6 +72,13 @@
            (filters (filter (lambda (name) (member name (map param->name (method->params method)))) foreign-keys-sub)))
         (list " @connection(key: \"" (model->name model) "\"" (if (null? filters) "" (list ", filter: [" (intersperse (map (lambda (f) (list "\"" f "\"")) filters) ", ") "]")) ")")))
 
+  (define (gql-result-params-emit model start-type)
+    (intersperse
+      (map (lambda (param) (recur-param->name model param))
+           (remove param-hidden?
+                   (type-fields (model->api model)
+                                start-type))) " "))
+
   (define (gql-query-emit model method)
     (let ((name (method->name method))
           (params (graphql-params model method))
@@ -89,13 +96,7 @@
                   "\n    }")
                 ""))
             "")
-          (let ((result-params
-                  (intersperse
-                    (map (lambda (param) (recur-param->name model param))
-                         (remove param-hidden?
-                                 (type-fields (model->api model)
-                                             (base-type rettype))
-                                 )) " ")))
+          (let ((result-params (gql-result-params-emit model (base-type (method->return-type method)))))
             (list " {"
                   (if (array? rettype)
                     (list

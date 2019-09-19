@@ -55,6 +55,8 @@
       (define api (schema->api schema)) ; prev-api + delta-api = api
       (print "\n---- [ GENERATING FRONTENT VERSION: v" vnum " ] ----")
 
+      ;(pp api)
+
       (define (get-path s) (string-append output-dir "/" s))
 
       (define last? (= (+ i 1) (length schemas)))

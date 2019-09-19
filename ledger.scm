@@ -208,7 +208,7 @@
                                   (result comment)))
 
     (create-type Device)
-    (type-add-field Device token String)
+    (type-add-field Device token String (key #t))
     (type-add-field Device createdAt DateTime)
     (type-add-field Device endpoint String)
     (type-add-field Device userAgent String)

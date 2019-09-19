@@ -25,12 +25,13 @@
                method->return-props method->implied-sub-field smoosh method-cache-expire? method->cache-expire
                model->unique-index-fieldnames model->props+foreign model->hidden-props command->cmdtype api->type-extensions
                type-extension->typename type-extension->param specs->find plus-type? plus-type->types make-plus-type
+               type->key-fields
                )
 
   (import scheme chicken data-structures commands matchable)
   (require-extension srfi-13 srfi-1)
 
-  (define (command->cmdtype model method mode)
+  (define (command->cmdtype model method default-mode)
     (define (mode->cmdtype mode)
       (match mode
              ;('Register 'create)
@@ -38,14 +39,14 @@
              ;('Unregister 'delete)
              (_ (error "mode->cmdtype - unknown command type mode " mode))))
     (if (not (method-command? method))
-        (mode->cmdtype mode)
+        (mode->cmdtype default-mode)
         (let ((cmd (cons 'command (method->command method))))
           (match cmd
                  (`(command (update . ,rs) . ,rrs) 'update)
                  (`(command (insert . ,rs) . ,rrs) 'create)
                  (`(command (delete . ,rs) . ,rrs) 'delete)
                  (`(command (select . ,rs) . ,rrs) 'update)
-                 (_ (error (smoosh "command->cmdtype - unknown command type " mode " - " (->string cmd))))))))
+                 (_ (error (smoosh "command->cmdtype - unknown command type " default-mode " - " (->string cmd))))))))
 
   (define (version-name->number v) (string->number (list->string (cdr (string->list (symbol->string v))))))
   (define (number->version-name n) (string->symbol (string-append "v" (number->string n))))
@@ -450,6 +451,9 @@
   ; types (aliases for typedef and inputdef)
   (define type->name typedef->name)
   (define type->fields typedef->params)
+  (define (type->key-fields api type)
+    (let ((params (typedef->params (typedef-assq! type api))))
+      (filter (lambda (p) (param->specs-assq 'key p)) params)))
 
   ; param
   (define (make-param . rest) 

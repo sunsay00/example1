@@ -1,4 +1,5 @@
 import { GraphQLError, ExecutionResult } from 'graphql';
+import { sleep } from '@inf/common';
 import { domainWrapper } from './domainwrapper';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 

@@ -36,3 +36,7 @@ export type QueryResult = {
 }
 
 export type QueryParam = object | number | string | undefined;
+
+import * as _cuid from 'cuid';
+
+export const cuid = _cuid;

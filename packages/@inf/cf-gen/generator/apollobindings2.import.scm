@@ -45,6 +45,30 @@
                                  (_ (error (smoosh "(apollobindings.import.ref) no match for gen-update-code " (->string cmd-ref))))))
                         (_ (error (smoosh "(apollobindings.import) no match for gen-update-code " (->string cmd)))))))))))))
 
+  (define (primary-keys model method)
+    (let* ((cmd (cons 'command (method->command method)))
+           (has-id? (match cmd
+                           (`(command (select . ,us) (where . ,ws) . ,rs)
+                             (any (lambda (w) (match w
+                                                     (`(= ',id ,id) #t)
+                                                     (`(= ,id ',id) #t)
+                                                     (_ #f))) ws))
+                           (_ #f))))
+      (if (not (method-command? method))
+        (if has-id? (list 'id) '())
+        (let ((ff-keys (map foreign-field->key (model->foreign model))))
+          (if has-id? (cons 'id ff-keys) ff-keys)))))
+
+  (define (gen-query model method lname)
+    (if (not (method-command? method))
+      (list lname "Query")
+      (let* ((keys (primary-keys model method))
+             (param-names (map param->name (method->params method)))
+             (param-keys (filter (lambda (name) (member name param-names)) keys)))
+        (if (null? param-keys) (list lname "Query")
+          (list (intersperse (map (lambda (k) (list "opts." k ".startsWith('-')")) param-keys) " || ")
+                " ? gql`{ Noop @client }` : " lname "Query")))))
+
   (define (gen-result-variables params)
     (list "{ " 
           (intersperse
@@ -103,13 +127,32 @@
                     (append/M vars)
                     (return (list ", variables: { " (intersperse (map (lambda (ff) (list (foreign-field->key ff) ": result." (foreign-field->name ff) "." (foreign-field->fkey ff))) fffs) ", ") " }")))))))))))
 
-  (define (gen-update mode model method storybook?)
+  (define (gen-defaults api typedef mode)
+    (define (recur ty)
+      (match ty
+             ('String "''")
+             (`(Optional ,t) "null as any")
+             ('Point "{ lon: 0, lat: 0 }")
+             ('DateTime (match mode
+                               ('delete "new Date(0)")
+                               (_ "new Date()")))
+             (`(Array ,t) "[]")
+             ('Int "0")
+             ('Float "0")
+             ('Boolean "false")
+             (_ (let ((td (typedef-assq ty api)))
+                  (if (not td) (error "unmknown default type " ty)
+                    (gen-defaults api td mode))))))
+    (let ((params (typedef->params typedef)))
+      (list "{ " (intersperse (map (lambda (p) (list (param->name p) ": " (recur (param->type p)))) params) ", ") " }")))
 
+  (define (gen-update mode model method storybook?)
     (let* ((methods (filter (lambda (method)
                               (and (get? method)
                                    (or (method-serviceonly? method) (method-apionly? method))))
                             (model->all-methods model)))
            (model-name (model->name model))
+           (typedef-name (typedef->name (model->typedef model)))
            (methodnames-to-update (delete-duplicates
                                     (map method->name (filter (lambda (m) (not (array? (method->return-type m)))) methods))))
            (methodnames-to-update/array (delete-duplicates
@@ -117,60 +160,96 @@
            (method-lookup (map (lambda (m) (cons (method->name m) m)) methods)))
       (list
         (if (and (zero? (length methodnames-to-update)) (zero? (length methodnames-to-update/array))) (list)
-          (list "\n    update: (proxy: any, mutationResult: any) => {"
-                "\n      const result = mutationResult.data." model-name mode ";"
-                "\n      if (!result) return;"
-
-                ;(if (zero? (length methodnames-to-update)) (list)
-                ;  (intersperse
-                ;    (map (lambda (name)
-                ;           (let ((query-name (list (model->name model) name "Query"))
-                ;                 (method-ref (cdr (assq name method-lookup))))
-                ;             (list
-                ;               "\n      try {"
-                ;               "\n        let readData = proxy.readQuery({ query: " query-name ", variables: " (gen-result-variables (method->params method-ref)) " });"
-                ;               (gen-update-code model method method-ref)
-                ;               "\n        proxy.writeQuery({ query: " query-name ", data: readData, variables: " (gen-result-variables (method->params method-ref)) " });"
-                ;               "\n      } catch (err) {"
-                ;               (if storybook?
-                ;                 (list "\n        console.log('cache not updated " model-name "." name "');")
-                ;                 (list "\n        if (process.env.NODE_ENV != 'test') console.log('cache not updated " model-name "." name "');"))
-                ;               "\n      }"
-                ;               )))
-                ;         methodnames-to-update) "\n"))
-
-                (if (zero? (length methodnames-to-update/array)) (list)
-                    (state-run
-                      (mapM (lambda (name)
-                              (doM
-                                (query-name <- (return (list (model->name model) name "Query")))
-                                (variables <- (gen-update-vars/M model (cdr (assq name method-lookup))))
-                                (return (if (null? variables) (list) (list
-                                          "\n      try {"
-                                          "\n        const data = proxy.readQuery({ query: " query-name variables " });"
-                                          (cond
-                                            ((eq? (command->cmdtype model method mode) 'update)
+          (list
+            (cond
+              ((eq? (command->cmdtype model method mode) 'create)
+               (let ((ret-td (typedef-assq! (base-type (method->return-type method)) (model->api model))))
+                 (list "\n    optimisticResponse: vars => ({"
+                       "\n      " model-name (method->name method) ": {"
+                       "\n        ..." (gen-defaults (model->api model) ret-td 'create) ","
+                       "\n        ...vars,"
+                       "\n        id: `-${cuid()}`,"
+                       "\n        __typename: '" typedef-name "'"
+                       "\n      }"
+                       "\n    } as { " model-name (method->name method) ": " (first-up model-name) (method->name method) "Result & { __typename: string } " "}),")))
+              ((eq? (command->cmdtype model method mode) 'update)
+               (let ((ret-td (typedef-assq! (base-type (method->return-type method)) (model->api model))))
+                 (list "\n    optimisticResponse: vars => ({"
+                       "\n      " model-name (method->name method) ": {"
+                       "\n        ...vars,"
+                       "\n        __typename: '" typedef-name "'"
+                       "\n      }"
+                       "\n    } as { " model-name (method->name method) ": " (first-up model-name) (method->name method) "Result & { __typename: string } " "}),")))
+              ((eq? (command->cmdtype model method mode) 'delete)
+               (let ((ret-td (typedef-assq! (base-type (method->return-type method)) (model->api model))))
+                 (list "\n    optimisticResponse: vars => ({"
+                       "\n      " model-name (method->name method) ": {"
+                       "\n        ..." (gen-defaults (model->api model) ret-td 'delete) ","
+                       "\n        ...vars,"
+                       "\n        __typename: '" typedef-name "'"
+                       "\n      }"
+                       "\n    } as { " model-name (method->name method) ": " (first-up model-name) (method->name method) "Result & { __typename: string } " "}),")))
+              (else (list)))
+            (let ((ffs (model->foreign model)))
+              (list "\n    update: (proxy: any, mutationResult: any) => {"
+                    "\n      const result = mutationResult.data." model-name mode " as " (first-up model-name) mode "Result" (if (null? ffs) "" (list " & { " (intersperse (map (lambda (ff) (list (foreign-field->key ff) ": string")) ffs) ", ") " }")) " | undefined;"
+                    "\n      if (!result) return;"
+                    (match (command->cmdtype model method mode)
+                           ('create (map (lambda (ff)
+                                           (let* ((result (model-assq (foreign-field->type ff) (model->api model))))
+                                             (if (not result) (list)
+                                               (let* ((foreign-model (cadr result))
+                                                      (fft (foreign-field->type ff)))
+                                                 (list "\n      if (!result." (foreign-field->name ff) ") {"
+                                                       "\n        result." (foreign-field->name ff) " = proxy.readFragment({"
+                                                       "\n          fragment: gql`fragment page on " (foreign-field->type ff) " { " (gql-result-params-emit foreign-model fft) " }`,"
+                                                       "\n          id: `" (foreign-field->type ff) ":${result." (foreign-field->key ff) "}`"
+                                                       "\n        });"
+                                                       "\n        if (!result." (foreign-field->name ff) ") return;"
+                                                       "\n      }"))))) ffs))
+                           ('update (map (lambda (ff) (list "\n      if (!result." (foreign-field->name ff) ") return;")) ffs))
+                           ('delete (map (lambda (ff) (list "\n      if (!result." (foreign-field->name ff) ") return;")) ffs))
+                           (_ ""))))
+            (if (zero? (length methodnames-to-update/array)) (list)
+              (state-run
+                (mapM (lambda (name)
+                        (doM
+                          (query-name <- (return (list (model->name model) name "Query")))
+                          (variables <- (gen-update-vars/M model (cdr (assq name method-lookup))))
+                          (return (if (null? variables) (list)
+                                    (let ((key-field-names (if (model-usermodel? model) '(id)
+                                                             (let ((names (map param->name (type->key-fields (model->api model) (base-type (method->return-type method))))))
+                                                               (if (null? names) '(id) names)))))
+                                      (list
+                                        "\n      try {"
+                                        (cond
+                                          ((eq? (command->cmdtype model method mode) 'update)
+                                           (list
+                                             "\n        const data = proxy.readQuery({ query: " query-name variables " });"
+                                             "\n        data." model-name name ".items[result.id] = { ...data." model-name name ".items[result.id], ...result };"))
+                                          ((eq? (command->cmdtype model method mode) 'delete)
                                              (list
-                                               "\n        data." model-name name ".items[result.id] = { ...data." model-name name ".items[result.id], ...result };"))
-                                            ((eq? (command->cmdtype model method mode) 'delete)
-                                             (list
-                                               "\n        data." model-name name ".items = data." model-name name ".items.filter((i: any) => i.id != result.id);"))
-                                            ((eq? (command->cmdtype model method mode) 'create)
-                                             (list
-                                               (if (method-ascending? method)
-                                                 (list "\n        data." model-name name ".items.unshift(result);")
-                                                 (list "\n        data." model-name name ".items.push(result);")) 
-                                               ))
-                                            (else (error "unknown gen-update mode in apollobindings2 " mode)))
-                                          "\n        proxy.writeQuery({ query: " query-name ", data" variables " });"
-                                          "\n      } catch (err) {"
-                                          (if storybook?
-                                            (list "\n        console.log('cache not updated " model-name "." name " ', err);")
-                                            (list "\n        if (process.env.NODE_ENV != 'test') console.log('cache not updated " model-name "." name " ', err);"))
-                                          "\n      }"
-                                          )))))
-                            methodnames-to-update/array)))
-                "\n    },")
+                                               "\n        const data = proxy.readQuery({ query: " query-name variables " });"
+                                               "\n        data." model-name name ".items = data." model-name name ".items.filter((i: any) => " (intersperse (map (lambda (n) (list "i." n " != result." n)) key-field-names) " || ") ");"))
+                                          ((eq? (command->cmdtype model method mode) 'create)
+                                           (list
+                                             "\n        const data = proxy.readQuery({ query: " query-name variables " });"
+                                             (list "\n      if (!data." model-name name ".items.find((i: any) => " (intersperse (map (lambda (n) (list "i." n " == result." n)) key-field-names) " && ") ")) {"
+                                                   (if (method-ascending? method)
+                                                     (list "\n        data." model-name name ".items.unshift(result);")
+                                                     (list "\n        data." model-name name ".items.push(result);")
+                                                     )
+                                                   "\n      }") 
+                                             ))
+                                          (else (error "unknown gen-update mode in apollobindings2 " mode)))
+                                        "\n        proxy.writeQuery({ query: " query-name ", data" variables " });"
+                                        "\n      } catch (err) {"
+                                        (if storybook?
+                                          (list "\n        //console.log('cache not updated " model-name "." name " (" (method->name method) ") ', err);")
+                                          (list "\n        //if (process.env.NODE_ENV != 'test') console.log('cache not updated " model-name "." name " (" (method->name method) ") ', err);"))
+                                        "\n      }"))))))
+                      methodnames-to-update/array)))
+            "\n    },")
           ))))
 
   (define (strip-typename params)
@@ -186,11 +265,10 @@
           (params (graphql-params model method))
           (lname (list (model->name model) (method->name method)))
           (cname (list (first-up (model->name model)) (method->name method))))
-      ;(list "\nexport type " name "Result = " (paginated-type return-type-emit (method->return-type method)) ";")))
       (list
         "\nexport const use" cname " = (client: ApolloClient<object>, opts: " cname "Props):"
         "\n  QueryResult<" cname "Result, Record<string, any>> => {"
-        "\n  const result = useQuery<" cname "Result>(" lname "Query, {"
+        "\n  const result = useQuery<" cname "Result>(" (gen-query model method lname) ", {"
         "\n    client,"
         "\n    variables: " (gen-variables params)
         "\n  });"
@@ -219,61 +297,21 @@
             (if (method-ascending? method)
               (list "\n              items: [...opts.fetchMoreResult." lname ".items, ...prev." lname ".items]")
               (list "\n              items: [...prev." lname ".items, ...opts.fetchMoreResult." lname ".items]"))
-            ;"\n              ...(props.updateQuery && props.updateQuery(prev." lname ", { fetchMoreResult: opts.fetchMoreResult && opts.fetchMoreResult." lname " }) || prev." cname ")"
             "\n            }"
             "\n          };"
             "\n        }"
             "\n      });"
             "\n    },"))
-        "\n    // @ts-ignore"
-        "\n    data: result.data && result.data." lname
+        (if (array? (method->return-type method))
+          (list "\n    // @ts-ignore"
+                "\n    data: result.data && result.data." lname " && {"
+                "\n      // @ts-ignore"
+                "\n      ...result.data." lname ", items: result.data." lname ".items.filter(i =>"
+                "\n        !(i.createdAt instanceof Date) || i.createdAt.getTime() != (new Date(0)).getTime())"
+                "\n    }")
+          (list "\n    // @ts-ignore"
+                "\n    data: result.data && result.data." lname))
         "\n  };"
-        ;"\n  try {"
-        ;"\n    const subscription = await client.watchQuery<{ " lname ": " cname "Result }>({"
-        ;"\n      query: " lname "Query,"
-        ;"\n      variables: " (gen-variables params)
-        ;"\n    });"
-        ;"\n    return {"
-        ;"\n      subscription,"
-        ;(if (not (array? (method->return-type method))) ""
-        ;  (list
-        ;    "\n      hasMore: () => !!(subscription.currentResult().data as { " lname ": " cname "Result })." lname ".cursor,"
-        ;    "\n      fetchMore: (variables?: {}) => {"
-        ;    "\n        const cursor = (subscription.currentResult().data as { " lname ": " cname "Result })." lname ".cursor;"
-        ;    "\n        return subscription.fetchMore({"
-        ;    "\n          query: subscription.options.query,"
-        ;    "\n          variables: {"
-        ;    "\n            ...subscription.variables,"
-        ;    "\n            after: cursor,"
-        ;    "\n            ...variables,"
-        ;    "\n          },"
-        ;    "\n          updateQuery: (prevResult, { fetchMoreResult }) => {"
-        ;    "\n            try {"
-        ;    "\n              const latestCursor = (subscription.currentResult().data as { " lname ": " cname "Result })." lname ".cursor;"
-        ;    "\n              const prev = prevResult as { " lname ": " cname "Result };"
-        ;    "\n              const next = fetchMoreResult as { " lname ": " cname "Result };"
-        ;    "\n              const isNewPage = latestCursor == cursor;"
-        ;    "\n              return {"
-        ;    "\n                " lname ": {"
-        ;    "\n                  ...prev." lname ","
-        ;    "\n                  cursor: next." lname ".cursor,"
-        ;    (if (method-ascending? method)
-        ;      (list "\n                  items: isNewPage ? [...prev." lname ".items, ...next." lname ".items] : prev." lname ".items,")
-        ;      (list "\n                  items: isNewPage ? [...next." lname ".items, ...prev." lname ".items] : prev." lname ".items,"))
-        ;    "\n                },"
-        ;    "\n              };"
-        ;    "\n            } catch (err) {"
-        ;    "\n              console.error(err);"
-        ;    "\n              throw err;"
-        ;    "\n            }"
-        ;    "\n          }"
-        ;    "\n        });"
-        ;    "\n      },"))
-        ;"\n    };"
-        ;"\n  } catch (err) {"
-        ;"\n    console.error(err);"
-        ;"\n    throw err;"
-        ;"\n  }"
         "\n}"
         )
       ))
@@ -291,28 +329,29 @@
           "\n    client,"
           (gen-update (method->name method) model method storybook?)
           "\n  });"
-          "\n  return ["
-          "\n    (opts: " cname "Props) => fn({"
-          "\n      variables: " (gen-variables params) ","
-          "\n    }),"
-          "\n    { ...result, data: result.data && result.data." lname " }"
-          "\n  ];"
+          "\n  // " (method->return-type method)
+          (let ((ufieldnames (model->unique-index-fieldnames model)))
+            (if (and (eq? (command->cmdtype model method 'delete) 'delete)
+                     (model-usermodel? model)); (not (null? ufieldnames))))
+                (list
+                  "\n  return ["
+                  "\n    async (opts: " cname "Props) => {"
+                  "\n      if (opts.id.startsWith('-'))"
+                  "\n        return {};"
+                  "\n      return fn({"
+                  "\n        variables: " (gen-variables params) ","
+                  "\n      });"
+                  "\n    },"
+                  "\n    { ...result, data: result.data && result.data." lname " }"
+                  "\n  ];")
+              (list
+                "\n  return ["
+                "\n    (opts: " cname "Props) => fn({"
+                "\n      variables: " (gen-variables params) ","
+                "\n    }),"
+                "\n    { ...result, data: result.data && result.data." lname " }"
+                "\n  ];")))
           "\n}"
-          ;"\nexport const " lname " = async (client: ApolloClient<object>, opts: " cname "Props): Promise<{ data?: " cname "Result }> => {"
-          ;"\n  try {"
-          ;"\n    const result = await client.mutate<{ " lname ": " cname "Result }>({"
-          ;"\n      mutation: " lname "Query,"
-          ;"\n      variables: " (gen-variables params) ","
-          ;(gen-update (method->name method) model method storybook?)
-          ;"\n    });"
-          ;"\n    return {"
-          ;"\n      data: result.data == undefined ? undefined : result.data." lname ","
-          ;"\n    };"
-          ;"\n  } catch (err) {"
-          ;"\n    console.error(err);"
-          ;"\n    throw err;"
-          ;"\n  }"
-          ;"\n}"
         )
       ))
 
@@ -401,7 +440,7 @@
               "\nimport { useQuery, useMutation } from '@apollo/react-hooks';"
               "\nimport { QueryResult } from '@apollo/react-common';"
               "\nimport { ExecutionResult } from 'graphql';"
-              "\nimport { Paginated, Point } from '@inf/cf-gen';"
+              "\nimport { Paginated, Point, cuid } from '@inf/cf-gen';"
               "\n"
               "\nexport type LoadResult<R> = {"
               "\n  subscription: ObservableQuery<R>,"

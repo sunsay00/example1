@@ -32,7 +32,7 @@ export default class DeviceListsService implements IDeviceListsPartialService<Us
       if (device == undefined) {
         const endpoint = await this._notifications.registerDevice(userAgent, chatIdentity, undefined, token);
         const device: M.Device = { token, endpoint, createdAt: new Date(), userAgent };
-        await this.store.deviceListsUpdate($ctx, deviceList.id, [...deviceList.devices, device]);
+        await this.store.deviceListsUpdate($ctx, deviceList.id, [device, ...deviceList.devices]);
         await this.subscribeToObjects(chatIdentity);
         return device;
       } else {

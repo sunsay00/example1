@@ -64,7 +64,7 @@ export const ApolloProvider = (props: {
   React.useEffect(() => {
     if (busyRef.current) return;
     busyRef.current = true;
-    createCache(props.disableCache || true).then(cache => {
+    createCache(props.disableCache || false).then(cache => {
       const httpLink = new HttpLink({ uri: props.graphqlEndpoint });
       const authLink = setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization: props.authorization } }));
       setClient(new ApolloClient({
@@ -80,7 +80,9 @@ export const ApolloProvider = (props: {
           concatWebSocket(authLink.concat(httpLink), props.websocketEndpoint),
         ]),
         cache,
-        resolvers: props.resolvers
+        resolvers: {
+          ...props.resolvers,
+        }
       }));
     }).catch(console.error).finally(() => busyRef.current = false);
   }, [props.authorization, props.graphqlEndpoint, props.websocketEndpoint, props.resolvers]);
