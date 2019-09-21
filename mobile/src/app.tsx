@@ -74,6 +74,12 @@ export const App = (props: {}) =>
         return (
           <ApolloProvider
             authorization={authorization}
+            onAuthorizationError={async () => {
+              if (account) {
+                await account.account.signOut();
+                console.log('sign-out');
+              }
+            }}
             websocketEndpoint={config.WEBSOCKET_ENDPOINT}
             graphqlEndpoint={config.GRAPHQL_ENDPOINT}
           >

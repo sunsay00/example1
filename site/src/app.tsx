@@ -66,6 +66,7 @@ export const App = (props: { children?: React.ReactNode }) =>
         const authorization = account && account.user && `Bearer ${account.user.tokens.idToken}` || 'Guest';
         return <ApolloProvider
           authorization={authorization}
+          onAuthorizationError={async () => account && await account.account.signOut()}
           websocketEndpoint={config.WEBSOCKET_ENDPOINT}
           graphqlEndpoint={config.GRAPHQL_ENDPOINT}
           resolvers={resolvers}

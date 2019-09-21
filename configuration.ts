@@ -1,5 +1,4 @@
 import { Configuration } from '@inf/hookops';
-import { useTunnel } from '@inf/hooks';
 import { vars } from '@inf/hookops/vars';
 
 import { useAwsInfo } from '@inf/cf-awsinfo/config';
@@ -11,7 +10,6 @@ import { useCognito } from '@inf/cf-cognito/config';
 import { useGen } from '@inf/cf-gen/config';
 import { useCDN } from '@inf/cf-cdn/config';
 
-import { useLamTest } from './cf-lam-test/config';
 import { useApi } from './api/config';
 import { useSite } from './site/config';
 import { useMobile } from './mobile/config';
@@ -112,12 +110,6 @@ const configuration: Configuration = {
         clientId: cog.WebUserPoolClientId,
       },
       genProps: gen.props
-    });
-
-    await useLamTest({
-      dbUrl: gen.dbUrl,
-      securityGroupIds: [aws.SecurityGroup_default],
-      subnetIds: [aws.Subnet1, aws.Subnet2],
     });
 
     await useMobile({

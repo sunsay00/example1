@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { AsyncStorage } from '@inf/core-ui';
+import { has } from '@inf/common';
 import { ApolloProvider as Apollo, useApolloClient } from 'react-apollo-hooks';
 import { ApolloClient, Resolvers } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { persistCache } from 'apollo-cache-persist';
+import { CachePersistor } from 'apollo-cache-persist';
 import { HttpLink } from 'apollo-link-http';
 import { WebSocketLink } from 'apollo-link-ws';
 import { ApolloLink, split } from 'apollo-link';
@@ -17,9 +18,16 @@ export type ApolloResolvers = Resolvers;
 
 const createCache = async (disableCache: boolean) => {
   const cache = new InMemoryCache();
-  if (!disableCache)
-    await persistCache({ cache, storage: AsyncStorage as any });
-  return cache;
+  if (!disableCache) {
+    const persistor = new CachePersistor({
+      cache,
+      storage: AsyncStorage as any,
+      key: `apollo-cache-persist-${process.env.STAGE || 'local'}`,
+    });
+    return { cache, purge: async () => await persistor.purge() };
+  } else {
+    return { cache, purge: async () => { } };
+  }
 }
 
 const concatWebSocket = (link: ApolloLink, websocketEndpoint: string | undefined) => {
@@ -53,44 +61,62 @@ export const useApollo = () => {
 export const ApolloProvider = (props: {
   disableCache?: boolean,
   authorization: string,
+  onAuthorizationError?: () => Promise<void>,
   websocketEndpoint: string | undefined,
   graphqlEndpoint: string,
   children?: React.ReactNode,
   resolvers?: ApolloResolvers | ApolloResolvers[],
 }) => {
-  const [client, setClient] = React.useState<ApolloClient<object> | undefined>(undefined);
+  const [state, setState] = React.useState<{ purge: () => Promise<void>, client: ApolloClient<object> } | undefined>(undefined);
   const busyRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!props.authorization.toLowerCase().startsWith('bearer ')) {
+      if (state) {
+        state.client.resetStore();
+        state.purge();
+      }
+    }
+  }, [props.authorization]);
 
   React.useEffect(() => {
     if (busyRef.current) return;
     busyRef.current = true;
-    createCache(props.disableCache || false).then(cache => {
+    createCache(props.disableCache || false).then(({ cache, purge }) => {
       const httpLink = new HttpLink({ uri: props.graphqlEndpoint });
       const authLink = setContext((_, ctx) => ({ ...ctx, headers: { ...ctx.headers, authorization: props.authorization } }));
-      setClient(new ApolloClient({
-        link: ApolloLink.from([
-          onError(({ graphQLErrors, networkError }) => {
-            if (graphQLErrors)
-              graphQLErrors.map(({ message, path }) =>
-                console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`));
-            if (networkError)
-              console.error(`[Network error]: ${networkError} ${props.graphqlEndpoint}`);
-            //debugger;
-          }),
-          concatWebSocket(authLink.concat(httpLink), props.websocketEndpoint),
-        ]),
-        cache,
-        resolvers: {
-          ...props.resolvers,
-        }
-      }));
+      setState({
+        purge,
+        client: new ApolloClient({
+          link: ApolloLink.from([
+            onError(({ graphQLErrors, networkError }) => {
+              if (graphQLErrors)
+                graphQLErrors.map(({ message, path }) =>
+                  console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`));
+              if (networkError) {
+                if (has(networkError, 'statusCode', 'number') && networkError.statusCode == 401) {
+                  props.onAuthorizationError && props.onAuthorizationError();
+                } else {
+                  console.error(`[Network error]: message:'${networkError.message}' name:'${networkError.name}' statusCode:${(networkError as any).statusCode}`);
+                  //debugger;
+                }
+              }
+            }),
+            concatWebSocket(authLink.concat(httpLink), props.websocketEndpoint),
+          ]),
+          cache,
+          resolvers: {
+            ...props.resolvers,
+          }
+        })
+      });
     }).catch(console.error).finally(() => busyRef.current = false);
   }, [props.authorization, props.graphqlEndpoint, props.websocketEndpoint, props.resolvers]);
 
   if (UI.useSSR()) return null;
-  if (!client) return null;
+  if (!state) return null;
 
   return (
-    <Apollo client={client}>{props.children}</Apollo>
+    <Apollo client={state.client}>{props.children}</Apollo>
   );
 }

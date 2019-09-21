@@ -6,7 +6,6 @@
     "packages/*",
     "api",
     "site",
-    "cf-lam-test",
     "packages/@inf/*",
     "packages/@inf/hookops/.tmp/*"
   ],

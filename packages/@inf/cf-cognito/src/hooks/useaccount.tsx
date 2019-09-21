@@ -27,7 +27,6 @@ export type AccountUser = {
 
 type ContextValue = {
   account: Account
-  setMode: (mode: AccountMode) => void,
   user?: AccountUser,
   ready: boolean,
 };
@@ -43,7 +42,7 @@ export const useAccount = () => {
   const ctx = useContext(AccountContext);
   if (!ctx) throw new Error('invalid account context');
 
-  const { account, setMode, user, ready } = ctx;
+  const { account, user, ready } = ctx;
 
   const { setLoading } = UI.useLoading(useAccount);
 
@@ -63,8 +62,6 @@ export const useAccount = () => {
     try {
       setLoading(true);
       await account.signOut();
-      setMode(AccountMode.LoggedOut);
-      console.log('logged out');
     } finally {
       setLoading(false);
     }
@@ -76,7 +73,6 @@ export const useAccount = () => {
       const result = await account.signIn(emailOrUsername, password);
       if (result == 'changepassword')
         return LogInResult.ChangePassword;
-      setMode(AccountMode.LoggedIn);
       console.log(`logged in as ${emailOrUsername}`);
       return LogInResult.Success;
     } catch (err) {
@@ -211,7 +207,11 @@ export const AccountProvider = (props: {
 
   React.useEffect(() => {
     setLoading(true);
-    _account.init(props.region, props.identityPoolId, props.userPoolId, props.clientId)
+    _account.init(props.region, props.identityPoolId, props.userPoolId, props.clientId, m => {
+      if (m == 'signedin') setMode(AccountMode.LoggedIn);
+      else if (m == 'signedout') setMode(AccountMode.LoggedOut);
+      console.log(`account state changed to ${m}`);
+    })
       .then(async () => {
         const user = await _account.getCurrentUser();
         setMode(user ? AccountMode.LoggedIn : AccountMode.LoggedOut);
@@ -238,7 +238,7 @@ export const AccountProvider = (props: {
   if (!initialized) return null;
 
   return (
-    <AccountContext.Provider value={{ account: _account, setMode, user, ready }}>
+    <AccountContext.Provider value={{ account: _account, user, ready }}>
       {props.children}
     </AccountContext.Provider>
   );

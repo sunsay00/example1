@@ -66,7 +66,7 @@ export default class UserProfile {
           cognitoUser.getUserAttributes(async (err?: Error, result?: CognitoUserAttribute[]) => {
             if (err || !result) { return reject(err); }
             const userAttributes = result.reduce((ret, p) => ({ ...ret, [p.getName()]: p.getValue() }), {});
-            console.log('Cognito User Pools User Attributes:', userAttributes);
+            //console.log('Cognito User Pools User Attributes:', userAttributes);
             // Write user profile attributes to local storage
             await this._localStorage.setObject('userProfile', userAttributes);
             resolve(userAttributes);

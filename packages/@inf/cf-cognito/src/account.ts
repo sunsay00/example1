@@ -73,18 +73,20 @@ export class Account {
   private _storage: LocalStorage;
   private _clientStorage: LocalStorage;
   private _initialized: boolean = false;
+  private _onModeChange: ((mode: 'signedin' | 'signedout') => void) | undefined;
 
   constructor(storage: Storage) {
     this._storage = new StorageAdaptor(storage, '@account:');
     this._clientStorage = new StorageAdaptor(storage, '');
   }
 
-  init = async (region: string, identityPoolId: string, userPoolId: string, clientId: string): Promise<boolean> => {
+  init = async (region: string, identityPoolId: string, userPoolId: string, clientId: string, onModeChange?: (mode: 'signedin' | 'signedout') => void): Promise<boolean> => {
     if (this._initialized) return true;
 
     this._identityPoolId = identityPoolId;
     this._userPoolId = userPoolId;
     this._clientId = clientId;
+    this._onModeChange = onModeChange;
 
     const client = new Client(region, this._identityPoolId, this._userPoolId, this._clientId, this._clientStorage) as CognitoClient;
     this._util = new CognitoUtil(client, this._storage);
@@ -107,6 +109,8 @@ export class Account {
   signIn = async (emailOrUsername: string, password: string): Promise<'success' | 'changepassword'> => {
     if (!this._login) throw new Error('not initialized');
     const ret = await this._login.signIn(emailOrUsername, password);
+    if (ret == 'success')
+      this._onModeChange && this._onModeChange('signedin');
     //Sentry.setUserContext({
     //email: emailOrUsername,
     //id: await this.sub(),
@@ -118,7 +122,7 @@ export class Account {
     if (!this._login) throw new Error('not initialized');
     await this._login.signOut();
     await this._storage.clear();
-
+    this._onModeChange && this._onModeChange('signedout');
     //Sentry.setUserContext({ id: sub.ok });
   }
   confirmSignUp = async (confirmationCode: string): Promise<boolean> => {
