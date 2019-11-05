@@ -121,7 +121,7 @@ const runAndroidStart = async (avdName) => {
 
 const runIOSStart = async () => {
   await runPackager();
-  shell('yarn', ['react-native', 'run-ios'], {});
+  shell('yarn', ['react-native', 'run-ios', '--simulator', 'iPhone 8'], {});
   shell('./scripts/tail-ios-log', [], {})
 }
 
