@@ -21,7 +21,7 @@
     "@types/jest": "24.0.18",
     "jest": "24.8.0",
     "ts-jest": "24.0.2",
-    "@infng/cf-gen": "^0.0.7",
+    "@infng/cf-gen": "^0.0.8",
     "@infng/cf-lam": "^0.0.9",
     "@infng/hookops": "^0.0.6",
     "@types/aws-lambda": "8.10.31"

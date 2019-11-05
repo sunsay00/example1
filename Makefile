@@ -1,7 +1,7 @@
 all: install
 
 start:
-	@yarn -s ss api start
+	@yarn -s x api start
 
 vars:
 	@yarn -s vars -V

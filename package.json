@@ -12,7 +12,7 @@
     "@infng/cf-cert": "^0.0.1",
     "@infng/cf-spot": "^0.0.1",
     "@infng/cf-docker": "^0.0.2",
-    "@infng/cf-cognito": "^0.0.3",
+    "@infng/cf-cognito": "^0.0.5",
     "@infng/cf-redis": "^0.0.1",
     "@infng/cf-cdn": "^0.0.1",
     "@infng/cf-lam": "^0.0.9",
