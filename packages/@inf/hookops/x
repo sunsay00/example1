@@ -1,9 +1,0 @@
-#!/usr/bin/env node
-// @ts-check
-
-const colors = require('colors/safe');
-const { main } = require('./lib/src/executer');
-
-main(process.argv).catch(err => {
-  console.error(colors.red(err));
-});

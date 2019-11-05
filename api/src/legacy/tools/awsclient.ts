@@ -136,7 +136,7 @@ export default class AWSClient {
       SubscriptionArn: subscriptionArn
     }).promise();
   }
-  publish = async (topicArn: string, message: string, custom: unknown): Promise<string> => {
+  publish = async (topicArn: string, message: string, custom: object): Promise<string> => {
     const apns = JSON.stringify({
       ...custom,
       aps: { alert: message, sound: 'default', badge: 0 },
@@ -160,7 +160,7 @@ export default class AWSClient {
     return ret.MessageId;
   }
 
-  send = async (targetArn: string, message: string, custom: unknown) => {
+  send = async (targetArn: string, message: string, custom: object) => {
     const apns = JSON.stringify({
       ...custom,
       aps: { alert: message, sound: 'default', badge: 0 },

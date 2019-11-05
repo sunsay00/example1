@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useChangePasswordForm } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import { useChangePasswordForm } from '@infng/cf-cognito';
 
 export const ChangePassword = (props: {
   locale: string,

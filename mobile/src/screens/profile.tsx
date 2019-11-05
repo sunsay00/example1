@@ -1,7 +1,7 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useApollo, Loader } from '@inf/apollo';
-import { useAccount } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import { useApollo, Loader } from '@infng/apollo';
+import { useAccount } from '@infng/cf-cognito';
 import { useNavOptions, useNav, NavHeaderButton } from '../hooks/usenav';
 
 import {

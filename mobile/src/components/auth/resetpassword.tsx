@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useResetPasswordForm } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import { useResetPasswordForm } from '@infng/cf-cognito';
 
 export const ResetPassword = (props: {
   emailOrUsername: string,

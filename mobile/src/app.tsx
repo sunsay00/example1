@@ -1,7 +1,7 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import * as Mobile from '@inf/mobile-ui';
-import { AccountProvider, AccountConsumer } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import * as Mobile from '@infng/mobile-ui';
+import { AccountProvider, AccountConsumer } from '@infng/cf-cognito';
 import {
   createSwitchNavigator, createDrawerNavigator, createBottomTabNavigator, createAppContainer,
   createStackNavigator, createTabBarIcon, createNavWrapper,
@@ -9,7 +9,7 @@ import {
 import { AuthGuard } from './components/authguard';
 import { Screens } from './components/auth';
 import { Landing } from './screens/landing';
-import { ApolloProvider } from '@inf/apollo';
+import { ApolloProvider } from '@infng/apollo';
 import { Profile } from './screens/profile';
 import { Drawer } from './screens/drawer';
 import { Home } from './screens/home';

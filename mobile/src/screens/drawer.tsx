@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
+import * as UI from '@infng/core-ui';
 
 export const Drawer = () =>
   <UI.SafeAreaView>

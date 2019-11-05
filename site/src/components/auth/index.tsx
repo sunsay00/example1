@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import * as UI from '@inf/core-ui';
+import * as UI from '@infng/core-ui';
 import { LogIn } from './login';
 import { SignUp } from './signup';
 import { ResetPassword } from './resetpassword';

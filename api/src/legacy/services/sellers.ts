@@ -1,5 +1,5 @@
 import { adminEnableDisableUser } from '../tools/awsclient';
-import { Point, Cursorize, Dict } from '@inf/cf-gen';
+import { Point, Cursorize, Dict } from '@infng/cf-gen';
 import * as M from '../../_gen';
 import { IStore, ISellersPartialService } from '../../_gen';
 import { UserContext } from '../types';

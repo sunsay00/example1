@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useState, useContext, useEffect } from 'react';
 import { Easing, Animated } from 'react-native';
 import * as Nav from 'react-navigation';
-import * as UI from '@inf/core-ui';
-import * as Mobile from '@inf/mobile-ui';
+import * as UI from '@infng/core-ui';
+import * as Mobile from '@infng/mobile-ui';
 
 export * from 'react-navigation';
 

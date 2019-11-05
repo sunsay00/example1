@@ -1,4 +1,4 @@
-import { Cursorize } from '@inf/cf-gen';
+import { Cursorize } from '@infng/cf-gen';
 import { IStore, IDeviceListsPartialService } from '../../_gen';
 import NotificationManager from '../tools/notificationmanager';
 import * as M from '../../_gen';

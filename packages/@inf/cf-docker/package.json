@@ -1,9 +1,0 @@
-{
-  "name": "@inf/cf-docker",
-  "version": "0.0.1",
-  "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {
-    "@inf/hookops": "*"
-  }
-}

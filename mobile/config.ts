@@ -1,6 +1,6 @@
-import { createModule, useGlobals, useShell } from '@inf/hookops';
-import { useFrontendGen, GenProps } from '@inf/cf-gen/config';
-import { useVarsWriter, useGitIgnore } from '@inf/hooks';
+import { createModule, useGlobals, useShell } from '@infng/hookops';
+import { useFrontendGen, GenProps } from '@infng/cf-gen/config';
+import { useVarsWriter, useGitIgnore } from '@infng/hooks';
 
 export const useMobile = (inputs: {
   graphqlEndpoint: string

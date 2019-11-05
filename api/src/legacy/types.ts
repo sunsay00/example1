@@ -1,1 +1,1 @@
-export { UserContext } from '@inf/core/src/serverless/apiwrapper';
+export { UserContext } from '@infng/core/src/serverless/apiwrapper';

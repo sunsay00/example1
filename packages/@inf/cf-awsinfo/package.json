@@ -1,8 +1,0 @@
-{
-  "name": "@inf/cf-awsinfo",
-  "version": "0.0.1",
-  "license": "MIT",
-  "dependencies": {
-    "@inf/hookops": "*"
-  }
-}

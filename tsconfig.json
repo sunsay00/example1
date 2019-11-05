@@ -1,48 +1,5 @@
 {
   "files": [],
   "includes": [],
-  "references": [
-    {
-      "path": "./packages/@inf/common"
-    },
-    {
-      "path": "./packages/@inf/core"
-    },
-    {
-      "path": "./packages/@inf/core-ui"
-    },
-    {
-      "path": "./packages/@inf/mobile-ui"
-    },
-    {
-      "path": "./packages/@inf/hookops"
-    },
-    {
-      "path": "./packages/@inf/hooks"
-    },
-    {
-      "path": "./packages/@inf/cf-cognito"
-    },
-    {
-      "path": "./packages/@inf/cf-serverless-postgres"
-    },
-    {
-      "path": "./packages/@inf/cf-gen"
-    },
-    {
-      "path": "./packages/@inf/cf-redis"
-    },
-    {
-      "path": "./packages/@inf/cf-spot"
-    },
-    {
-      "path": "./packages/@inf/gatsby-theme-web-ui"
-    },
-    {
-      "path": "./packages/@inf/apollo"
-    },
-    {
-      "path": "./packages/@inf/chat"
-    }
-  ]
+  "references": [{ "path": "./packages/example" }]
 }

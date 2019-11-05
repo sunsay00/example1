@@ -1,7 +1,7 @@
-import { apiWrapper } from '@inf/core';
-import { verifyVars } from '@inf/common';
-//import CacheClient from '@inf/cf-redis';
-import RDSDBClient from '@inf/cf-serverless-postgres';
+import { apiWrapper } from '@infng/core';
+import { verifyVars } from '@infng/common';
+//import CacheClient from '@infng/cf-redis';
+import RDSDBClient from '@infng/cf-serverless-postgres';
 import vars from './_vars';
 import { createDefaultResolver } from '../src/legacy/tools/resolver';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';

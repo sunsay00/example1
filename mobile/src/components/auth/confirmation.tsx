@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useConfirmationForm } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import { useConfirmationForm } from '@infng/cf-cognito';
 
 export const Confirmation = (props: {
   onGoToLogIn: () => void

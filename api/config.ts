@@ -1,8 +1,8 @@
-import { useLamApi } from '@inf/cf-lam-api/config';
-import { createModule, useTempDir, useScriptRegistry } from '@inf/hookops';
-import { vars } from '@inf/hookops/vars';
-import { useBackendGen, GenProps } from '@inf/cf-gen/config';
-import { useVarsWriter, TunnelProps, useTunnel } from '@inf/hooks';
+import { useLamApi } from '@infng/cf-lam-api/config';
+import { createModule, useTempDir, useScriptRegistry } from '@infng/hookops';
+import { vars } from '@infng/hookops/vars';
+import { useBackendGen, GenProps } from '@infng/cf-gen/config';
+import { useVarsWriter, TunnelProps, useTunnel } from '@infng/hooks';
 
 export const useApi = async (props: {
   accountId: string,
@@ -49,6 +49,7 @@ export const useApi = async (props: {
   });
 
   return await useLamApi({
+    region: vars.AWS_REGION,
     id,
     _deprecatedAlias: 'api',
     dependsOn: ['./package.json', './src/**/*.ts', './config.ts'],

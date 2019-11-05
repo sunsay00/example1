@@ -1,8 +1,8 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useApollo, Loader } from '@inf/apollo';
-import { useAccount } from '@inf/cf-cognito';
-import * as Web from '@inf/gatsby-theme-web-ui';
+import * as UI from '@infng/core-ui';
+import { useApollo, Loader } from '@infng/apollo';
+import { useAccount } from '@infng/cf-cognito';
+import * as Web from '@infng/gatsby-theme-web-ui';
 import { Tabs, Tab } from '../components/tabs';
 
 import {

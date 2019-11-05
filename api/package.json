@@ -13,13 +13,17 @@
     "webpack": "webpack",
     "test": "jest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@infng/cf-serverless-postgres": "^0.0.2",
+    "aws-lambda": "0.1.2"
+  },
   "devDependencies": {
     "@types/jest": "24.0.18",
     "jest": "24.8.0",
     "ts-jest": "24.0.2",
-    "@inf/cf-gen": "*",
-    "@inf/cf-lam": "*",
-    "@inf/hookops": "*"
+    "@infng/cf-gen": "^0.0.7",
+    "@infng/cf-lam": "^0.0.9",
+    "@infng/hookops": "^0.0.6",
+    "@types/aws-lambda": "8.10.31"
   }
 }

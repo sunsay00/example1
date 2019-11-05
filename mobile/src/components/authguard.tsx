@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useAccount } from '@inf/cf-cognito';
+import { useAccount } from '@infng/cf-cognito';
 import { useNav } from '../hooks/usenav';
 
 export const AuthGuard = (props: { children?: React.ReactNode }) => {

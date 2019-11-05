@@ -1,6 +1,6 @@
-import { createModule, useShell, useGlobals } from '@inf/hookops';
-import { useFrontendGen, GenProps } from '@inf/cf-gen/config';
-import { useVarsWriter } from '@inf/hooks';
+import { createModule, useShell, useGlobals } from '@infng/hookops';
+import { useFrontendGen, GenProps } from '@infng/cf-gen/config';
+import { useVarsWriter } from '@infng/hooks';
 
 export const useSite = (props: {
   graphqlEndpoint: string

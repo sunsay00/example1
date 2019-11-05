@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useLogInForm } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import { useLogInForm } from '@infng/cf-cognito';
 
 export const LogIn = (props: {
   onLogInComplete: () => void,

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { StyleSheet, Easing, Animated, ViewStyle, LayoutChangeEvent, Platform, StatusBar, View, Dimensions, TextInput, UIManager, findNodeHandle } from 'react-native';
-import { useKeyboard } from '@inf/mobile-ui';
-import { useAnimation, useTopViewStack } from '@inf/core-ui';
+import { useKeyboard } from '@infng/mobile-ui';
+import { useAnimation, useTopViewStack } from '@infng/core-ui';
 import { useNavEvents } from '../hooks/usenav';
 
 const DURATION = Platform.OS == 'android' ? 0 : 250;

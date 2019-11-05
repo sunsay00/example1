@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { useAccount } from '@inf/cf-cognito';
+import * as UI from '@infng/core-ui';
+import { useAccount } from '@infng/cf-cognito';
 import { useNav, useNavOptions, NavHeaderButton } from '../hooks/usenav';
 
 export const Home = () => {

@@ -1,8 +1,8 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import * as Web from '@inf/gatsby-theme-web-ui';
-import { AccountProvider, useAccount, AccountConsumer } from '@inf/cf-cognito';
-import { ApolloProvider, ApolloResolvers } from '@inf/apollo';
+import * as UI from '@infng/core-ui';
+import * as Web from '@infng/gatsby-theme-web-ui';
+import { AccountProvider, useAccount, AccountConsumer } from '@infng/cf-cognito';
+import { ApolloProvider, ApolloResolvers } from '@infng/apollo';
 import { Auth } from './components/auth';
 import vars from './_vars';
 

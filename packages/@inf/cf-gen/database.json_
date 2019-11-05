@@ -1,5 +1,0 @@
-{
-  "useenv": {"ENV": "DB"},
-  "defaultEnv": "useenv",
-  "sql-file": true
-}

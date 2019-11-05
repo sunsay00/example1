@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ScrollView, ViewStyle } from '@inf/core-ui';
+import { ScrollView, ViewStyle } from '@infng/core-ui';
 import * as Web from 'gatsby-theme-core-ui';
 
 export const Terminal = (props: { lines: string[], style?: ViewStyle, secondary?: boolean }) => {

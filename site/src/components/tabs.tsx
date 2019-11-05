@@ -1,6 +1,6 @@
 import * as React from 'react';
-import * as UI from '@inf/core-ui';
-import { has } from '@inf/common';
+import * as UI from '@infng/core-ui';
+import { has } from '@infng/common';
 
 export const Tabs = (props: {
   initalIndex: number,

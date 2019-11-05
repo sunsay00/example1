@@ -1,9 +1,0 @@
-_outputs.*
-_vars.*
-lib
-src/vars.env
-src/vars.js
-src/vars.ts
-vars.env
-vars.js
-vars.ts

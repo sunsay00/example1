@@ -1,14 +1,14 @@
-import { Configuration } from '@inf/hookops';
-import { vars } from '@inf/hookops/vars';
+import { Configuration } from '@infng/hookops';
+import { vars } from '@infng/hookops/vars';
 
-import { useAwsInfo } from '@inf/cf-awsinfo/config';
-import { useCert } from '@inf/cf-cert/config';
-import { useSpot } from '@inf/cf-spot/config';
-import { usePostgres } from '@inf/cf-serverless-postgres/config';
-import { useRedis } from '@inf/cf-redis/config';
-import { useCognito } from '@inf/cf-cognito/config';
-import { useGen } from '@inf/cf-gen/config';
-import { useCDN } from '@inf/cf-cdn/config';
+import { useAwsInfo } from '@infng/cf-awsinfo/config';
+import { useCert } from '@infng/cf-cert/config';
+import { useSpot } from '@infng/cf-spot/config';
+import { usePostgres } from '@infng/cf-serverless-postgres/config';
+import { useRedis } from '@infng/cf-redis/config';
+import { useCognito } from '@infng/cf-cognito/config';
+import { useGen } from '@infng/cf-gen/config';
+import { useCDN } from '@infng/cf-cdn/config';
 
 import { useApi } from './api/config';
 import { useSite } from './site/config';
@@ -26,7 +26,15 @@ const configuration: Configuration = {
   stage: vars.STAGE,
   configure: async () => {
 
-    const aws = await useAwsInfo({ rootEnv: ROOT_ENV });
+    console.log('configuration called');
+
+    const aws = await useAwsInfo({
+      region: vars.AWS_REGION,
+      awsAccessKeyId: vars.AWS_ACCESS_KEY_ID,
+      awsSecretAccessKey: vars.AWS_SECRET_ACCESS_KEY,
+      domain: vars.DOMAIN,
+      rootEnv: ROOT_ENV,
+    });
 
     const cognito = await useCognito({
       Domain: vars.DOMAIN,
