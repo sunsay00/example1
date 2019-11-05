@@ -1,4 +1,4 @@
-import { Configuration } from '@infng/hookops';
+import { createConfiguration } from '@infng/hookops';
 import { vars } from '@infng/hookops/vars';
 
 import { useAwsInfo } from '@infng/cf-awsinfo/config';
@@ -22,7 +22,7 @@ enum ServiceIds {
   RDS = 1,
 };
 
-const configuration: Configuration = {
+export default createConfiguration({
   stage: vars.STAGE,
   configure: async () => {
 
@@ -37,6 +37,7 @@ const configuration: Configuration = {
     });
 
     const cognito = await useCognito({
+      region: vars.AWS_REGION,
       Domain: vars.DOMAIN,
       InvitationEmailSubject: `Welcome To ${vars.NICE_NAME}`,
       VerificationEmailSubject: `${vars.NICE_NAME} requires your verification`,
@@ -131,6 +132,4 @@ const configuration: Configuration = {
       genProps: gen.props
     });
   }
-};
-
-export default configuration;
+});

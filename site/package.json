@@ -15,8 +15,8 @@
     "@infng/apollo": "^0.0.4",
     "@infng/gatsby-theme-web-ui": "^1.0.0",
     "@infng/core-ui": "^1.0.2",
-    "@infng/cf-cognito": "^0.0.5",
-    "@infng/cf-gen": "^0.0.8",
+    "@infng/cf-cognito": "^0.0.6",
+    "@infng/cf-gen": "^0.0.10",
     "@types/node": "12.6.8",
     "babel-plugin-react-native-web": "0.11.5",
     "dotenv": "8.2.0",
@@ -30,7 +30,7 @@
     "source-map-loader": "0.2.4"
   },
   "devDependencies": {
-    "@infng/hookops": "*",
+    "@infng/hookops": "^0.0.10",
     "@types/graphql": "14.2.2",
     "@types/react-native": "0.60.2",
     "gatsby-cli": "2.7.20",

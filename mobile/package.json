@@ -10,8 +10,8 @@
   "dependencies": {
     "@apollo/react-hooks": "3.1.0",
     "@infng/apollo": "^0.0.4",
-    "@infng/cf-cognito": "^0.0.5",
-    "@infng/cf-gen": "^0.0.8",
+    "@infng/cf-cognito": "^0.0.6",
+    "@infng/cf-gen": "^0.0.10",
     "@infng/common": "^1.0.1",
     "@infng/core-ui": "^1.0.2",
     "@infng/mobile-ui": "^0.0.3",

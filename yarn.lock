@@ -801,12 +801,12 @@
     react-apollo-hooks "^0.5.0"
     subscriptions-transport-ws "^0.9.16"
 
-"@infng/cf-awsinfo@^0.0.3":
-  version "0.0.3"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-awsinfo/0.0.3/73f78572d2661213778ffcdd07aa0f2fcd140a3131c982fa671063339ff77e76#7cf99a3994a9455a1bb7f94d6b88b27352f78133"
-  integrity sha512-0aCISvVlOPMBIJvEwkPTSVGuxfc0Etmb6sXNkybDgAG3NQmyzSHFE4yH7JMZZ9+HlFnqgwUYC7amXg36bqpzxw==
+"@infng/cf-awsinfo@^0.0.5":
+  version "0.0.5"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-awsinfo/0.0.5/e9c246508f74fc18cfefe5e0a100423817668092d3dd7d135ee41fa2b16024dd#366a1d4de8f1cc05eba1f9705ed503e0fafc0575"
+  integrity sha512-/Ro320nIrp9pcuVL/mJ5BPhqHL/4w6/rXuTpDqbJhncGBuZVpXph/r5ojpiLnysAy9VFRbKxD4C9IOPDXbgtvg==
   dependencies:
-    "@infng/hookops" "0.0.6"
+    "@infng/hookops" "^0.0.10"
     aws-sdk "2.507.0"
 
 "@infng/cf-cdn@^0.0.1":
@@ -819,34 +819,34 @@
   resolved "https://npm.pkg.github.com/download/@infng/cf-cert/0.0.1/6ad071f7b3ea7d93ebfd0778035773b2aaa99ee156856ca3d954f15dbf6e1320#cfa9105cf2ab663c075784e452a78fedd80146a4"
   integrity sha512-Elc8hrC8PFjx6YgnhsaHmS5ln9Sf+DhEjHC0I1vrnT0jvgxm8UDUXTZ0UhclrQEg238CXO5DC9RP0MWefujC6A==
 
-"@infng/cf-cognito@^0.0.5":
-  version "0.0.5"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-cognito/0.0.5/2ae590976c2b747eaf2041e16e06b61d1698e85416a5a4f36efad58aae57416c#4c5fa0bed592e3996b7d195316c0c5555a797004"
-  integrity sha512-irrMlJiDQdDt6pf/TcGYs9uVVfEkKxmEu60cJaOb1VPSjBDRbqqe/H6eWd7ZAlLT5sszulFYj0e9b+K6pbjHGw==
+"@infng/cf-cognito@^0.0.6":
+  version "0.0.6"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-cognito/0.0.6/c4f83e5fd61fa48d62a40afebdf01fca23a3d8d2d12c403b4fb3a053a4c352d5#e9518c270fb41574fd0d992805341dcab8583a6f"
+  integrity sha512-0Pkh7uZPamdGA3bN9Pk4ukUmgQzOCavw9P3CWwBt6x1G+d0VH9g8dsaZ6LxZLyDpinlqD9nD8Ajs4lxie7CDoA==
   dependencies:
     "@infng/core-ui" "^1.0.2"
-    "@infng/hookops" "^0.0.6"
-    "@infng/hooks" "^0.0.5"
+    "@infng/hookops" "^0.0.10"
+    "@infng/hooks" "^0.0.6"
     amazon-cognito-identity-js "3.0.15"
     aws-sdk "2.507.0"
     runtypes "4.0.0"
     sjcl "git+https://github.com/kyunghoon/react-native-sjcl.git"
 
-"@infng/cf-docker@^0.0.2":
-  version "0.0.2"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-docker/0.0.2/9257a668a62e35d4eb0e7c2d1c978b24d0b768ea1cfd107c35bfc4148a335829#ae1ba5bd47566a2449bc7d1d3f3915ecb9284bce"
-  integrity sha512-LL9Gn/bVSGu5g5xIEL6lQs4pDdWAJqf+Pqa96OpJFI05mMURrx7DheSyMDjtWb/8vmohzKrSDF65JkzUdlCDow==
+"@infng/cf-docker@^0.0.3":
+  version "0.0.3"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-docker/0.0.3/9c51e32b2a5d5542b2e9e11de2ea0af1a96888f336abeb71e99e8e3c4c7d6881#080f841358791671167cb58f91cbe3aa3a5cc39a"
+  integrity sha512-oSrfjq5d/FzpUBHvLf+ee3pHnZDW1pP9TaGYR9EKhrTLhSUIw9J/9SXe6Lb81J8K53VYDD58eAngSdyWqWNFxg==
   dependencies:
     yamljs "0.3.0"
 
-"@infng/cf-gen@^0.0.8":
-  version "0.0.8"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-gen/0.0.8/4d46d28a235b908be48f46a242e9023aeacf53687da656882ce1d81ab2da8dd7#cbe96bdf5601269512caad87173342e5fd0d17b2"
-  integrity sha512-2DqbPKQ7qXsxDjlt6dIa8QZ91TxbFtMiF/lnp1LLJNDvVtsu/tQCPqIdgf79/6FfHnl1q2QhawMrtyzlT4LI0g==
+"@infng/cf-gen@^0.0.10":
+  version "0.0.10"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-gen/0.0.10/7fb4849a7c6b900f4211dc224f7a8fe33d09885ff80c19afb61e54b1238ad256#f16040b9b5f41a60e1a29b38737a010e13739cb8"
+  integrity sha512-TSMQ2AYa5KEvKeU9/DoZUuXM4kUoxW3TaSDu300uSq3jZ/XFrLwDAjsEKMzglChXn29jP/ro7cy7xCitpWEG8g==
   dependencies:
     "@apollo/react-common" "3.1.0"
     "@apollo/react-hooks" "3.1.0"
-    "@infng/hookops" "^0.0.6"
+    "@infng/hookops" "^0.0.10"
     apollo-client "2.6.4"
     cuid "^2.1.6"
     db-migrate "0.10.0-beta.20"
@@ -855,22 +855,22 @@
     graphql-tag "2.10.1"
     graphql-tools "4.0.5"
 
-"@infng/cf-lam-api@^0.0.5":
-  version "0.0.5"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-lam-api/0.0.5/7e4f764dfff93672059733d3b771d7ee52b3db6a0d79fc997e1c8124399abbe5#894b65cdfe5f2788315304a586868549825ae4dd"
-  integrity sha512-DiMuwIkpkD1rmB6ZZPj+VDbpX2qGropQ30KCFfzyTUvEmh+YNJFXoGOnzllgegbyFyKUro0+LHxBq8RJVtUR1w==
+"@infng/cf-lam-api@^0.0.7":
+  version "0.0.7"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-lam-api/0.0.7/b2beb2d7a229932feea94317b1be39f35ca6debb3017dfdb286ef06fbfe52ea1#698450e9cc1d4984d4f8ae5843ecaff2180064be"
+  integrity sha512-rXtqdjfaQnAMWrAGg+S29IPj96b6UlN1/KBHKKCf4Y5O5b2Lo+8XrLfRwhAWlVnMpKBzbSSgRj+74XVhghLY+w==
   dependencies:
-    "@infng/cf-lam" "^0.0.9"
-    "@infng/hookops" "^0.0.6"
+    "@infng/cf-lam" "^0.0.11"
+    "@infng/hookops" "^0.0.10"
     "@types/node" "12.6.8"
 
-"@infng/cf-lam@^0.0.9":
-  version "0.0.9"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-lam/0.0.9/7cb982e6fc0b0dfffc9909c8a820d2a214b6e0c2b43ae0e479afd5277925c1a4#4c52b9113c6b446283ceb0bf58e67f6b989e27c3"
-  integrity sha512-6F3G7zlWvSvsIBJ+FlgOh88aV1rracGtto2aQy8NzZdg4IuaqCAYggf5WZ/XTbdSUmSS+KOqTcmVEkjSymhEuQ==
+"@infng/cf-lam@^0.0.11":
+  version "0.0.11"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-lam/0.0.11/50394607b0a49fa8456ae9c56384bb817bc9198977835d59903fbc47de24c6c6#792ad578f76ebc76d58c153d46f028ad6781f90b"
+  integrity sha512-Q9XMf+H4ROKyGwulSR9pemWa1BHGvCQez4gyoy0XxOUDnY47iVRCJf8Iw3XSgCUSi28Bx4/ofnz2of50yuJjoA==
   dependencies:
-    "@infng/hookops" "^0.0.6"
-    "@infng/hooks" "^0.0.5"
+    "@infng/hookops" "^0.0.10"
+    "@infng/hooks" "^0.0.6"
     "@types/yamljs" "0.2.30"
     runtypes "4.0.0"
     yamljs "0.3.0"
@@ -889,12 +889,13 @@
   dependencies:
     pg "6.1.0"
 
-"@infng/cf-spot@^0.0.1":
-  version "0.0.1"
-  resolved "https://npm.pkg.github.com/download/@infng/cf-spot/0.0.1/490d985369faf64c90e7efdecfbb358be670c175b47e617a7a4857a473c1f241#96b2a624dcb5bcebb469a242ad194ec466acb695"
-  integrity sha512-QHVkCzapYIMz9ANln04pkh4QBMWOLxv/r/46EpxcTK0neMe4WRoZoDJdlOQZ8/569D++EZOurkR7RYb4L7zZ3w==
+"@infng/cf-spot@^0.0.2":
+  version "0.0.2"
+  resolved "https://npm.pkg.github.com/download/@infng/cf-spot/0.0.2/dbab82af2365dca484fc57f237faf9bd1f943654146ea789446a38635c705256#158a8b3da2deaa66972bcc10ade0ee1e554b97a3"
+  integrity sha512-//IA8sYLJWQYPmuzHgg1uscRJwjRak23Lock/TEjxeDEerIzfCY4HLgM69j2r32bRPPUVZ3/psL7Hvt4XZOWRg==
   dependencies:
-    "@infng/hookops" "*"
+    "@infng/hookops" "^0.0.10"
+    "@infng/hooks" "^0.0.6"
 
 "@infng/common@1.0.1", "@infng/common@^1.0.1":
   version "1.0.1"
@@ -946,21 +947,21 @@
     react-live "2.1.2"
     react-native-web "0.11.4"
 
-"@infng/hookops@*", "@infng/hookops@0.0.6", "@infng/hookops@^0.0.6":
-  version "0.0.6"
-  resolved "https://npm.pkg.github.com/download/@infng/hookops/0.0.6/2d01a296395f552c8c28c9c4286c143849eca0e83af67349753c1c00e1a8d34c#72fd7a1b533565cb92150670e5e9d910fe8111bc"
-  integrity sha512-jbILxOPcpEm7W90wurlbXjyg90sdzbieJBaU8UHjuW3lVsnIam5u9kFRtrnv03snNCiV1Xf1n+IW5esDBirVqg==
+"@infng/hookops@^0.0.10":
+  version "0.0.10"
+  resolved "https://npm.pkg.github.com/download/@infng/hookops/0.0.10/3ebcc97ba0f29e186afbb52d8608784cf41e0d0d52a787580811430b34dae691#63ff636cd351b182c6012b3268c88ad63832a5a4"
+  integrity sha512-qaujZCtPIeJXfYBKUvY/Vp7i+6P4VdP2gxD3x4zdAQDHsf5VkucXAdv77hzJwc3X7xh25OUKwAtnHUEdhSCjpQ==
   dependencies:
     "@infng/common" "^1.0.1"
     "@infng/core" "^0.0.2"
 
-"@infng/hooks@^0.0.5":
-  version "0.0.5"
-  resolved "https://npm.pkg.github.com/download/@infng/hooks/0.0.5/f3730e9ab1d032ef655b889aa60078a8c82efe171a470ae3ca4e5556ab088428#ebc046f6c7c3e68ec0a6b6cf3064eef156894919"
-  integrity sha512-qHNENE2ZLWmJMSZKyHCrDjcGZm2FOYPrktjIKK/qTPEMbss5o3eJlUQCWIAFYqmMotR7H7BA2p0ryx/08q9gsw==
+"@infng/hooks@^0.0.6":
+  version "0.0.6"
+  resolved "https://npm.pkg.github.com/download/@infng/hooks/0.0.6/abd9e8ea85e9d255e48d537763085e0d51fec5257e942507eb5156b6281a2d8d#1b75240c6d87f367e0c4690f567f51ab742acf2d"
+  integrity sha512-cL7w9csikQ6yQcWTMT8PlOiWTetkrKr8IdXpgxTmUPE/1VfW30jFus8vkQFksC0ChJQrn0BN+TV/NYo2eKqPtg==
   dependencies:
     "@infng/common" "^1.0.1"
-    "@infng/hookops" "^0.0.6"
+    "@infng/hookops" "^0.0.10"
     aws-sdk "2.507.0"
     colors "1.3.3"
 

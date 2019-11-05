@@ -8,15 +8,15 @@
     "site"
   ],
   "devDependencies": {
-    "@infng/cf-awsinfo": "^0.0.3",
+    "@infng/cf-awsinfo": "^0.0.5",
     "@infng/cf-cert": "^0.0.1",
-    "@infng/cf-spot": "^0.0.1",
-    "@infng/cf-docker": "^0.0.2",
-    "@infng/cf-cognito": "^0.0.5",
+    "@infng/cf-spot": "^0.0.2",
+    "@infng/cf-docker": "^0.0.3",
+    "@infng/cf-cognito": "^0.0.6",
     "@infng/cf-redis": "^0.0.1",
     "@infng/cf-cdn": "^0.0.1",
-    "@infng/cf-lam": "^0.0.9",
-    "@infng/cf-lam-api": "^0.0.5",
+    "@infng/cf-lam": "^0.0.11",
+    "@infng/cf-lam-api": "^0.0.7",
     "@types/node": "12.6.8",
     "react-native-cli": "2.0.1",
     "typescript": "3.7.1-rc"
