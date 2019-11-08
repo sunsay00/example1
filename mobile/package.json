@@ -20,7 +20,7 @@
     "graphql-tag": "2.10.1",
     "react": "16.9.0",
     "react-native": "0.60.4",
-    "react-native-gesture-handler": "1.1.0",
+    "react-native-gesture-handler": "1.5.0",
     "react-native-ionicons": "https://github.com/kyunghoon/react-native-ionicons.git",
     "react-native-screens": "1.0.0-alpha.23",
     "react-navigation": "3.11.1"
