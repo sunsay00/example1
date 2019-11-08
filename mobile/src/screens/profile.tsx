@@ -41,7 +41,7 @@ export const Profile = () => {
         radiusMiles: 10,
         count: 5
       }} hooks={useDeckFactoriesFindByLocation}>{(factories, { refetch, fetchMore, fetching }) =>
-        <UI.View>
+        <UI.View style={{ flex: 1 }}>
           <UI.View style={{ flexDirection: 'row', padding: 16 }}>
             <UI.Button onPress={() => createDeckFactory({
               name: 'factory-name',
@@ -52,7 +52,7 @@ export const Profile = () => {
             <UI.Button secondary onPress={refetch}>Refetch</UI.Button>
           </UI.View>
           <UI.Spacer />
-          <UI.ScrollView>
+          <UI.ScrollView style={{ flex: 1 }}>
             {factories.map((factory, i) => (
               <UI.View key={i}>
                 <UI.View style={{ padding: 16, flexDirection: 'row', borderColor: UI.Colors.lightGray, borderTopWidth: i == 0 ? 0 : 1 }}>
