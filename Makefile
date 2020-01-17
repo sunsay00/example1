@@ -7,7 +7,7 @@ vars:
 	@yarn -s vars -V
 
 install:
-	@tsc -b && \
+	@./node_modules/typescript/bin/tsc -b && \
 		yarn -s vars yarn -s configure up -v
 force:
 	@yarn -s vars yarn -s configure up -v -f

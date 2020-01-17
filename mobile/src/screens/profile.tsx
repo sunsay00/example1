@@ -4,11 +4,6 @@ import { useApollo, Loader } from '@infng/apollo';
 import { useAccount } from '@infng/cf-cognito';
 import { useNavOptions, useNav, NavHeaderButton } from '../hooks/usenav';
 
-import {
-  useDecksCreate, useDecksUpdate, useDecksRemove, useDecksFindByFactoryId,
-  useDeckFactoriesCreate, useDeckFactoriesFindByLocation, useDeckFactoriesRemove
-} from '../_gen/models';
-
 export const Profile = () => {
   const nav = useNav();
 
@@ -22,6 +17,7 @@ export const Profile = () => {
 
   const client = useApollo();
 
+  /*
   const [createDeck] = useDecksCreate(client);
   const [updateDeck] = useDecksUpdate(client);
   const [removeDeck] = useDecksRemove(client);
@@ -33,9 +29,6 @@ export const Profile = () => {
 
   return (
     <>
-      {/*<UI.Header3>Username: {account.user.username}</UI.Header3>
-      <UI.Spacer />
-  <UI.Header3>Email: {account.user.email}</UI.Header3>*/}
       <Loader variables={{
         location: { lat: 35.6683627, lon: 139.6706567 },
         radiusMiles: 10,
@@ -105,4 +98,6 @@ export const Profile = () => {
       </Loader>
     </>
   );
+  */
+  return null;
 }

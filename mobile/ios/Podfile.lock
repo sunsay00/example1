@@ -87,7 +87,7 @@ PODS:
     - React
   - RNCAsyncStorage (1.6.1):
     - React
-  - RNGestureHandler (1.3.0):
+  - RNGestureHandler (1.5.0):
     - React
   - RNScreens (1.0.0-alpha.23):
     - React
@@ -201,7 +201,7 @@ SPEC CHECKSUMS:
   React-RCTWebSocket: 163873f4cdd5f1058a9483443404fc3801581cb6
   RNAWSCognito: b0b908817ce6547cdddaa7842bc166b4c5e7c128
   RNCAsyncStorage: 2e2e3feb9bdadc752a026703d8c4065ca912e75a
-  RNGestureHandler: 5329a942fce3d41c68b84c2c2276ce06a696d8b0
+  RNGestureHandler: a4ddde1ffc6e590c8127b8b7eabfdade45475c74
   RNScreens: f28b48b8345f2f5f39ed6195518291515032a788
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 

@@ -1,5 +1,4 @@
 import { createModule, useGlobals, useShell } from '@infng/hookops';
-import { useFrontendGen, GenProps } from '@infng/cf-gen/config';
 import { useVarsWriter, useGitIgnore } from '@infng/hooks';
 
 export const useMobile = (inputs: {
@@ -10,13 +9,8 @@ export const useMobile = (inputs: {
     userPoolId: string,
     clientId: string
   },
-  genProps: GenProps
 }) => createModule(async () => {
   const { currentModuleDir } = useGlobals();
-
-  await useFrontendGen({
-    genProps: inputs.genProps
-  });
 
   useVarsWriter('ts', currentModuleDir, {
     GRAPHQL_ENDPOINT: inputs.graphqlEndpoint,

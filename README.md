@@ -1,5 +1,4 @@
-Example 1
-=============
+Frontend Only Example
+=====================
 
-Work in Progress
-----------------
+  - to run android debug.keystore needs to be copied over
